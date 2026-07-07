@@ -45,8 +45,15 @@ that ends in something demoable.
       destination becomes the workshop dashboard once S1.10's edge-count landing exists; until
       then the signed-in stub stands in. Slim + Bootstrap adopted along the way — see
       [[Tech stack]] + worklog Sessions 6–7. 2026-07-07: commit `c8134bb`.)*
-- [ ] **S0.6** Move the Obsidian vault into the repo as `docs/`.
-- [ ] **S0.7** Generate `CLAUDE.md` at repo root from [[Agent guide]].
+- [x] **S0.6** Move the Obsidian vault into the repo as `docs/`. *(2026-07-07: done with a
+      privacy revision — `docs/` is **gitignored** in the app repo and carries its **own private
+      git history** (root commit `ca72c49`; `.obsidian/`, `.claude/`, `.DS_Store` excluded).
+      App-repo trace: gitignore commit `e68b71b`. Obsidian re-points to
+      `~/teckhong/pilot/docs`; Claude sessions open at the repo root.)*
+- [x] **S0.7** Generate `CLAUDE.md` at repo root from [[Agent guide]]. *(2026-07-07: written —
+      task-scoped reading lists into `docs/`, working mode, hard invariants incl. ADR-006 +
+      Slim/Bootstrap rules, tracking conventions, dev quirks. **Untracked by design** (private,
+      references private docs), so no commit hash — it lives on disk only.)*
 - [ ] **S0.8** Deploy skeleton to Render/Heroku (managed Postgres, env vars, Procfile/`render.yaml`);
       verify the deployed login page loads.
 - [ ] **S0.9** First commit(s), tagged `S0`.

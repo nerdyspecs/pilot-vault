@@ -40,10 +40,19 @@ task added, enum fixed, access-door task, create-workshop flow, **add-crew flow*
 old exit criterion mentioned a 2nd user joining but no task built the path), edge-count landing.
 
 **Open:**
-- Everything since Session 6 is still one uncommitted changeset — commit as S0.5 (extended:
-  auth views + layout), then tick.
+- ~~Everything since Session 6 is still one uncommitted changeset~~ → committed `c8134bb`
+  (S0.5, same day) and ticked.
 - ADR-006 leaves open: the exact in-app permission surface of an Ownership (beyond
   governance) — settle when the board is built.
+
+**Later same day — S0.6 + S0.7 done (privacy-revised).** The vault physically moved into the
+repo at `docs/` but is **gitignored** there (builder wants planning private) with its **own git
+history** (root `ca72c49`; `.obsidian/`/`.claude/`/`.DS_Store` excluded). `CLAUDE.md` generated
+at the repo root from [[Agent guide]] — also untracked. App-repo trace: gitignore commit
+`e68b71b`. Claude's session memory copied to the repo's project path. **New habits:** Obsidian
+opens `~/teckhong/pilot/docs`; Claude Code sessions open at `~/teckhong/pilot`; vault changes
+commit to the vault's own repo. Next: S0.8 deploy (pick Render vs Heroku) → S0.9 tag `S0` →
+Sprint 1 (builder drives).
 
 ---
 
