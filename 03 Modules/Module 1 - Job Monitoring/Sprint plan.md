@@ -57,8 +57,13 @@ that ends in something demoable.
       Slim/Bootstrap rules, tracking conventions, dev quirks. **Untracked by design** (private,
       references private docs), so no commit hash — it lives on disk only.)*
 - [ ] **S0.8** Deploy skeleton to Render/Heroku (managed Postgres, env vars, Procfile/`render.yaml`);
-      verify the deployed login page loads.
-- [ ] **S0.9** First commit(s), tagged `S0`.
+      verify the deployed login page loads. *(2026-07-08: deliberately still open — builder
+      deciding deploy-now vs Sprint-1-exit. Prereq done: private GitHub remote
+      `nerdyspecs/pilot` exists, `main` pushed.)*
+- [x] **S0.9** First commit(s), tagged `S0`. *(2026-07-08: branches unified — `v1-db-setup`
+      fast-forwarded into `main` and deleted; `main` = `fc821b7` pushed to private GitHub +
+      annotated tag `S0`. Note: GitHub immediately opened 3 dependabot PRs (Rails 8.1.3 +
+      two Actions bumps) — Rails stays pinned 8.0.5, handle deliberately later.)*
 
 ---
 
