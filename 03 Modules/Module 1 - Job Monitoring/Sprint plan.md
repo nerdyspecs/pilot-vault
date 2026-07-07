@@ -75,22 +75,36 @@ landing routes by edge count. Old S1.x numbering retired — no commits referenc
 **Exit:** signup creates a bare user; "create workshop" creates `Workshop` + founder `Ownership`
 atomically; a 2nd user joins via employment; ending an employment kills access next request.
 
-- [ ] **S1.1** Migration + model **Workshop** (`name`, timestamps).
-- [ ] **S1.2** Migration + model **Ownership** (`user_id`, `workshop_id`; unique per pair) —
+- [x] **S1.1** Migration + model **Workshop** (`name`, timestamps). *(2026-07-08: `name`
+      `null: false` + presence validation. Commit `6a7e82a`.)*
+- [x] **S1.2** Migration + model **Ownership** (`user_id`, `workshop_id`; unique per pair) —
       the governance edge ([[ADR-006 Ownership separate from Employment]]). Not `CompanyOwner` —
-      "Company" is reserved for the v2 fleet entity.
-- [ ] **S1.3** Migration + model **Employment** (`user_id`, `workshop_id`, `role:integer`,
-      `ended_at`); `belongs_to :user, :workshop`.
-- [ ] **S1.4** `role` enum on Employment: `technician / service_advisor / parts_advisor /
+      "Company" is reserved for the v2 fleet entity. *(2026-07-08: composite unique index +
+      model-level uniqueness validation; `User#owned_workshops`, `Workshop#owners` associations.
+      Commit `6a7e82a`.)*
+- [x] **S1.3** Migration + model **Employment** (`user_id`, `workshop_id`, `role:integer`,
+      `ended_at`); `belongs_to :user, :workshop`. *(2026-07-08: `scope :active`. Commit `6a7e82a`.)*
+- [x] **S1.4** `role` enum on Employment: `technician / service_advisor / parts_advisor /
       workshop_manager` — **no `owner`** (ADR-006; the wrenching towkay holds both edges).
-- [ ] **S1.5** Partial unique index: one **active** employment per `(user_id, workshop_id)` where
-      `ended_at IS NULL`.
-- [ ] **S1.6** `Current` (`ActiveSupport::CurrentAttributes`) with `workshop` + `employment`
-      (+ `ownership` when acting as owner).
-- [ ] **S1.7** **The access door**: ONE method resolving a user's access to a workshop —
+      *(2026-07-08: commit `6a7e82a`.)*
+- [x] **S1.5** Partial unique index: one **active** employment per `(user_id, workshop_id)` where
+      `ended_at IS NULL`. *(2026-07-08: DB partial index + matching Ruby validation
+      (`conditions: -> { active }`) — belt and suspenders. Smoke-tested: ended employment +
+      new active one for the same pair coexist correctly. Commit `6a7e82a`.)*
+- [x] **S1.6** `Current` (`ActiveSupport::CurrentAttributes`) with `workshop` + `employment`
+      (+ `ownership` when acting as owner). *(2026-07-08: `app/models/current.rb`, 3 attributes.
+      Commit `efb919d`.)*
+- [x] **S1.7** **The access door**: ONE method resolving a user's access to a workshop —
       active `Employment` OR `Ownership` — called from an `ApplicationController` before_action
       that sets `Current` from session, **re-verified every request**; reject if no edge
-      ([[ADR-004 Multi-tenant foundation]] / ADR-006 §3).
+      ([[ADR-004 Multi-tenant foundation]] / ADR-006 §3). *(2026-07-08: `User#access_for` +
+      `set_current_context` before_action + `require_workshop!` helper (unused until S1.8-10
+      wire a gated controller). Smoke-tested: no edge → nil; ownership+employment both resolve;
+      ending employment while ownership remains still grants access; wrong workshop → nil.
+      Also fixed two unrelated pre-existing bugs found while running the full suite: stale
+      `users.yml` fixture (blank emails collided on the new unique index, dating to S0.4) and
+      `home_controller_test.rb`'s leftover `home_show_url` (dating to S0.5's index rename).
+      Commits `c3f0d36`, `efb919d`.)*
 - [ ] **S1.8** "Create your workshop" flow (post-signup, signed-in): `Workshop` + founder
       `Ownership` in **one transaction**. Signup itself stays thin (User only) — already true.
 - [ ] **S1.9** Minimal add-crew flow (v1-crude is fine): owner/manager enters an email →

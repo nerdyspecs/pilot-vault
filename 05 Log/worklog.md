@@ -1,11 +1,45 @@
 ---
 type: log
-updated: 2026-07-07
+updated: 2026-07-08
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-08 · Session 8 — Sprint 1 Phase A+B: tenancy models + the access door
+
+**Summary.** Git housekeeping closed out (branches unified onto `main`, pushed to private
+GitHub `nerdyspecs/pilot`, tag `S0`; vault renamed `docs/` → `vault/`). Then Sprint 1 began —
+builder explicitly handed Phase A (data layer) and Phase B (request plumbing) to Claude to
+execute directly (an exception to the default learning-drive mode, same as S0.1). Used
+Claude Code's plan mode for this: reviewed the phased plan before approving execution.
+
+**Built (S1.1–S1.7, all in [[ADR-006 Ownership separate from Employment]]'s shape):**
+- `Workshop`, `Ownership` (governance edge, composite unique index), `Employment` (operations
+  edge, role enum with **no owner**, partial unique index for "one active per pair").
+- `Current` (`ActiveSupport::CurrentAttributes`) — the per-request clipboard: `workshop`,
+  `employment`, `ownership`, reset automatically between requests.
+- **The access door**: `User#access_for(workshop)` resolves active Employment OR Ownership
+  (or both, for the wrenching-towkay case); `ApplicationController#set_current_context`
+  re-verifies on every request from `session[:workshop_id]` — never trusts the session alone;
+  `require_workshop!` ready for controllers to opt into once S1.8-10 build them.
+
+**Verification:** `rails runner` smoke tests (not just generator stubs) proved every
+constraint — duplicate ownership rejected, duplicate active employment rejected, ended+new
+employment coexist, cross-workshop access denied, `Current` sets/resets correctly. Full
+`bin/rails test` also surfaced and fixed two **unrelated pre-existing bugs**: a stale
+`users.yml` fixture (blank emails, latent since S0.4, only now colliding with the unique
+index) and a leftover `home_show_url` test call (should've been renamed with S0.5's
+`show`→`index` swap). Suite is green.
+
+**Open:**
+- Phases C+D (S1.8 create-workshop, S1.9 add-crew, S1.10 edge-count landing, S1.11 scoping
+  convention, S1.12 real tests) deferred to a future session, back to builder-drive mode.
+- S0.8 deploy still waits on S1.12 passing (per the S0.8 deferral decision).
+- Vault still has no offsite git remote.
 
 ---
 
