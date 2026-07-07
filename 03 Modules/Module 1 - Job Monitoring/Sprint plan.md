@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-07
+updated: 2026-07-08
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -49,7 +49,9 @@ that ends in something demoable.
       privacy revision — `docs/` is **gitignored** in the app repo and carries its **own private
       git history** (root commit `ca72c49`; `.obsidian/`, `.claude/`, `.DS_Store` excluded).
       App-repo trace: gitignore commit `e68b71b`. Obsidian re-points to
-      `~/teckhong/pilot/docs`; Claude sessions open at the repo root.)*
+      `~/teckhong/pilot/docs`; Claude sessions open at the repo root. 2026-07-08: folder
+      renamed `docs/` → **`vault/`** (builder preference); gitignore + CLAUDE.md pointers
+      updated, app-repo commit `fc821b7`.)*
 - [x] **S0.7** Generate `CLAUDE.md` at repo root from [[Agent guide]]. *(2026-07-07: written —
       task-scoped reading lists into `docs/`, working mode, hard invariants incl. ADR-006 +
       Slim/Bootstrap rules, tracking conventions, dev quirks. **Untracked by design** (private,
