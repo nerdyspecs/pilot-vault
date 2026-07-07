@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — no job goes unseen</title>
+<style>
+  :root {
+    --brand: #22456B;
+    --action: #2D5E94;
+    --action-hover: #24507F;
+    --page: #F5F6F8;
+    --surface: #FFFFFF;
+    --border: #E2E6EB;
+    --text: #1C2B3A;
+    --text-muted: #5C6670;
+
+    --st-neutral-bg: #F1EFE8; --st-neutral-tx: #444441;
+    --st-info-bg:    #E6F1FB; --st-info-tx:    #0C447C;
+    --st-wait-bg:    #FAEEDA; --st-wait-tx:    #633806;
+    --st-block-bg:   #FCEBEB; --st-block-tx:   #791F1F;
+    --st-done-bg:    #EAF3DE; --st-done-tx:    #27500A;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--page);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- wordmark: the K is unmissable ---------- */
+  .wordmark {
+    font-weight: 800;
+    font-size: 1.35rem;
+    color: var(--brand);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wordmark .k-mark {
+    display: inline-flex;
+    width: 30px; height: 30px;
+    flex: none;
+  }
+
+  /* ---------- nav: chrome whispers ---------- */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+  }
+  .nav a.quiet-link {
+    color: var(--action); text-decoration: none; font-size: 0.95rem;
+  }
+  .nav a.quiet-link:hover { text-decoration: underline; }
+
+  /* ---------- buttons: one solid action ---------- */
+  .btn {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    min-height: 44px;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .btn-solid { background: var(--action); color: #fff; }
+  .btn-solid:hover { background: var(--action-hover); }
+  .btn-outline {
+    background: transparent; color: var(--action);
+    border-color: var(--action);
+  }
+  .btn-outline:hover { background: var(--st-info-bg); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 56px 0 40px; }
+  .hero h1 {
+    font-size: clamp(2rem, 6vw, 3.1rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    max-width: 16ch;
+  }
+  .hero h1 .accent { color: var(--brand); }
+  .hero .sub {
+    margin-top: 16px;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+  .hero .cta-row { margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero .cta-note { margin-top: 10px; font-size: 0.85rem; color: var(--text-muted); }
+
+  /* ---------- the board mock ---------- */
+  .board-wrap { padding: 8px 0 56px; }
+  .board {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(28,43,58,0.06);
+  }
+  .board-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem; color: var(--text-muted);
+  }
+  .board-head .live {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .board-head .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--st-done-tx);
+  }
+  .job-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 6px 14px;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .job-row:last-child { border-bottom: none; }
+  .plate {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--page);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .job-desc { font-size: 0.92rem; color: var(--text); min-width: 0; }
+  .job-desc .who { color: var(--text-muted); font-size: 0.82rem; display: block; }
+  .badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    justify-self: end;
+  }
+  .b-neutral { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .b-info    { background: var(--st-info-bg);    color: var(--st-info-tx); }
+  .b-wait    { background: var(--st-wait-bg);    color: var(--st-wait-tx); }
+  .b-block   { background: var(--st-block-bg);   color: var(--st-block-tx); }
+  .b-done    { background: var(--st-done-bg);    color: var(--st-done-tx); }
+
+  /* ---------- sections ---------- */
+  section { padding: 52px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .kicker-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    max-width: 24ch;
+  }
+  h2 .accent { color: var(--brand); }
+  .section-body {
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: 1.02rem;
+    max-width: 58ch;
+  }
+  .section-body strong { color: var(--text); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .two-col { grid-template-columns: 1fr 1fr; }
+    .two-col.flip .col-visual { order: -1; }
+  }
+
+  /* ---------- villain: the whiteboard ---------- */
+  .whiteboard {
+    background: #FDFDFB;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 3px rgba(28,43,58,0.06);
+    font-family: "Comic Sans MS", "Chalkboard SE", cursive;
+    color: #3a4652;
+    transform: rotate(-0.6deg);
+  }
+  .whiteboard div { padding: 5px 0; border-bottom: 1px dashed #d8dce1; font-size: 0.95rem; }
+  .whiteboard div:last-child { border-bottom: none; }
+  .whiteboard .erased { text-decoration: line-through; opacity: 0.45; }
+  .whiteboard .faded { opacity: 0.55; }
+
+  /* ---------- phone mocks ---------- */
+  .phone {
+    width: 250px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 14px 12px;
+    box-shadow: 0 4px 16px rgba(28,43,58,0.08);
+  }
+  .phone .p-head {
+    font-size: 0.78rem; color: var(--text-muted);
+    text-align: center; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .phone .p-plate { text-align: center; margin-bottom: 4px; }
+  .phone .p-title { font-weight: 700; font-size: 0.95rem; text-align: center; }
+  .phone .p-sub { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; }
+  .phone .p-btn {
+    display: block; width: 100%;
+    background: var(--action); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 1rem; font-weight: 700;
+    padding: 16px 0; margin-top: 10px;
+    font-family: var(--font-sans);
+  }
+  .phone .p-btn.ghost {
+    background: transparent; color: var(--action);
+    border: 1px solid var(--action);
+    font-weight: 600; padding: 12px 0;
+  }
+
+  /* owner progress steps */
+  .steps { list-style: none; margin-top: 4px; }
+  .steps li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 7px 0;
+    font-size: 0.86rem;
+  }
+  .steps .mark {
+    width: 20px; height: 20px; border-radius: 50%;
+    flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700;
+    margin-top: 1px;
+  }
+  .steps .done-m { background: var(--st-done-bg); color: var(--st-done-tx); }
+  .steps .now-m  { background: var(--st-info-bg); color: var(--st-info-tx); }
+  .steps .todo-m { background: var(--page); color: var(--text-muted); border: 1px solid var(--border); }
+  .steps .todo-t { color: var(--text-muted); }
+  .steps .t small { display: block; color: var(--text-muted); font-size: 0.75rem; }
+
+  /* ---------- pricing posture ---------- */
+  .pricing-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px;
+    max-width: 520px;
+    box-shadow: 0 1px 3px rgba(28,43,58,0.06);
+  }
+  .pricing-card h3 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
+  .pricing-card p { margin-top: 8px; color: var(--text-muted); }
+  .pricing-card p strong { color: var(--text); }
+
+  /* ---------- final CTA + footer ---------- */
+  .final-cta { text-align: center; padding: 64px 0; }
+  .final-cta h2 { margin: 0 auto; }
+  .final-cta .section-body { margin-left: auto; margin-right: auto; }
+  .final-cta .btn { margin-top: 24px; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding: 24px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .foot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header>
+  <div class="container nav">
+    <a class="wordmark" href="#">
+      <!-- knot mark: a simple overhand loop, K resolved by the eye -->
+      <svg class="k-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6 26 C6 14, 14 6, 24 6" stroke="#22456B" stroke-width="4" stroke-linecap="round"/>
+        <path d="M6 6 C6 18, 14 26, 26 26" stroke="#2D5E94" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="6" cy="6" r="3" fill="#22456B"/>
+        <circle cx="26" cy="26" r="3" fill="#2D5E94"/>
+      </svg>
+      Knot
+    </a>
+    <a class="quiet-link" href="#owner">For vehicle owners</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<div class="container hero">
+  <h1>No job goes <span class="accent">unseen.</span></h1>
+  <p class="sub">
+    Knot is the job board for vehicle workshops. Every job, every handoff,
+    on every phone — and your customers watch their own car.
+  </p>
+  <div class="cta-row">
+    <a class="btn btn-solid" href="#early">Try Knot in your shop</a>
+  </div>
+  <p class="cta-note">Works on the phones your crew already has. No training needed.</p>
+</div>
+
+<!-- the live board, right under the promise -->
+<div class="container board-wrap">
+  <div class="board" aria-label="Example of the Knot job board">
+    <div class="board-head">
+      <span>Today — 6 jobs in the shop</span>
+      <span class="live"><span class="dot"></span>Live</span>
+    </div>
+    <div class="job-row">
+      <span class="plate">WXY 4821</span>
+      <span class="job-desc">Front brake pads + discs <span class="who">Ravi · started 9:40</span></span>
+      <span class="badge b-info">In progress</span>
+    </div>
+    <div class="job-row">
+      <span class="plate">BKV 902</span>
+      <span class="job-desc">Aircon not cold, check compressor <span class="who">Waiting on part · compressor relay</span></span>
+      <span class="badge b-block">Blocked</span>
+    </div>
+    <div class="job-row">
+      <span class="plate">PJH 3377</span>
+      <span class="job-desc">Major service 80,000 km <span class="who">Done 11:15 · owner notified</span></span>
+      <span class="badge b-done">Done</span>
+    </div>
+    <div class="job-row">
+      <span class="plate">VDE 651</span>
+      <span class="job-desc">Timing chain noise, diagnose <span class="who">Waiting for customer approval · 2 hrs</span></span>
+      <span class="badge b-wait">Waiting</span>
+    </div>
+    <div class="job-row">
+      <span class="plate">JRM 208</span>
+      <span class="job-desc">Walk-in — battery + alternator check <span class="who">Registered 12:02</span></span>
+      <span class="badge b-neutral">Registered</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VILLAIN ============ -->
+<section class="alt">
+  <div class="container two-col">
+    <div>
+      <p class="kicker-label">The problem</p>
+      <h2>The whiteboard mostly works. Until it doesn't.</h2>
+      <p class="section-body">
+        A job waits on a part. The part came in yesterday — but the person who knew
+        went out for lunch, and the board still says what it said this morning.
+        The customer calls. Nobody has the answer.
+      </p>
+      <p class="section-body">
+        <strong>"I told him already"</strong> is not a system. When the shop lives in
+        one person's head, jobs stall silently — and you find out when the customer does.
+      </p>
+    </div>
+    <div class="col-visual">
+      <div class="whiteboard" aria-label="A workshop whiteboard, half out of date">
+        <div class="erased">WXY 4821 — brakes — Ravi?</div>
+        <div>BKV 902 — aircon — WAITING PART</div>
+        <div class="faded">PJH 3377 — service — done??</div>
+        <div>VDE 651 — call customer!!</div>
+        <div class="erased">ask Ah Meng about relay</div>
+        <div class="faded">JRM 208 — ???</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROMISE ============ -->
+<section>
+  <div class="container">
+    <p class="kicker-label">The board</p>
+    <h2>Every job, every handoff, visible to the whole team.</h2>
+    <p class="section-body">
+      The counter sees what the floor sees. The floor sees what the warehouse sees.
+      When a job passes from one person to the next, the handoff is on the board —
+      who has it, since when, and what it's waiting on.
+    </p>
+    <p class="section-body">
+      A job that stalls turns amber on its own. You see it from across the room,
+      before anyone complains. <strong>The shop stops living in one person's head.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ============ CREW EASE ============ -->
+<section class="alt">
+  <div class="container two-col">
+    <div>
+      <p class="kicker-label">For the crew</p>
+      <h2>Faster than walking to the board.</h2>
+      <p class="section-body">
+        Your mechanics won't fill in forms, and they shouldn't have to.
+        One job on the screen, one button to press. Start work, raise a blocker,
+        mark it done — from the phone in their pocket, one thumb, greasy hands.
+      </p>
+      <p class="section-body">
+        If updating the system is slower than shouting across the floor,
+        nobody updates it. So we made it faster.
+      </p>
+    </div>
+    <div class="col-visual">
+      <div class="phone" aria-label="Technician's phone view">
+        <div class="p-head">Your current job</div>
+        <div class="p-plate"><span class="plate">WXY 4821</span></div>
+        <div class="p-title">Front brake pads + discs</div>
+        <div class="p-sub">Handed to you by counter · 9:38</div>
+        <button class="p-btn">Mark done</button>
+        <button class="p-btn ghost">Raise blocker</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KICKER ============ -->
+<section id="owner">
+  <div class="container two-col flip">
+    <div class="col-visual">
+      <div class="phone" aria-label="Vehicle owner's tracking page">
+        <div class="p-head">Your car at Seng Huat Motor</div>
+        <div class="p-plate"><span class="plate">VDE 651</span></div>
+        <ul class="steps">
+          <li><span class="mark done-m">✓</span><span class="t">Checked in <small>Tue 8:55 am</small></span></li>
+          <li><span class="mark done-m">✓</span><span class="t">Diagnosed — timing chain <small>Tue 10:30 am</small></span></li>
+          <li><span class="mark now-m">●</span><span class="t">Waiting for your approval <small>quote sent Tue 11:05 am</small></span></li>
+          <li><span class="mark todo-m"></span><span class="t todo-t">Repair</span></li>
+          <li><span class="mark todo-m"></span><span class="t todo-t">Ready for pickup <small>est. Thu</small></span></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <p class="kicker-label">The part no whiteboard can do</p>
+      <h2>Your customers watch their own car.</h2>
+      <p class="section-body">
+        Every customer gets a link. No app to install, no password. They open it
+        and see where their car is: checked in, diagnosed, waiting on a part,
+        ready for pickup — with an estimate of when.
+      </p>
+      <p class="section-body">
+        They stop calling to ask. Your front desk stops guessing.
+        <strong>The calls stop</strong> — and the customer trusts the shop
+        that showed them everything.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING POSTURE ============ -->
+<section class="alt">
+  <div class="container">
+    <p class="kicker-label">Pricing</p>
+    <div class="pricing-card">
+      <h3>One flat fee per workshop.</h3>
+      <p>
+        Never per user. Knot only works when the <strong>whole crew</strong> is on it —
+        so we will never charge you for adding one more mechanic.
+        One honest fee, get everyone on.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<div class="container final-cta" id="early">
+  <h2>See every job in the shop — from the counter, the floor, or home.</h2>
+  <p class="section-body">We're onboarding a small number of workshops first. Leave your number and we'll set your shop up ourselves.</p>
+  <a class="btn btn-solid" href="#">Try Knot in your shop</a>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container foot-row">
+    <span><strong style="color:var(--brand)">Knot</strong> — no job goes unseen.</span>
+    <span>Built for independent vehicle workshops.</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,200 @@
+<svg viewBox="0 0 1900 1250" xmlns="http://www.w3.org/2000/svg" font-family="Manrope, Inter, Arial, sans-serif">
+<rect x="0" y="0" width="1900" height="1250" fill="#F6F4EE"/>
+<text x="40" y="52" font-size="26" font-weight="800" fill="#24406B">Knot — UI Flow (all roles)</text>
+<text x="40" y="76" font-size="13" fill="#6B6B66">Screen map &amp; handoffs · solid = in-role navigation · dashed = cross-role handoff (the tie)</text>
+<rect x="40" y="90" width="1820" height="140" fill="#EDF0F5" stroke="#D9D6CC"/>
+<rect x="40" y="90" width="6" height="140" fill="#24406B"/>
+<text x="58" y="112" font-size="14" font-weight="800" fill="#24406B" letter-spacing="0.5">PUBLIC / ENTRY</text>
+<rect x="40" y="230" width="1820" height="210" fill="#E4F4EE" stroke="#D9D6CC"/>
+<rect x="40" y="230" width="6" height="210" fill="#0F6E56"/>
+<text x="58" y="252" font-size="14" font-weight="800" fill="#0F6E56" letter-spacing="0.5">SERVICE ADVISOR</text>
+<rect x="40" y="440" width="1820" height="220" fill="#F3EEE3" stroke="#D9D6CC"/>
+<rect x="40" y="440" width="6" height="220" fill="#8A6534"/>
+<text x="58" y="462" font-size="14" font-weight="800" fill="#8A6534" letter-spacing="0.5">WORKSHOP MANAGER</text>
+<rect x="40" y="660" width="1820" height="210" fill="#F9ECE7" stroke="#D9D6CC"/>
+<rect x="40" y="660" width="6" height="210" fill="#993C1D"/>
+<text x="58" y="682" font-size="14" font-weight="800" fill="#993C1D" letter-spacing="0.5">TECHNICIAN</text>
+<rect x="40" y="870" width="1820" height="200" fill="#FBEFDB" stroke="#D9D6CC"/>
+<rect x="40" y="870" width="6" height="200" fill="#854F0B"/>
+<text x="58" y="892" font-size="14" font-weight="800" fill="#854F0B" letter-spacing="0.5">PARTS / WAREHOUSE</text>
+<rect x="40" y="1070" width="1820" height="130" fill="#EEEEE9" stroke="#D9D6CC"/>
+<rect x="40" y="1070" width="6" height="130" fill="#6B6B66"/>
+<text x="58" y="1092" font-size="14" font-weight="800" fill="#6B6B66" letter-spacing="0.5">VEHICLE OWNER</text>
+<path d="M 338 160 L 360 160 L 360 160 L 382 160" fill="none" stroke="#24406B" stroke-width="2"/>
+<polygon points="382,160 375,153 375,167" fill="#24406B"/>
+<path d="M 558 160 L 580 160 L 580 330 L 602 330" fill="none" stroke="#24406B" stroke-width="2"/>
+<polygon points="602,330 595,323 595,337" fill="#24406B"/>
+<path d="M 470 191 L 470 355 L 690 355 L 690 519" fill="none" stroke="#24406B" stroke-width="2"/>
+<polygon points="690,519 683,512 697,512" fill="#24406B"/>
+<path d="M 470 191 L 470 465 L 910 465 L 910 739" fill="none" stroke="#24406B" stroke-width="2"/>
+<polygon points="910,739 903,732 917,732" fill="#24406B"/>
+<path d="M 470 191 L 470 565 L 1130 565 L 1130 939" fill="none" stroke="#24406B" stroke-width="2"/>
+<polygon points="1130,939 1123,932 1137,932" fill="#24406B"/>
+<path d="M 778 330 L 800 330 L 800 290 L 822 290" fill="none" stroke="#0F6E56" stroke-width="2"/>
+<polygon points="822,290 815,283 815,297" fill="#0F6E56"/>
+<path d="M 998 290 L 1020 290 L 1020 370 L 1042 370" fill="none" stroke="#0F6E56" stroke-width="2"/>
+<polygon points="1042,370 1035,363 1035,377" fill="#0F6E56"/>
+<path d="M 1218 370 L 1350 370 L 1350 290 L 1482 290" fill="none" stroke="#0F6E56" stroke-width="2"/>
+<polygon points="1482,290 1475,283 1475,297" fill="#0F6E56"/>
+<path d="M 1658 290 L 1680 290 L 1680 370 L 1702 370" fill="none" stroke="#0F6E56" stroke-width="2"/>
+<polygon points="1702,370 1695,363 1695,377" fill="#0F6E56"/>
+<path d="M 778 550 L 800 550 L 800 500 L 822 500" fill="none" stroke="#8A6534" stroke-width="2"/>
+<polygon points="822,500 815,493 815,507" fill="#8A6534"/>
+<path d="M 778 550 L 800 550 L 800 610 L 822 610" fill="none" stroke="#8A6534" stroke-width="2"/>
+<polygon points="822,610 815,603 815,617" fill="#8A6534"/>
+<path d="M 778 550 L 910 550 L 910 610 L 1042 610" fill="none" stroke="#8A6534" stroke-width="2"/>
+<polygon points="1042,610 1035,603 1035,617" fill="#8A6534"/>
+<path d="M 998 500 L 1020 500 L 1020 500 L 1042 500" fill="none" stroke="#8A6534" stroke-width="2"/>
+<polygon points="1042,500 1035,493 1035,507" fill="#8A6534"/>
+<path d="M 778 550 L 1020 550 L 1020 555 L 1262 555" fill="none" stroke="#8A6534" stroke-width="2"/>
+<polygon points="1262,555 1255,548 1255,562" fill="#8A6534"/>
+<path d="M 998 770 L 1020 770 L 1020 720 L 1042 720" fill="none" stroke="#993C1D" stroke-width="2"/>
+<polygon points="1042,720 1035,713 1035,727" fill="#993C1D"/>
+<path d="M 1218 720 L 1240 720 L 1240 770 L 1262 770" fill="none" stroke="#993C1D" stroke-width="2"/>
+<polygon points="1262,770 1255,763 1255,777" fill="#993C1D"/>
+<path d="M 1262 770 L 1240 770 L 1240 825 L 1218 825" fill="none" stroke="#993C1D" stroke-width="2"/>
+<polygon points="1218,825 1225,818 1225,832" fill="#993C1D"/>
+<path d="M 1438 770 L 1460 770 L 1460 770 L 1482 770" fill="none" stroke="#993C1D" stroke-width="2"/>
+<polygon points="1482,770 1475,763 1475,777" fill="#993C1D"/>
+<path d="M 1218 970 L 1240 970 L 1240 920 L 1262 920" fill="none" stroke="#854F0B" stroke-width="2"/>
+<polygon points="1262,920 1255,913 1255,927" fill="#854F0B"/>
+<path d="M 1218 970 L 1240 970 L 1240 1015 L 1262 1015" fill="none" stroke="#854F0B" stroke-width="2"/>
+<polygon points="1262,1015 1255,1008 1255,1022" fill="#854F0B"/>
+<path d="M 1218 970 L 1350 970 L 1350 970 L 1482 970" fill="none" stroke="#854F0B" stroke-width="2"/>
+<polygon points="1482,970 1475,963 1475,977" fill="#854F0B"/>
+<path d="M 910 321 L 910 420 L 690 420 L 690 519" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="690,519 683,512 697,512" fill="#6B6B66"/>
+<rect x="760" y="411" width="80" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="800" y="423" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Registered</text>
+<path d="M 1130 531 L 1130 635 L 910 635 L 910 739" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="910,739 903,732 917,732" fill="#6B6B66"/>
+<rect x="987" y="626" width="66" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1020" y="638" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Assigned</text>
+<path d="M 1130 856 L 1130 898 L 1130 898 L 1130 939" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="1130,939 1123,932 1137,932" fill="#6B6B66"/>
+<rect x="1070" y="888" width="121" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1130" y="900" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Blocker (untied)</text>
+<path d="M 1350 889 L 1350 845 L 1350 845 L 1350 801" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="1350,801 1343,808 1357,808" fill="#6B6B66"/>
+<rect x="1303" y="836" width="94" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1350" y="848" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Acknowledged</text>
+<path d="M 1350 984 L 1350 892 L 1350 892 L 1350 801" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="1350,801 1343,808 1357,808" fill="#6B6B66"/>
+<rect x="1290" y="884" width="121" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1350" y="896" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Cleared → resume</text>
+<path d="M 1570 739 L 1570 530 L 1570 530 L 1570 321" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="1570,321 1563,328 1577,328" fill="#6B6B66"/>
+<rect x="1523" y="521" width="94" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1570" y="533" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Done → ready</text>
+<path d="M 1570 321 L 1570 705 L 1350 705 L 1350 1089" fill="none" stroke="#6B6B66" stroke-width="2" stroke-dasharray="6 5"/>
+<polygon points="1350,1089 1343,1082 1357,1082" fill="#6B6B66"/>
+<rect x="1413" y="696" width="94" height="17" rx="8" fill="#F6F4EE" stroke="#D9D6CC"/>
+<text x="1460" y="708" font-size="11" font-weight="700" fill="#6B6B66" text-anchor="middle">Notify owner</text>
+<rect x="162" y="129" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#24406B" stroke-width="1.6"/>
+<rect x="162" y="129" width="176" height="4" rx="2" fill="#24406B"/>
+<text x="250" y="156" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Marketing Home</text>
+<text x="250" y="172" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(public)</text>
+<rect x="382" y="129" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#24406B" stroke-width="1.6"/>
+<rect x="382" y="129" width="176" height="4" rx="2" fill="#24406B"/>
+<text x="470" y="156" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Login</text>
+<text x="470" y="172" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(role-aware)</text>
+<rect x="602" y="299" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<rect x="602" y="299" width="176" height="4" rx="2" fill="#0F6E56"/>
+<text x="690" y="326" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Advisor Home</text>
+<text x="690" y="342" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">/ Inbox</text>
+<rect x="822" y="259" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<rect x="822" y="259" width="176" height="4" rx="2" fill="#0F6E56"/>
+<text x="910" y="286" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">New Job Intake</text>
+<text x="910" y="302" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(&lt;1 min)</text>
+<rect x="1042" y="339" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<rect x="1042" y="339" width="176" height="4" rx="2" fill="#0F6E56"/>
+<text x="1130" y="366" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Job Detail</text>
+<text x="1130" y="382" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(advisor)</text>
+<rect x="1482" y="259" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<rect x="1482" y="259" width="176" height="4" rx="2" fill="#0F6E56"/>
+<text x="1570" y="286" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Ready for Pickup</text>
+<text x="1570" y="302" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">→ Notify Owner</text>
+<rect x="1702" y="339" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#0F6E56" stroke-width="1.6"/>
+<rect x="1702" y="339" width="176" height="4" rx="2" fill="#0F6E56"/>
+<text x="1790" y="366" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Mark</text>
+<text x="1790" y="382" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Delivered</text>
+<rect x="602" y="519" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="602" y="519" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="690" y="546" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Manager</text>
+<text x="690" y="562" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Dashboard</text>
+<rect x="822" y="469" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="822" y="469" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="910" y="496" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Live Stage</text>
+<text x="910" y="512" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Board</text>
+<rect x="1042" y="469" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="1042" y="469" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="1130" y="496" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Assign Job</text>
+<text x="1130" y="512" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">→ Technician</text>
+<rect x="822" y="579" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="822" y="579" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="910" y="606" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Technician</text>
+<text x="910" y="622" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Load</text>
+<rect x="1042" y="579" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="1042" y="579" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="1130" y="606" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Blockers</text>
+<text x="1130" y="622" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Overview</text>
+<rect x="1262" y="524" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#8A6534" stroke-width="1.6"/>
+<rect x="1262" y="524" width="176" height="4" rx="2" fill="#8A6534"/>
+<text x="1350" y="551" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Job Detail</text>
+<text x="1350" y="567" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(manager)</text>
+<rect x="822" y="739" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#993C1D" stroke-width="1.6"/>
+<rect x="822" y="739" width="176" height="4" rx="2" fill="#993C1D"/>
+<text x="910" y="766" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">My Jobs</text>
+<text x="910" y="782" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(queue)</text>
+<rect x="1042" y="689" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#993C1D" stroke-width="1.6"/>
+<rect x="1042" y="689" width="176" height="4" rx="2" fill="#993C1D"/>
+<text x="1130" y="716" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Accept Job</text>
+<text x="1130" y="732" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(Untied → tied)</text>
+<rect x="1262" y="739" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#993C1D" stroke-width="1.6"/>
+<rect x="1262" y="739" width="176" height="4" rx="2" fill="#993C1D"/>
+<text x="1350" y="766" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Work Screen</text>
+<text x="1350" y="782" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(In-Progress)</text>
+<rect x="1042" y="794" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#993C1D" stroke-width="1.6"/>
+<rect x="1042" y="794" width="176" height="4" rx="2" fill="#993C1D"/>
+<text x="1130" y="821" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Raise</text>
+<text x="1130" y="837" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Blocker</text>
+<rect x="1482" y="739" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#993C1D" stroke-width="1.6"/>
+<rect x="1482" y="739" width="176" height="4" rx="2" fill="#993C1D"/>
+<text x="1570" y="766" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Mark Done</text>
+<text x="1570" y="782" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(immutable)</text>
+<rect x="1042" y="939" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#854F0B" stroke-width="1.6"/>
+<rect x="1042" y="939" width="176" height="4" rx="2" fill="#854F0B"/>
+<text x="1130" y="966" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Parts Home</text>
+<text x="1130" y="982" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(In Your Court)</text>
+<rect x="1262" y="889" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#854F0B" stroke-width="1.6"/>
+<rect x="1262" y="889" width="176" height="4" rx="2" fill="#854F0B"/>
+<text x="1350" y="916" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Acknowledge</text>
+<text x="1350" y="932" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">Blocker</text>
+<rect x="1262" y="984" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#854F0B" stroke-width="1.6"/>
+<rect x="1262" y="984" width="176" height="4" rx="2" fill="#854F0B"/>
+<text x="1350" y="1011" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Clear Blocker</text>
+<text x="1350" y="1027" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(Part Arrived)</text>
+<rect x="1482" y="939" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#854F0B" stroke-width="1.6"/>
+<rect x="1482" y="939" width="176" height="4" rx="2" fill="#854F0B"/>
+<text x="1570" y="966" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">On-Order POs</text>
+<text x="1570" y="982" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(V2)</text>
+<rect x="1262" y="1089" width="176" height="62" rx="9" fill="#FFFFFF" stroke="#6B6B66" stroke-width="1.6"/>
+<rect x="1262" y="1089" width="176" height="4" rx="2" fill="#6B6B66"/>
+<text x="1350" y="1116" font-size="13" font-weight="800" fill="#2C2C2A" text-anchor="middle">Vehicle Status</text>
+<text x="1350" y="1132" font-size="11.5" font-weight="500" fill="#6B6B66" text-anchor="middle">(token link, read-only)</text>
+<text x="1050" y="38" font-size="11" font-weight="700" fill="#6B6B66">STAGE LIFECYCLE (+ Cancelled)</text>
+<rect x="1050" y="50" width="92" height="24" rx="12" fill="#FFFFFF" stroke="#24406B"/>
+<text x="1096.0" y="66" font-size="11" font-weight="700" fill="#24406B" text-anchor="middle">Registered</text>
+<text x="1146" y="66" font-size="13" fill="#6B6B66">→</text>
+<rect x="1162" y="50" width="78" height="24" rx="12" fill="#FFFFFF" stroke="#24406B"/>
+<text x="1201.0" y="66" font-size="11" font-weight="700" fill="#24406B" text-anchor="middle">Assigned</text>
+<text x="1244" y="66" font-size="13" fill="#6B6B66">→</text>
+<rect x="1260" y="50" width="99" height="24" rx="12" fill="#FFFFFF" stroke="#24406B"/>
+<text x="1309.5" y="66" font-size="11" font-weight="700" fill="#24406B" text-anchor="middle">In-Progress</text>
+<text x="1363" y="66" font-size="13" fill="#6B6B66">→</text>
+<rect x="1379" y="50" width="50" height="24" rx="12" fill="#FFFFFF" stroke="#24406B"/>
+<text x="1404.0" y="66" font-size="11" font-weight="700" fill="#24406B" text-anchor="middle">Done</text>
+<text x="1433" y="66" font-size="13" fill="#6B6B66">→</text>
+<rect x="1449" y="50" width="85" height="24" rx="12" fill="#FFFFFF" stroke="#24406B"/>
+<text x="1491.5" y="66" font-size="11" font-weight="700" fill="#24406B" text-anchor="middle">Delivered</text>
+</svg>

@@ -1,0 +1,4 @@
+# Personal editor/session state — not project truth.
+.obsidian/
+.claude/
+.DS_Store

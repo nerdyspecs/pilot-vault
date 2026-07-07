@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knot — V1 UI flow prototype</title>
+<style>
+  :root {
+    --brand: #22456B;
+    --action: #2D5E94;
+    --action-hover: #24507F;
+    --page: #F5F6F8;
+    --surface: #FFFFFF;
+    --border: #E2E6EB;
+    --text: #1C2B3A;
+    --text-muted: #5C6670;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    /* status colors — semantic, never decoration */
+    --st-neutral-bg: #F1EFE8; --st-neutral-tx: #444441;
+    --st-info-bg: #E6F1FB;    --st-info-tx: #0C447C;
+    --st-wait-bg: #FAEEDA;    --st-wait-tx: #633806;
+    --st-danger-bg: #FCEBEB;  --st-danger-tx: #791F1F;
+    --st-success-bg: #EAF3DE; --st-success-tx: #27500A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+  .mono { font-family: var(--font-mono); }
+
+  /* ---------- app bar (all-light chrome) ---------- */
+  header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+  .bar { max-width: 1180px; margin: 0 auto; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 18px; }
+  .wordmark { font-weight: 800; font-size: 20px; color: var(--brand); letter-spacing: .2px; text-decoration: none; cursor: pointer; }
+  .wordmark .k { font-size: 24px; }
+  .tagline { color: var(--text-muted); font-size: 12px; margin-left: -6px; white-space: nowrap; }
+  nav.tabs { display: flex; gap: 4px; flex: 1; }
+  nav.tabs button { border: 0; background: none; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+  nav.tabs button:hover { background: var(--page); }
+  nav.tabs button.on { color: var(--action); background: #EEF3F9; }
+  nav.tabs .cnt { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--st-wait-bg); color: var(--st-wait-tx); font-size: 11px; margin-left: 4px; }
+
+  /* role dropdown */
+  details.roledd { position: relative; }
+  details.roledd summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; background: var(--surface); white-space: nowrap; }
+  details.roledd summary::-webkit-details-marker { display: none; }
+  details.roledd summary:hover { border-color: var(--action); }
+  details.roledd .menu { position: absolute; right: 0; top: 42px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(28,43,58,.10); min-width: 240px; padding: 6px; }
+  details.roledd .menu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; color: var(--text); }
+  details.roledd .menu button:hover { background: var(--page); }
+  details.roledd .menu button.on { background: #EEF3F9; color: var(--action); font-weight: 700; }
+  details.roledd .menu .who { color: var(--text-muted); font-size: 12px; }
+  .ghost { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-muted); }
+  .ghost:hover { border-color: var(--action); color: var(--action); }
+
+  /* ---------- layout ---------- */
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 20px 80px; }
+  main.narrow { max-width: 760px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 22px 0 10px; }
+  .sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .stack > * + * { margin-top: 12px; }
+
+  /* phone posture frame */
+  .phoneswrap { display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 412px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 14px 14px 20px; }
+  .phone .postlabel { text-align: center; color: var(--text-muted); font-size: 11px; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 10px; }
+  .phone .btn, .phone .btn-o { min-height: 48px; font-size: 16px; width: 100%; }
+  .phone .card { border-radius: 14px; }
+
+  /* ---------- components ---------- */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .st-registered { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .st-assigned   { background: var(--st-info-bg); color: var(--st-info-tx); }
+  .st-in_progress{ background: var(--st-info-bg); color: var(--st-info-tx); }
+  .st-done       { background: var(--st-success-bg); color: var(--st-success-tx); }
+  .st-delivered  { background: var(--st-success-bg); color: var(--st-success-tx); }
+  .st-cancelled  { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .bl { background: var(--st-danger-bg); color: var(--st-danger-tx); }
+  .limbo { background: var(--st-wait-bg); color: var(--st-wait-tx); }
+  .agewarn { color: var(--st-wait-tx); font-weight: 700; }
+
+  .plate { font-family: var(--font-mono); font-weight: 700; letter-spacing: .5px; }
+  .jobno { font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; }
+
+  .btn, .btn-o, .btn-q { font-family: var(--font-sans); font-size: 14px; font-weight: 700; border-radius: 9px; padding: 10px 16px; cursor: pointer; min-height: 40px; }
+  .btn { background: var(--action); border: 1px solid var(--action); color: #fff; }
+  .btn:hover { background: var(--action-hover); border-color: var(--action-hover); }
+  .btn-o { background: var(--surface); border: 1px solid var(--action); color: var(--action); }
+  .btn-o:hover { background: #EEF3F9; }
+  .btn-q { background: none; border: 0; color: var(--action); padding: 8px 10px; }
+  .btn-q:hover { text-decoration: underline; }
+  .btn[disabled], .btn-o[disabled] { opacity: .45; cursor: not-allowed; }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* dense table (PC buys density) */
+  table.board { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.board thead th { text-align: left; font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  table.board td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.board tbody tr { cursor: pointer; }
+  table.board tbody tr:hover { background: #FAFBFC; }
+  table.board tbody tr:last-child td { border-bottom: 0; }
+
+  /* forms — keyboard first */
+  form.intake { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  form.intake .full { grid-column: 1 / -1; }
+  label.f { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  input[type=text], textarea, select { width: 100%; font-family: var(--font-sans); font-size: 15px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--action); outline-offset: 0; border-color: var(--action); }
+  textarea { resize: vertical; min-height: 72px; }
+  .hint { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+
+  /* inbox items */
+  .inbox-item { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .inbox-item + .inbox-item { margin-top: 10px; }
+  .inbox-item .what { font-weight: 700; }
+  .inbox-item .meta { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+  /* stat cards */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .stat .n { font-size: 28px; font-weight: 800; }
+  .stat .l { color: var(--text-muted); font-size: 13px; font-weight: 600; }
+
+  /* timeline */
+  ul.timeline { list-style: none; margin: 0; padding: 0; }
+  ul.timeline li { position: relative; padding: 0 0 16px 22px; border-left: 2px solid var(--border); margin-left: 6px; }
+  ul.timeline li::before { content: ""; position: absolute; left: -6px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--text-muted); }
+  ul.timeline li:last-child { padding-bottom: 0; }
+  ul.timeline .t { color: var(--text-muted); font-size: 12px; }
+  ul.timeline .ackp { font-size: 12px; margin-top: 2px; }
+
+  /* owner progress steps */
+  .steps { display: flex; align-items: flex-start; margin: 18px 0 6px; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); margin: 0 auto 6px; position: relative; z-index: 2; }
+  .step.donept .dot { background: var(--action); border-color: var(--action); }
+  .step.now .dot { background: var(--surface); border-color: var(--action); box-shadow: 0 0 0 4px #EEF3F9; }
+  .step .lb { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .step.now .lb { color: var(--action); font-weight: 800; }
+  .step::after { content: ""; position: absolute; top: 6px; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: 1; }
+  .step:last-child::after { display: none; }
+  .step.donept::after { background: var(--action); }
+
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; font-size: 14px; }
+  .kv .k { color: var(--text-muted); }
+
+  /* toast — neutral, never green (status colors are reserved words) */
+  #toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 60; max-width: 90vw; }
+  #toast.show { opacity: 1; }
+
+  /* guide overlay */
+  #guide { position: fixed; inset: 0; background: rgba(28,43,58,.45); z-index: 50; display: none; }
+  #guide.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
+  #guide .panel { background: var(--surface); border-radius: 14px; max-width: 640px; width: 100%; max-height: 85vh; overflow: auto; padding: 24px 26px; }
+  #guide ol { padding-left: 20px; } #guide li { margin-bottom: 8px; }
+
+  .empty { text-align: center; color: var(--text-muted); padding: 34px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
+  .empty .big { font-weight: 700; color: var(--text); margin-bottom: 4px; }
+
+  .rowlink { color: var(--action); font-weight: 700; cursor: pointer; }
+  .backlink { display: inline-block; margin-bottom: 12px; color: var(--action); font-weight: 700; cursor: pointer; background: none; border: 0; font-size: 14px; padding: 0; }
+
+  @media (max-width: 860px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    form.intake { grid-template-columns: 1fr; }
+    .tagline { display: none; }
+    nav.tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<header><div class="bar" id="appbar"></div></header>
+<main id="app"></main>
+<div id="toast"></div>
+<div id="guide">
+  <div class="panel">
+    <h1>Demo the full flow</h1>
+    <p class="sub">One job, hand to hand, intake to delivery. Switch roles with the dropdown — no login, same data underneath.</p>
+    <ol>
+      <li><strong>Service advisor</strong> → <em>New job</em>: register a car (keyboard only — tab / Enter).</li>
+      <li>On the job page, <strong>assign a mechanic</strong> — one motion: crew + stage move to Assigned.</li>
+      <li>Switch to <strong>Technician</strong> (pick the mechanic you assigned): the job is in the inbox — <strong>Accept</strong>, then <strong>Start work</strong>.</li>
+      <li>Optionally <strong>raise a blocker</strong> (“Waiting on parts”) → switch to <strong>Parts advisor</strong>: acknowledge &amp; resolve it.</li>
+      <li>Back as Technician: <strong>Mark done</strong> — the job freezes.</li>
+      <li>Switch to <strong>Service advisor</strong>: the stage change sits in your inbox — <strong>Acknowledge</strong>, then <strong>Mark delivered</strong>.</li>
+      <li><strong>Workshop manager</strong> watches all of it: stage counts, blocked jobs, and unacknowledged handoffs (limbo).</li>
+      <li><strong>Vehicle owner</strong> sees the same truth read-only, via a token link — no login, no actions.</li>
+    </ol>
+    <div class="btnrow" style="margin-top:16px">
+      <button class="btn" onclick="toggleGuide()">Close</button>
+      <button class="btn-o" onclick="location.reload()">Reset demo data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Knot — V1 UI flow prototype (standalone, in-memory, no auth)
+   Faithful to the vault: stage model, blockers as overlay, acknowledged
+   handoffs (ADR-005), role matrix (M1-F1), visual theme tokens & UI laws.
+   ===================================================================== */
+
+const MIN = 60e3, HR = 3600e3, DAY = 24 * HR;
+const NOW = Date.now();
+
+const STAGES = ["registered", "assigned", "in_progress", "done", "delivered"];
+const STAGE_LABEL = { registered: "Registered", assigned: "Assigned", in_progress: "In progress", done: "Done", delivered: "Delivered", cancelled: "Cancelled" };
+const OWNER_STAGE_WORDS = {
+  registered: "Your car is checked in and waiting to be assigned.",
+  assigned: "A mechanic has been assigned to your car.",
+  in_progress: "Work on your car is in progress.",
+  done: "Work is complete. We’ll contact you for pickup.",
+  delivered: "Your car has been collected. Thank you!",
+  cancelled: "This job was cancelled. Contact the workshop for details."
+};
+
+const TECHS = ["Arif", "Kumar", "Wei Loon"];
+const PEOPLE = { service_advisor: "Mira", parts_advisor: "Hafiz", workshop_manager: "Ah Seng" };
+
+const ROLES = [
+  { id: "service_advisor", label: "Service advisor", who: "Mira · front desk · PC" },
+  { id: "technician",      label: "Technician",      who: "workshop floor · phone" },
+  { id: "parts_advisor",   label: "Parts advisor",   who: "Hafiz · warehouse · phone" },
+  { id: "workshop_manager",label: "Workshop manager",who: "Ah Seng · god-mode · PC" },
+  { id: "owner_view",      label: "Vehicle owner",   who: "token link · read-only · phone" },
+];
+
+const BLOCKER_CATALOG = [
+  { id: "hold_payment",   label: "Hold for payment",             raisedBy: "service_advisor", clearedBy: "service_advisor" },
+  { id: "waiting_parts",  label: "Waiting on parts",             raisedBy: "technician",      clearedBy: "parts_advisor" },
+  { id: "cust_approval",  label: "Waiting on customer approval", raisedBy: "service_advisor", clearedBy: "service_advisor" },
+];
+const cat = id => BLOCKER_CATALOG.find(b => b.id === id);
+
+/* ---------------- seed data (placeholders) ---------------- */
+let seq = 1000;
+const uid = () => "e" + (seq++);
+let nextJobNo = 1043;
+
+const jobs = [
+  { id: "j1", number: "J-1042", plate: "WXY 4821", vehicle: "Perodua Myvi 1.5", customer: "Lim Chee Keong", phone: "012-000 0000", complaint: "Grinding noise when braking", stage: "registered", createdAt: NOW - 45 * MIN, token: "k7f2w" },
+  { id: "j2", number: "J-1041", plate: "VBP 7734", vehicle: "Proton X50",       customer: "Nurul Ain",       phone: "012-000 0000", complaint: "Aircond blows warm",           stage: "assigned",   createdAt: NOW - 3 * HR,   token: "m3q9z" },
+  { id: "j3", number: "J-1040", plate: "PKD 903",  vehicle: "Toyota Hilux 2.8", customer: "Maju Hardware Sdn Bhd", phone: "012-000 0000", complaint: "Clutch slipping under load", stage: "in_progress", createdAt: NOW - 26 * HR, token: "p8d1x" },
+  { id: "j4", number: "J-1039", plate: "JSK 5512", vehicle: "Honda City",       customer: "Tan Mei Ling",    phone: "012-000 0000", complaint: "60k service + brake pads",     stage: "in_progress", createdAt: NOW - 5 * HR,  token: "r2v6c" },
+  { id: "j5", number: "J-1038", plate: "BMR 2210", vehicle: "Nissan Navara",    customer: "Roslan bin Ahmad",phone: "012-000 0000", complaint: "Engine overheating",           stage: "done",       createdAt: NOW - 2 * DAY,  token: "t5n4h" },
+  { id: "j6", number: "J-1037", plate: "SGP 66",   vehicle: "BMW 320i",         customer: "David Wong",      phone: "012-000 0000", complaint: "Oil leak, front gasket",       stage: "delivered",  createdAt: NOW - 3 * DAY,  token: "w9b7j" },
+];
+
+/* Event trackers — the three, each with ack columns (ADR-005) */
+const stageT = [
+  { id: uid(), jobId: "j1", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 45 * MIN, needsAck: null, ackAt: null, ackBy: null },
+
+  { id: uid(), jobId: "j2", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 3 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j2", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 2.5 * HR, needsAck: null, ackAt: null, ackBy: null },
+
+  { id: uid(), jobId: "j3", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 26 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j3", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 25 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j3", from: "assigned", to: "in_progress", by: "Arif", byRole: "technician", at: NOW - 24 * HR, needsAck: "service_advisor", ackAt: NOW - 23 * HR, ackBy: "Mira" },
+
+  { id: uid(), jobId: "j4", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 5 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j4", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 4.5 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j4", from: "assigned", to: "in_progress", by: "Kumar", byRole: "technician", at: NOW - 4 * HR, needsAck: "service_advisor", ackAt: NOW - 3.5 * HR, ackBy: "Mira" },
+
+  { id: uid(), jobId: "j5", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 2 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j5", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 47 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j5", from: "assigned", to: "in_progress", by: "Kumar", byRole: "technician", at: NOW - 46 * HR, needsAck: "service_advisor", ackAt: NOW - 45 * HR, ackBy: "Mira" },
+  { id: uid(), jobId: "j5", from: "in_progress", to: "done", by: "Kumar", byRole: "technician", at: NOW - 3 * HR, needsAck: "service_advisor", ackAt: null, ackBy: null },
+
+  { id: uid(), jobId: "j6", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 3 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j6", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 3 * DAY + 1 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j6", from: "assigned", to: "in_progress", by: "Arif", byRole: "technician", at: NOW - 3 * DAY + 2 * HR, needsAck: "service_advisor", ackAt: NOW - 3 * DAY + 3 * HR, ackBy: "Mira" },
+  { id: uid(), jobId: "j6", from: "in_progress", to: "done", by: "Arif", byRole: "technician", at: NOW - 2 * DAY, needsAck: "service_advisor", ackAt: NOW - 2 * DAY + 1 * HR, ackBy: "Mira" },
+  { id: uid(), jobId: "j6", from: "done", to: "delivered", by: "Mira", byRole: "service_advisor", at: NOW - 26 * HR, needsAck: null, ackAt: null, ackBy: null },
+];
+
+const blockerT = [
+  /* j3: technician raised "waiting on parts" — parts advisor hasn't acknowledged (limbo) */
+  { id: uid(), jobId: "j3", blockerId: "waiting_parts", action: "raised", note: "Clutch kit — 2.8 diesel, need master + slave cylinder too", by: "Arif", byRole: "technician", at: NOW - 4 * HR, needsAck: { role: "parts_advisor", person: null }, ackAt: null, ackBy: null },
+  /* j5: SA raised "hold for payment", still active */
+  { id: uid(), jobId: "j5", blockerId: "hold_payment", action: "raised", note: "Awaiting bank transfer confirmation", by: "Mira", byRole: "service_advisor", at: NOW - 2 * HR, needsAck: { role: "service_advisor", person: null }, ackAt: NOW - 2 * HR, ackBy: "Mira" },
+];
+
+const jobMech = [
+  /* j2: Arif assigned but has NOT accepted yet — limbo */
+  { id: uid(), jobId: "j2", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 2.5 * HR, ackAt: null, removedAt: null },
+  { id: uid(), jobId: "j3", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 25 * HR, ackAt: NOW - 24.5 * HR, removedAt: null },
+  { id: uid(), jobId: "j4", mechanic: "Kumar", primary: true, by: "Mira", at: NOW - 4.5 * HR, ackAt: NOW - 4.2 * HR, removedAt: null },
+  { id: uid(), jobId: "j5", mechanic: "Kumar", primary: true, by: "Mira", at: NOW - 47 * HR, ackAt: NOW - 46.5 * HR, removedAt: null },
+  { id: uid(), jobId: "j6", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 3 * DAY + 1 * HR, ackAt: NOW - 3 * DAY + 1.2 * HR, removedAt: null },
+];
+
+/* ---------------- app state ---------------- */
+const state = { role: "service_advisor", tech: "Arif", view: "board", jobId: null, ownerJobId: null };
+
+/* ---------------- derived queries (dashboards are queries) ---------------- */
+const job = id => jobs.find(j => j.id === id);
+const jobEvents = id => ({
+  stages: stageT.filter(t => t.jobId === id),
+  blockers: blockerT.filter(t => t.jobId === id),
+  crew: jobMech.filter(m => m.jobId === id && !m.removedAt),
+});
+function activeBlockers(id) {
+  const raises = blockerT.filter(t => t.jobId === id && t.action === "raised");
+  return raises.filter(r => !blockerT.some(t => t.jobId === id && t.action === "resolved" && t.blockerId === r.blockerId && t.at > r.at));
+}
+function lastStageAt(id) {
+  const s = stageT.filter(t => t.jobId === id);
+  return s.length ? Math.max(...s.map(t => t.at)) : job(id).createdAt;
+}
+const isActive = j => !["delivered", "cancelled"].includes(j.stage);
+const crewNames = id => jobEvents(id).crew.map(m => m.mechanic + (m.ackAt ? "" : " (not accepted)")).join(", ");
+
+function inboxFor(role) {
+  const items = [];
+  if (role === "technician") {
+    jobMech.filter(m => !m.ackAt && !m.removedAt && m.mechanic === state.tech).forEach(m =>
+      items.push({ kind: "mech", id: m.id, at: m.at, jobId: m.jobId, what: "New job assigned to you", by: m.by }));
+    blockerT.filter(t => !t.ackAt && t.needsAck && t.needsAck.role === "technician" && (!t.needsAck.person || t.needsAck.person === state.tech)).forEach(t =>
+      items.push({ kind: "blocker", id: t.id, at: t.at, jobId: t.jobId, what: (t.action === "resolved" ? "Blocker resolved: " : "Blocker raised: ") + cat(t.blockerId).label, by: t.by }));
+  }
+  if (role === "service_advisor" || role === "workshop_manager") {
+    stageT.filter(t => !t.ackAt && t.needsAck === "service_advisor").forEach(t =>
+      items.push({ kind: "stage", id: t.id, at: t.at, jobId: t.jobId, what: "Stage change: " + STAGE_LABEL[t.from] + " → " + STAGE_LABEL[t.to], by: t.by }));
+    blockerT.filter(t => !t.ackAt && t.needsAck && t.needsAck.role === "service_advisor").forEach(t =>
+      items.push({ kind: "blocker", id: t.id, at: t.at, jobId: t.jobId, what: (t.action === "resolved" ? "Blocker resolved: " : "Blocker raised: ") + cat(t.blockerId).label, by: t.by }));
+  }
+  if (role === "parts_advisor") {
+    blockerT.filter(t => !t.ackAt && t.needsAck && t.needsAck.role === "parts_advisor").forEach(t =>
+      items.push({ kind: "blocker", id: t.id, at: t.at, jobId: t.jobId, what: "Blocker raised: " + cat(t.blockerId).label, by: t.by }));
+  }
+  return items.filter(it => isActive(job(it.jobId))).sort((a, b) => a.at - b.at);
+}
+function allLimbo() { /* manager view: every unacknowledged handoff, org-wide */
+  const items = [];
+  stageT.filter(t => !t.ackAt && t.needsAck).forEach(t => items.push({ at: t.at, jobId: t.jobId, waitingOn: "Service advisor", what: "Stage change " + STAGE_LABEL[t.from] + " → " + STAGE_LABEL[t.to] + " by " + t.by }));
+  blockerT.filter(t => !t.ackAt && t.needsAck).forEach(t => items.push({ at: t.at, jobId: t.jobId, waitingOn: roleLabel(t.needsAck.role), what: (t.action === "resolved" ? "Resolved" : "Raised") + " “" + cat(t.blockerId).label + "” by " + t.by }));
+  jobMech.filter(m => !m.ackAt && !m.removedAt).forEach(m => items.push({ at: m.at, jobId: m.jobId, waitingOn: m.mechanic, what: "Assignment to " + m.mechanic + " not yet accepted" }));
+  return items.filter(it => isActive(job(it.jobId))).sort((a, b) => a.at - b.at);
+}
+const roleLabel = r => (ROLES.find(x => x.id === r) || { label: r }).label;
+
+/* ---------------- ONE DOOR — every state change flows through here ---------------- */
+function actor() {
+  if (state.role === "technician") return { name: state.tech, role: "technician" };
+  if (state.role === "owner_view") return null; /* read-only, no door access */
+  return { name: PEOPLE[state.role], role: state.role };
+}
+function oneDoor(action, jobId, payload) {
+  const a = actor();
+  if (!a) return fail("Vehicle owners are read-only.");
+  const j = job(jobId);
+  const god = a.role === "workshop_manager";
+  const t = Date.now();
+
+  const ALLOW = { /* role → allowed stage transitions (from → to) */
+    technician: { assigned: "in_progress", in_progress: "done" },
+    service_advisor: { registered: "assigned", done: "delivered" },
+  };
+
+  switch (action) {
+    case "assign": {
+      if (!god && a.role !== "service_advisor") return fail("Only the service advisor assigns work.");
+      if (j.stage !== "registered") return fail("Assignment happens from Registered.");
+      /* one motion: crew row + stage move */
+      jobMech.push({ id: uid(), jobId, mechanic: payload.mechanic, primary: true, by: a.name, at: t, ackAt: null, removedAt: null });
+      stageT.push({ id: uid(), jobId, from: "registered", to: "assigned", by: a.name, byRole: a.role, at: t, needsAck: null, ackAt: null, ackBy: null });
+      j.stage = "assigned";
+      return ok(payload.mechanic + " assigned — waiting for them to accept.");
+    }
+    case "start": case "done_stage": {
+      const to = action === "start" ? "in_progress" : "done";
+      const from = action === "start" ? "assigned" : "in_progress";
+      if (j.stage !== from) return fail("Illegal transition — job is " + STAGE_LABEL[j.stage] + ".");
+      if (!god) {
+        if (a.role !== "technician" || ALLOW.technician[from] !== to) return fail("Not permitted for your role.");
+        if (!jobEvents(jobId).crew.some(m => m.mechanic === a.name)) return fail("You’re not on this job’s crew.");
+      }
+      if (action === "start") /* starting work implicitly accepts the assignment */
+        jobEvents(jobId).crew.filter(m => m.mechanic === a.name && !m.ackAt).forEach(m => { m.ackAt = t; });
+      stageT.push({ id: uid(), jobId, from, to, by: a.name, byRole: a.role, at: t, needsAck: a.role === "technician" ? "service_advisor" : null, ackAt: null, ackBy: null });
+      j.stage = to;
+      return ok(to === "done" ? "Marked done — job is now frozen. Service advisor will acknowledge." : "Work started.");
+    }
+    case "deliver": {
+      if (!god && a.role !== "service_advisor") return fail("Only the service advisor marks delivery.");
+      if (j.stage !== "done") return fail("Delivery happens from Done.");
+      const ab = activeBlockers(jobId);
+      if (ab.length) return fail("Clear active blockers first: " + ab.map(r => cat(r.blockerId).label).join(", ") + ".");
+      stageT.push({ id: uid(), jobId, from: "done", to: "delivered", by: a.name, byRole: a.role, at: t, needsAck: null, ackAt: null, ackBy: null });
+      j.stage = "delivered";
+      return ok("Delivered. Job closed.");
+    }
+    case "cancel": {
+      if (!god && a.role !== "service_advisor") return fail("Only the service advisor or manager cancels.");
+      if (!["registered", "assigned", "in_progress"].includes(j.stage)) return fail("Only active jobs can be cancelled — a Done job is frozen.");
+      stageT.push({ id: uid(), jobId, from: j.stage, to: "cancelled", by: a.name, byRole: a.role, at: t, needsAck: null, ackAt: null, ackBy: null });
+      j.stage = "cancelled";
+      return ok("Job cancelled.");
+    }
+    case "send_back": {
+      if (!god) return fail("Only the manager sends a job back.");
+      if (j.stage !== "in_progress") return fail("Send-back applies to In progress only.");
+      stageT.push({ id: uid(), jobId, from: "in_progress", to: "assigned", by: a.name, byRole: a.role, at: t, needsAck: null, ackAt: null, ackBy: null });
+      j.stage = "assigned";
+      return ok("Sent back to Assigned (crew kept).");
+    }
+    case "raise_blocker": {
+      const c = cat(payload.blockerId);
+      if (!god && c.raisedBy !== a.role) return fail("“" + c.label + "” is raised by the " + roleLabel(c.raisedBy).toLowerCase() + ".");
+      if (["delivered", "cancelled"].includes(j.stage)) return fail("Job is closed.");
+      if (activeBlockers(jobId).some(r => r.blockerId === c.id)) return fail("That blocker is already active on this job.");
+      blockerT.push({ id: uid(), jobId, blockerId: c.id, action: "raised", note: payload.note || "", by: a.name, byRole: a.role, at: t, needsAck: { role: c.clearedBy, person: null }, ackAt: c.clearedBy === a.role ? t : null, ackBy: c.clearedBy === a.role ? a.name : null });
+      return ok("Blocker raised — now in the " + roleLabel(c.clearedBy).toLowerCase() + "’s court.");
+    }
+    case "resolve_blocker": {
+      const raise = blockerT.find(x => x.id === payload.raiseId);
+      const c = cat(raise.blockerId);
+      if (!god && c.clearedBy !== a.role) return fail("“" + c.label + "” is cleared by the " + roleLabel(c.clearedBy).toLowerCase() + ".");
+      if (!raise.ackAt) { raise.ackAt = t; raise.ackBy = a.name; } /* resolving implicitly acknowledges */
+      blockerT.push({ id: uid(), jobId, blockerId: raise.blockerId, action: "resolved", note: payload.note || "", by: a.name, byRole: a.role, at: t,
+        needsAck: raise.byRole === a.role ? null : { role: raise.byRole, person: raise.byRole === "technician" ? raise.by : null },
+        ackAt: raise.byRole === a.role ? t : null, ackBy: raise.byRole === a.role ? a.name : null });
+      return ok("“" + c.label + "” resolved — " + (raise.byRole === a.role ? "done." : raise.by + " will be notified."));
+    }
+  }
+  return fail("Unknown action.");
+  function ok(msg) { toast(msg); render(); return true; }
+  function fail(msg) { toast(msg); return false; }
+}
+
+/* acknowledgements — non-blocking accountability (ADR-005) */
+function ackEvent(kind, id) {
+  const a = actor(); if (!a) return;
+  const t = Date.now();
+  if (kind === "stage") { const e = stageT.find(x => x.id === id); e.ackAt = t; e.ackBy = a.name; }
+  if (kind === "blocker") { const e = blockerT.find(x => x.id === id); e.ackAt = t; e.ackBy = a.name; }
+  if (kind === "mech") { const e = jobMech.find(x => x.id === id); e.ackAt = t; }
+  toast("Acknowledged.");
+  render();
+}
+
+/* ---------------- ui helpers ---------------- */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function ago(ts) {
+  const d = Date.now() - ts;
+  if (d < HR) return Math.max(1, Math.round(d / MIN)) + "m";
+  if (d < DAY) return Math.round(d / HR) + "h";
+  return Math.round(d / DAY) + "d";
+}
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2600);
+}
+const stageBadge = s => '<span class="badge st-' + s + '">' + STAGE_LABEL[s] + "</span>";
+const blockerBadges = id => activeBlockers(id).map(r => '<span class="badge bl">' + esc(cat(r.blockerId).label) + "</span>").join(" ");
+function limboBadge(id) {
+  const inLimbo =
+    stageT.some(t => t.jobId === id && t.needsAck && !t.ackAt) ||
+    blockerT.some(t => t.jobId === id && t.needsAck && !t.ackAt) ||
+    jobMech.some(m => m.jobId === id && !m.ackAt && !m.removedAt);
+  return inLimbo ? '<span class="badge limbo">Pending ack</span>' : "";
+}
+function agingCell(j) {
+  if (!isActive(j)) return '<span class="jobno">—</span>';
+  const ms = Date.now() - lastStageAt(j.id);
+  const s = ago(lastStageAt(j.id));
+  return ms > DAY ? '<span class="agewarn">' + s + "</span>" : esc(s);
+}
+
+/* ---------------- views ---------------- */
+function render() {
+  renderBar();
+  const app = document.getElementById("app");
+  const r = state.role;
+  app.className = (r === "service_advisor" || r === "workshop_manager") ? "" : "narrow";
+  if (state.jobId && r !== "owner_view") { app.innerHTML = vJobDetail(state.jobId); focusIntake(); return; }
+  let html = "";
+  if (r === "service_advisor") {
+    if (state.view === "board") html = vBoard("Job board", "Every active job, at a glance — the front desk’s answer to any phone call.");
+    else if (state.view === "inbox") html = vInbox();
+    else if (state.view === "intake") html = vIntake();
+  } else if (r === "technician") {
+    html = phone(state.view === "inbox" ? vInbox() : vTechJobs());
+  } else if (r === "parts_advisor") {
+    html = phone(vPartsQueue());
+  } else if (r === "workshop_manager") {
+    if (state.view === "dash") html = vDash();
+    else if (state.view === "board") html = vBoard("All jobs", "Full board including closed jobs.", true);
+    else if (state.view === "limbo") html = vLimbo();
+  } else if (r === "owner_view") {
+    html = phone(state.ownerJobId ? vOwnerStatus(state.ownerJobId) : vOwnerPicker());
+  }
+  app.innerHTML = html;
+  focusIntake();
+}
+function focusIntake() { const f = document.getElementById("f-plate"); if (f) f.focus(); }
+
+function renderBar() {
+  const r = state.role;
+  const tabs = {
+    service_advisor: [["board", "Board"], ["inbox", "Inbox", inboxFor(r).length], ["intake", "New job"]],
+    technician: [["jobs", "My jobs"], ["inbox", "Inbox", inboxFor(r).length]],
+    parts_advisor: [["queue", "Blocker queue", inboxFor(r).length]],
+    workshop_manager: [["dash", "Dashboard"], ["board", "Board"], ["limbo", "Limbo", allLimbo().length]],
+    owner_view: [],
+  }[r];
+  const nav = tabs.map(([v, l, n]) =>
+    '<button class="' + (state.view === v && !state.jobId ? "on" : "") + '" onclick="setView(\'' + v + '\')">' + l + (n ? '<span class="cnt">' + n + "</span>" : "") + "</button>").join("");
+  const menu = ROLES.map(x =>
+    '<button class="' + (x.id === r ? "on" : "") + '" onclick="setRole(\'' + x.id + '\')">' + x.label + '<div class="who">' + x.who + "</div></button>").join("");
+  const current = roleLabel(r) + (r === "technician" ? " · " + state.tech : "");
+  document.getElementById("appbar").innerHTML =
+    '<span class="wordmark" onclick="setView(homeView())"><span class="k">K</span>not</span>' +
+    '<span class="tagline">no job goes unseen</span>' +
+    '<nav class="tabs">' + nav + "</nav>" +
+    '<button class="ghost" onclick="toggleGuide()">Demo guide</button>' +
+    '<details class="roledd" id="roledd"><summary>Viewing as: ' + esc(current) + ' ▾</summary><div class="menu">' + menu + "</div></details>";
+}
+const homeView = () => ({ service_advisor: "board", technician: "jobs", parts_advisor: "queue", workshop_manager: "dash", owner_view: "owner" }[state.role]);
+
+const phone = inner =>
+  '<div class="phoneswrap"><div class="phone"><div class="postlabel">' +
+  (state.role === "owner_view" ? "Owner status page · phone · read-only" : roleLabel(state.role) + " · phone posture") +
+  "</div>" + inner + "</div></div>";
+
+/* ---- board (dense table — PC buys density) ---- */
+function vBoard(title, sub, includeClosed) {
+  const list = jobs.filter(j => includeClosed || isActive(j)).sort((a, b) => b.createdAt - a.createdAt);
+  const rows = list.map(j =>
+    "<tr onclick=\"openJob('" + j.id + "')\">" +
+    '<td class="jobno">' + j.number + "</td>" +
+    '<td class="plate">' + esc(j.plate) + "</td>" +
+    "<td>" + esc(j.vehicle) + "</td>" +
+    "<td>" + esc(j.customer) + "</td>" +
+    "<td>" + stageBadge(j.stage) + "</td>" +
+    "<td>" + (blockerBadges(j.id) || '<span class="jobno">—</span>') + "</td>" +
+    "<td>" + (crewNames(j.id) ? esc(crewNames(j.id)) : '<span class="jobno">unassigned</span>') + "</td>" +
+    "<td>" + agingCell(j) + "</td>" +
+    "<td>" + limboBadge(j.id) + "</td></tr>").join("");
+  return "<h1>" + title + "</h1><p class='sub'>" + sub + "</p>" +
+    '<table class="board"><thead><tr><th>Job</th><th>Plate</th><th>Vehicle</th><th>Customer</th><th>Stage</th><th>Blockers</th><th>Crew</th><th>In stage</th><th></th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="9"><div class="empty"><div class="big">No jobs yet</div>Register the first car from “New job”.</div></td></tr>') +
+    "</tbody></table>";
+}
+
+/* ---- intake (keyboard-first: tab / Enter, autofocus) ---- */
+function vIntake() {
+  return "<h1>New job</h1><p class='sub'>Under a minute: tab through, Enter to register. The car lands on the board as <strong>Registered</strong>.</p>" +
+    '<div class="card"><form class="intake" onsubmit="return submitIntake(event)">' +
+    '<div><label class="f" for="f-plate">Plate number</label><input type="text" id="f-plate" required placeholder="WXY 1234" autocomplete="off"><div class="hint">Lookup key — normalized automatically.</div></div>' +
+    '<div><label class="f" for="f-vehicle">Vehicle</label><input type="text" id="f-vehicle" required placeholder="Make & model"></div>' +
+    '<div><label class="f" for="f-customer">Customer name</label><input type="text" id="f-customer" required placeholder="Person or company"></div>' +
+    '<div><label class="f" for="f-phone">Phone</label><input type="text" id="f-phone" placeholder="012-345 6789"></div>' +
+    '<div class="full"><label class="f" for="f-complaint">Complaint / work requested</label><textarea id="f-complaint" placeholder="What the customer reported"></textarea><div class="hint">Lands on the jobsheet — the mechanic reads this before touching the car.</div></div>' +
+    '<div class="full btnrow"><button type="submit" class="btn">Register job</button><span class="hint">Enter submits from any field.</span></div>' +
+    "</form></div>";
+}
+function submitIntake(e) {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const plate = v("f-plate").toUpperCase().replace(/\s+/g, " ");
+  const id = "j" + Math.random().toString(36).slice(2, 8);
+  const t = Date.now();
+  jobs.push({ id, number: "J-" + (nextJobNo++), plate, vehicle: v("f-vehicle"), customer: v("f-customer"), phone: v("f-phone") || "—", complaint: v("f-complaint") || "—", stage: "registered", createdAt: t, token: Math.random().toString(36).slice(2, 7) });
+  stageT.push({ id: uid(), jobId: id, from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: t, needsAck: null, ackAt: null, ackBy: null });
+  toast("Registered. Next: assign a mechanic.");
+  state.jobId = id; state.view = "board";
+  render();
+  return false;
+}
+
+/* ---- inbox (“waiting on me” — a query, not a table) ---- */
+function vInbox() {
+  const items = inboxFor(state.role);
+  const head = "<h1>Inbox</h1><p class='sub'>Handoffs waiting on you. The change already happened — acknowledging it takes ownership.</p>";
+  if (!items.length) return head + '<div class="empty"><div class="big">Nothing waiting on you</div>Every handoff has been picked up.</div>';
+  return head + items.map(it => {
+    const j = job(it.jobId);
+    return '<div class="inbox-item"><div><div class="what">' + esc(it.what) + '</div><div class="meta"><span class="plate">' + esc(j.plate) + "</span> · " + esc(j.vehicle) + " · by " + esc(it.by) + " · " + ago(it.at) + ' ago</div></div><div class="btnrow">' +
+      '<button class="btn-q" onclick="openJob(\'' + j.id + '\')">View job</button>' +
+      '<button class="btn-o" onclick="ackEvent(\'' + it.kind + "','" + it.id + '\')">' + (it.kind === "mech" ? "Accept job" : "Acknowledge") + "</button>" +
+      "</div></div>";
+  }).join("");
+}
+
+/* ---- technician: my jobs (phone cards, thumb-first) ---- */
+function vTechJobs() {
+  const mine = jobs.filter(j => isActive(j) && jobEvents(j.id).crew.some(m => m.mechanic === state.tech));
+  const picker = '<div class="btnrow" style="margin-bottom:14px"><label class="f" style="margin:0">You are:</label><select style="width:auto" onchange="setTech(this.value)">' +
+    TECHS.map(t => '<option ' + (t === state.tech ? "selected" : "") + ">" + t + "</option>").join("") + "</select></div>";
+  const head = "<h1>My jobs</h1><p class='sub'>Everything on your bench right now.</p>" + picker;
+  if (!mine.length) return head + '<div class="empty"><div class="big">No jobs on your bench</div>New assignments appear here and in your inbox.</div>';
+  return head + '<div class="stack">' + mine.map(j => {
+    const accepted = jobEvents(j.id).crew.some(m => m.mechanic === state.tech && m.ackAt);
+    return '<div class="card" onclick="openJob(\'' + j.id + '\')" style="cursor:pointer">' +
+      '<div class="btnrow" style="justify-content:space-between"><span class="plate" style="font-size:18px">' + esc(j.plate) + "</span>" + stageBadge(j.stage) + "</div>" +
+      '<div style="margin:4px 0 2px">' + esc(j.vehicle) + '</div><div class="jobno">' + j.number + " · " + esc(j.complaint) + "</div>" +
+      '<div style="margin-top:8px">' + (accepted ? "" : '<span class="badge limbo">Tap to accept</span> ') + blockerBadges(j.id) + "</div></div>";
+  }).join("") + "</div>";
+}
+
+/* ---- parts advisor: blocker queue ---- */
+function vPartsQueue() {
+  const open = blockerT.filter(t => t.action === "raised" && cat(t.blockerId).clearedBy === "parts_advisor" &&
+    !blockerT.some(x => x.action === "resolved" && x.jobId === t.jobId && x.blockerId === t.blockerId && x.at > t.at));
+  const head = "<h1>Blocker queue</h1><p class='sub'>Jobs waiting on parts — clearing one hands the job back to whoever raised it.</p>";
+  if (!open.length) return head + '<div class="empty"><div class="big">No jobs waiting on parts</div>When a technician raises “Waiting on parts”, it lands here.</div>';
+  return head + '<div class="stack">' + open.map(t => {
+    const j = job(t.jobId);
+    return '<div class="card">' +
+      '<div class="btnrow" style="justify-content:space-between"><span class="plate" style="font-size:17px">' + esc(j.plate) + '</span><span class="badge bl">' + esc(cat(t.blockerId).label) + "</span></div>" +
+      '<div style="margin:4px 0">' + esc(j.vehicle) + ' · <span class="jobno">' + j.number + "</span></div>" +
+      '<div class="meta" style="color:var(--text-muted);font-size:13px">Raised by ' + esc(t.by) + " · " + ago(t.at) + " ago" + (t.ackAt ? " · acknowledged" : "") + "</div>" +
+      (t.note ? '<div style="margin-top:6px;font-size:14px">“' + esc(t.note) + "”</div>" : "") +
+      '<div class="stack" style="margin-top:12px">' +
+      (!t.ackAt ? '<button class="btn-o" onclick="ackEvent(\'blocker\',\'' + t.id + '\')">Acknowledge — I’m on it</button>' : "") +
+      '<input type="text" id="note-' + t.id + '" placeholder="Resolution note (e.g. part arrived, bay 2)">' +
+      '<button class="btn" onclick="resolveFromQueue(\'' + t.jobId + "','" + t.id + '\')">Mark resolved</button>' +
+      "</div></div>";
+  }).join("") + "</div>";
+}
+function resolveFromQueue(jobId, raiseId) {
+  const note = (document.getElementById("note-" + raiseId) || { value: "" }).value.trim();
+  oneDoor("resolve_blocker", jobId, { raiseId, note });
+}
+
+/* ---- manager dashboard ---- */
+function vDash() {
+  const act = jobs.filter(isActive);
+  const blocked = act.filter(j => activeBlockers(j.id).length);
+  const limbo = allLimbo();
+  const inProg = act.filter(j => j.stage === "in_progress");
+  const stat = (n, l) => '<div class="stat"><div class="n">' + n + '</div><div class="l">' + l + "</div></div>";
+  const limboRows = limbo.map(it => {
+    const j = job(it.jobId);
+    return '<div class="inbox-item"><div><div class="what">' + esc(it.what) + '</div><div class="meta"><span class="plate">' + esc(j.plate) + "</span> · waiting on <strong>" + esc(it.waitingOn) + "</strong> · " + ago(it.at) + ' ago</div></div><button class="btn-q" onclick="openJob(\'' + j.id + '\')">View job</button></div>';
+  }).join("");
+  const counts = STAGES.map(s => {
+    const n = act.filter(j => j.stage === s).length;
+    return n ? '<span class="badge st-' + s + '">' + STAGE_LABEL[s] + " · " + n + "</span>" : "";
+  }).filter(Boolean).join(" ");
+  return "<h1>Workshop health</h1><p class='sub'>Where is every job right now — and which handoffs nobody has picked up.</p>" +
+    '<div class="stats">' + stat(act.length, "Active jobs") + stat(inProg.length, "In progress") + stat(blocked.length, "Blocked") + stat(limbo.length, "Unacknowledged handoffs") + "</div>" +
+    '<h2>Stage spread</h2><div class="card"><div class="btnrow">' + (counts || '<span class="jobno">No active jobs</span>') + "</div></div>" +
+    "<h2>Limbo — handoffs nobody has picked up</h2>" +
+    (limboRows || '<div class="empty"><div class="big">Nothing in limbo</div>Every handoff has been acknowledged.</div>');
+}
+function vLimbo() {
+  const limbo = allLimbo();
+  const head = "<h1>Limbo</h1><p class='sub'>Every unacknowledged handoff in the workshop, oldest first. This list is the alert.</p>";
+  if (!limbo.length) return head + '<div class="empty"><div class="big">Nothing in limbo</div>Every handoff has been acknowledged.</div>';
+  return head + limbo.map(it => {
+    const j = job(it.jobId);
+    return '<div class="inbox-item"><div><div class="what">' + esc(it.what) + '</div><div class="meta"><span class="plate">' + esc(j.plate) + "</span> · " + esc(j.vehicle) + " · waiting on <strong>" + esc(it.waitingOn) + "</strong> · " + ago(it.at) + ' ago</div></div><button class="btn-q" onclick="openJob(\'' + j.id + '\')">View job</button></div>';
+  }).join("");
+}
+
+/* ---- job detail (role-gated actions; one primary per screen) ---- */
+function vJobDetail(id) {
+  const j = job(id);
+  const r = state.role;
+  const ev = jobEvents(id);
+  const ab = activeBlockers(id);
+  const frozen = ["done", "delivered", "cancelled"].includes(j.stage);
+  const isPhone = (r === "technician" || r === "parts_advisor");
+
+  /* ----- actions per role (exactly one solid button) ----- */
+  let primary = "", secondary = [];
+  if (r === "service_advisor" || r === "workshop_manager") {
+    if (j.stage === "registered") {
+      primary = '<div class="btnrow"><select id="mech" style="width:auto;min-width:160px">' + TECHS.map(t => "<option>" + t + "</option>").join("") + "</select>" +
+        '<button class="btn" onclick="oneDoor(\'assign\',\'' + id + '\',{mechanic:document.getElementById(\'mech\').value})">Assign mechanic</button></div>';
+    } else if (j.stage === "done") {
+      primary = '<button class="btn" onclick="oneDoor(\'deliver\',\'' + id + '\',{})">Mark delivered</button>';
+    }
+    if (["registered", "assigned", "in_progress"].includes(j.stage))
+      secondary.push('<button class="btn-o" onclick="if(confirm(\'Cancel this job?\'))oneDoor(\'cancel\',\'' + id + '\',{})">Cancel job</button>');
+    if (r === "workshop_manager" && j.stage === "in_progress")
+      secondary.push('<button class="btn-o" onclick="oneDoor(\'send_back\',\'' + id + '\',{})">Send back to Assigned</button>');
+    if (r === "workshop_manager") {
+      if (j.stage === "assigned") secondary.push('<button class="btn-o" onclick="oneDoor(\'start\',\'' + id + '\',{})">Start work (override)</button>');
+      if (j.stage === "in_progress") secondary.push('<button class="btn-o" onclick="oneDoor(\'done_stage\',\'' + id + '\',{})">Mark done (override)</button>');
+    }
+  }
+  if (r === "technician") {
+    const mine = ev.crew.find(m => m.mechanic === state.tech);
+    const unaccepted = mine && !mine.ackAt;
+    if (unaccepted) primary = '<button class="btn" onclick="ackEvent(\'mech\',\'' + mine.id + '\')">Accept this job</button>';
+    else if (j.stage === "assigned" && mine) primary = '<button class="btn" onclick="oneDoor(\'start\',\'' + id + '\',{})">Start work</button>';
+    else if (j.stage === "in_progress" && mine) primary = '<button class="btn" onclick="oneDoor(\'done_stage\',\'' + id + '\',{})">Mark done</button>';
+  }
+
+  /* raise blocker — offered to whoever the catalog allows */
+  const raisable = BLOCKER_CATALOG.filter(c => (r === "workshop_manager" || c.raisedBy === r) && !ab.some(x => x.blockerId === c.id));
+  const canRaise = !["delivered", "cancelled"].includes(j.stage) && raisable.length && r !== "owner_view";
+  const raiseUI = canRaise ?
+    '<div class="card"><h2 style="margin-top:0">Raise a blocker</h2><div class="stack">' +
+    '<select id="blsel">' + raisable.map(c => '<option value="' + c.id + '">' + c.label + " → " + roleLabel(c.clearedBy).toLowerCase() + " clears</option>").join("") + "</select>" +
+    '<input type="text" id="blnote" placeholder="Detail (part needed, reason…)">' +
+    '<button class="btn-o" onclick="oneDoor(\'raise_blocker\',\'' + id + '\',{blockerId:document.getElementById(\'blsel\').value,note:document.getElementById(\'blnote\').value})">Raise blocker</button>' +
+    "</div></div>" : "";
+
+  /* resolve active blockers I can clear */
+  const resolvables = ab.filter(x => r === "workshop_manager" || cat(x.blockerId).clearedBy === r);
+  const resolveUI = resolvables.length && r !== "owner_view" ?
+    '<div class="card"><h2 style="margin-top:0">Active blockers</h2><div class="stack">' + resolvables.map(x =>
+      '<div><span class="badge bl">' + esc(cat(x.blockerId).label) + '</span> <span class="jobno">raised by ' + esc(x.by) + " · " + ago(x.at) + " ago</span>" +
+      (x.note ? '<div style="font-size:14px;margin:4px 0">“' + esc(x.note) + "”</div>" : "") +
+      '<div class="btnrow" style="margin-top:6px"><input type="text" id="rn-' + x.id + '" placeholder="Resolution note" style="flex:1;min-width:140px">' +
+      '<button class="btn-o" onclick="oneDoor(\'resolve_blocker\',\'' + id + "',{raiseId:'" + x.id + '\',note:document.getElementById(\'rn-' + x.id + '\').value})">Resolve</button></div></div>').join("") +
+    "</div></div>" : "";
+
+  /* pending acks on THIS job for me */
+  const myInbox = inboxFor(r).filter(it => it.jobId === id);
+  const ackUI = myInbox.length ?
+    '<div class="card" style="border-color:var(--st-wait-tx)"><h2 style="margin-top:0">Waiting on you</h2>' + myInbox.map(it =>
+      '<div class="btnrow" style="justify-content:space-between;margin-bottom:8px"><span>' + esc(it.what) + ' <span class="jobno">by ' + esc(it.by) + " · " + ago(it.at) + " ago</span></span>" +
+      '<button class="btn-o" onclick="ackEvent(\'' + it.kind + "','" + it.id + '\')">' + (it.kind === "mech" ? "Accept job" : "Acknowledge") + "</button></div>").join("") + "</div>" : "";
+
+  /* timeline: merge all three trackers */
+  const events = [];
+  ev.stages.forEach(t => events.push({ at: t.at, html: (t.from ? STAGE_LABEL[t.from] + " → " : "") + "<strong>" + STAGE_LABEL[t.to] + "</strong> by " + esc(t.by), ack: t.needsAck ? (t.ackAt ? "acknowledged by " + esc(t.ackBy) + " · " + ago(t.ackAt) + " ago" : "awaiting acknowledgement — " + roleLabel(t.needsAck).toLowerCase()) : null, pend: t.needsAck && !t.ackAt }));
+  ev.blockers.forEach(t => events.push({ at: t.at, html: (t.action === "raised" ? "Blocker raised" : "Blocker resolved") + ": <strong>" + esc(cat(t.blockerId).label) + "</strong> by " + esc(t.by) + (t.note ? " — “" + esc(t.note) + "”" : ""), ack: t.needsAck ? (t.ackAt ? "acknowledged by " + esc(t.ackBy) : "awaiting acknowledgement — " + (t.needsAck.person || roleLabel(t.needsAck.role).toLowerCase())) : null, pend: t.needsAck && !t.ackAt }));
+  jobMech.filter(m => m.jobId === id).forEach(m => events.push({ at: m.at, html: "<strong>" + esc(m.mechanic) + "</strong> assigned (primary) by " + esc(m.by), ack: m.ackAt ? "accepted · " + ago(m.ackAt) + " ago" : "not yet accepted", pend: !m.ackAt }));
+  events.sort((a, b) => b.at - a.at);
+  const timeline = '<ul class="timeline">' + events.map(e =>
+    "<li><div>" + e.html + '</div><div class="t">' + ago(e.at) + " ago</div>" +
+    (e.ack ? '<div class="ackp"><span class="badge ' + (e.pend ? "limbo" : "st-registered") + '" style="font-weight:600">' + e.ack + "</span></div>" : "") + "</li>").join("") + "</ul>";
+
+  const ownerLink = (r === "service_advisor" || r === "workshop_manager") ?
+    '<div class="card"><h2 style="margin-top:0">Owner link</h2><div class="jobno mono">knot.app/s/' + j.token + '</div><div class="hint">The customer’s live view — no login, read-only. Copy-paste it into WhatsApp/SMS.</div>' +
+    '<div class="btnrow" style="margin-top:10px"><button class="btn-o" onclick="copyLink(\'' + id + '\')">Copy link</button><button class="btn-q" onclick="previewOwner(\'' + id + '\')">Preview as owner</button></div></div>' : "";
+
+  const jobsheet = '<div class="card"><h2 style="margin-top:0">Jobsheet</h2><div class="kv">' +
+    '<span class="k">Complaint</span><span>' + esc(j.complaint) + "</span>" +
+    '<span class="k">Customer</span><span>' + esc(j.customer) + "</span>" +
+    '<span class="k">Phone</span><span>' + esc(j.phone) + "</span>" +
+    '<span class="k">Registered</span><span>' + ago(j.createdAt) + " ago</span></div>" +
+    (frozen ? '<div class="hint" style="margin-top:8px">Job is ' + STAGE_LABEL[j.stage].toLowerCase() + " — answers and history are frozen. Corrections open a new job.</div>" : "") + "</div>";
+
+  const body =
+    '<button class="backlink" onclick="closeJob()">← Back</button>' +
+    '<div class="btnrow" style="justify-content:space-between;align-items:flex-start">' +
+    '<div><h1><span class="plate">' + esc(j.plate) + '</span> <span class="jobno">' + j.number + "</span></h1>" +
+    "<p class='sub'>" + esc(j.vehicle) + " · " + esc(j.customer) + "</p></div>" +
+    "<div>" + stageBadge(j.stage) + " " + blockerBadges(id) + "</div></div>" +
+    (primary || secondary.length ? '<div class="card"><div class="' + (isPhone ? "stack" : "btnrow") + '">' + primary + secondary.join("") + "</div></div>" : "") +
+    ackUI +
+    '<div class="stack" style="margin-top:12px">' + resolveUI + raiseUI + jobsheet + ownerLink +
+    '<div class="card"><h2 style="margin-top:0">History</h2>' + timeline + "</div></div>";
+
+  return isPhone ? phone(body) : body;
+}
+
+/* ---- owner (token link, read-only, phone) ---- */
+function vOwnerPicker() {
+  return "<h1>Open a status link</h1><p class='sub'>In real life the owner taps a link we sent them — no login, no app. Pick a car to simulate opening its link.</p>" +
+    '<div class="stack">' + jobs.slice().sort((a, b) => b.createdAt - a.createdAt).map(j =>
+      '<div class="card" style="cursor:pointer" onclick="ownerOpen(\'' + j.id + '\')">' +
+      '<div class="btnrow" style="justify-content:space-between"><span class="plate" style="font-size:17px">' + esc(j.plate) + "</span>" + stageBadge(j.stage) + "</div>" +
+      "<div>" + esc(j.vehicle) + '</div><div class="jobno mono">knot.app/s/' + j.token + "</div></div>").join("") + "</div>";
+}
+function vOwnerStatus(id) {
+  const j = job(id);
+  const cancelled = j.stage === "cancelled";
+  const idx = STAGES.indexOf(j.stage);
+  const steps = '<div class="steps">' + STAGES.map((s, i) =>
+    '<div class="step ' + (i < idx ? "donept" : i === idx ? "now" : "") + '"><div class="dot"></div><div class="lb">' + STAGE_LABEL[s] + "</div></div>").join("") + "</div>";
+  const ab = activeBlockers(id);
+  const paused = ab.length && !cancelled ?
+    '<div class="card" style="background:var(--st-wait-bg);border-color:var(--st-wait-bg)"><strong style="color:var(--st-wait-tx)">Work is paused</strong><div style="color:var(--st-wait-tx);font-size:14px;margin-top:2px">' +
+    ab.map(x => esc(cat(x.blockerId).label)).join(" · ") + ". We’ll update you as soon as it moves.</div></div>" : "";
+  const publicEvents = [];
+  stageT.filter(t => t.jobId === id).forEach(t => publicEvents.push({ at: t.at, txt: { registered: "Checked in at the workshop", assigned: "Mechanic assigned", in_progress: "Work started", done: "Work completed", delivered: "Collected — thank you!", cancelled: "Job cancelled" }[t.to] }));
+  blockerT.filter(t => t.jobId === id).forEach(t => publicEvents.push({ at: t.at, txt: t.action === "raised" ? "Paused — " + cat(t.blockerId).label.toLowerCase() : "Resumed — " + cat(t.blockerId).label.toLowerCase() + " cleared" }));
+  publicEvents.sort((a, b) => b.at - a.at);
+  return '<button class="backlink" onclick="state.ownerJobId=null;render()">← All links</button>' +
+    '<div style="text-align:center;margin-bottom:6px"><div class="jobno">Weld & Wrench Workshop</div>' +
+    '<div class="plate" style="font-size:26px;margin:4px 0">' + esc(j.plate) + "</div><div>" + esc(j.vehicle) + "</div></div>" +
+    (cancelled ? '<div style="text-align:center;margin:14px 0">' + stageBadge("cancelled") + "</div>" : steps) +
+    '<p style="text-align:center;font-size:15px;margin:14px 0">' + OWNER_STAGE_WORDS[j.stage] + "</p>" +
+    paused +
+    '<div class="card" style="margin-top:12px"><h2 style="margin-top:0">Updates</h2><ul class="timeline">' +
+    publicEvents.map(e => "<li><div>" + esc(e.txt) + '</div><div class="t">' + ago(e.at) + " ago</div></li>").join("") +
+    '</ul></div><p class="hint" style="text-align:center;margin-top:16px">Questions? Call the workshop — 03-0000 0000.<br>This page updates automatically. Nothing to install.</p>';
+}
+
+/* ---------------- interactions ---------------- */
+function setRole(r) { state.role = r; state.jobId = null; state.ownerJobId = null; state.view = { service_advisor: "board", technician: "jobs", parts_advisor: "queue", workshop_manager: "dash", owner_view: "owner" }[r]; closeDD(); render(); }
+function setView(v) { state.view = v; state.jobId = null; render(); }
+function setTech(t) { state.tech = t; render(); }
+function openJob(id) { state.jobId = id; render(); }
+function closeJob() { state.jobId = null; render(); }
+function ownerOpen(id) { state.ownerJobId = id; render(); }
+function previewOwner(id) { state.role = "owner_view"; state.jobId = null; state.ownerJobId = id; render(); }
+function copyLink(id) {
+  const url = "https://knot.app/s/" + job(id).token;
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast("Link copied: " + url), () => toast(url));
+  else toast(url);
+}
+function toggleGuide() { document.getElementById("guide").classList.toggle("show"); closeDD(); }
+function closeDD() { const d = document.getElementById("roledd"); if (d) d.removeAttribute("open"); }
+document.addEventListener("click", e => { const d = document.getElementById("roledd"); if (d && d.hasAttribute("open") && !d.contains(e.target)) d.removeAttribute("open"); });
+
+render();
+</script>
+</body>
+</html>

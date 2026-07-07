@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knot — design vision mock</title>
+<style>
+  :root {
+    --brand: #22456B;
+    --action: #2D5E94;
+    --action-hover: #24507F;
+    --page: #F5F6F8;
+    --surface: #FFFFFF;
+    --border: #E2E6EB;
+    --text: #1C2B3A;
+    --text-muted: #5C6670;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --st-neutral-bg: #F1EFE8; --st-neutral-tx: #444441;
+    --st-info-bg: #E6F1FB;    --st-info-tx: #0C447C;
+    --st-wait-bg: #FAEEDA;    --st-wait-tx: #633806;
+    --st-danger-bg: #FCEBEB;  --st-danger-tx: #791F1F;
+    --st-success-bg: #EAF3DE; --st-success-tx: #27500A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.45; }
+  .mono { font-family: var(--font-mono); }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+  .bar { max-width: 1220px; margin: 0 auto; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 16px; }
+  .wordmark { font-weight: 800; font-size: 20px; color: var(--brand); cursor: pointer; }
+  .wordmark .k { font-size: 24px; }
+  .visiontag { font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--st-wait-tx); background: var(--st-wait-bg); border-radius: 6px; padding: 2px 8px; }
+  nav.tabs { display: flex; gap: 4px; flex: 1; }
+  nav.tabs button { border: 0; background: none; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+  nav.tabs button.on { color: var(--action); background: #EEF3F9; }
+  nav.tabs .cnt { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--st-wait-bg); color: var(--st-wait-tx); font-size: 11px; margin-left: 4px; }
+  details.roledd { position: relative; margin-left: auto; }
+  details.roledd summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; background: var(--surface); white-space: nowrap; }
+  details.roledd summary::-webkit-details-marker { display: none; }
+  details.roledd .menu { position: absolute; right: 0; top: 42px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(28,43,58,.10); min-width: 265px; padding: 6px; z-index: 30; }
+  details.roledd .menu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; color: var(--text); }
+  details.roledd .menu button:hover { background: var(--page); }
+  details.roledd .menu button.on { background: #EEF3F9; color: var(--action); font-weight: 700; }
+  details.roledd .menu .who { color: var(--text-muted); font-size: 12px; }
+  .ghost { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-muted); white-space: nowrap; }
+  .ghost:hover { border-color: var(--action); color: var(--action); }
+
+  main { max-width: 1220px; margin: 0 auto; padding: 22px 20px 90px; }
+  main.narrow { max-width: 760px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 20px 0 10px; }
+  .sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .stack > * + * { margin-top: 12px; }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .st-registered { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .st-assigned, .st-in_progress { background: var(--st-info-bg); color: var(--st-info-tx); }
+  .st-done, .st-delivered { background: var(--st-success-bg); color: var(--st-success-tx); }
+  .st-cancelled { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .bl { background: var(--st-danger-bg); color: var(--st-danger-tx); }
+  .loose { background: var(--st-wait-bg); color: var(--st-wait-tx); }
+  .plate { font-family: var(--font-mono); font-weight: 700; letter-spacing: .5px; }
+  .jobno { font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; }
+
+  .btn, .btn-o, .btn-q { font-family: var(--font-sans); font-size: 14px; font-weight: 700; border-radius: 9px; padding: 10px 16px; cursor: pointer; min-height: 40px; }
+  .btn { background: var(--action); border: 1px solid var(--action); color: #fff; }
+  .btn:hover { background: var(--action-hover); }
+  .btn-o { background: var(--surface); border: 1px solid var(--action); color: var(--action); }
+  .btn-o:hover { background: #EEF3F9; }
+  .btn-q { background: none; border: 0; color: var(--action); padding: 8px 10px; }
+  input[type=text], select { width: 100%; font-family: var(--font-sans); font-size: 15px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); }
+  input:focus, select:focus { outline: 2px solid var(--action); border-color: var(--action); }
+  label.f { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .hint { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+
+  /* ---------- WALL BOARD (TV mode) ---------- */
+  .wallhead { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .wallhead h1 { font-size: 24px; }
+  .wallhead .live { color: var(--st-success-tx); font-weight: 800; font-size: 13px; letter-spacing: 1px; }
+  .wallhead .clock { font-family: var(--font-mono); color: var(--text-muted); font-size: 18px; margin-left: auto; }
+  .wallgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 14px; }
+  .wallcard { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--surface); }
+  .wallcard .plate { font-size: 30px; display: block; line-height: 1.1; }
+  .wallcard .veh { color: var(--text-muted); font-size: 14px; margin: 2px 0 10px; }
+  .wallcard .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .wallcard .agetx { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+  .pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(99,56,6,0); } 50% { box-shadow: 0 0 0 6px rgba(99,56,6,.18); } }
+  .wallfoot { margin-top: 18px; display: flex; gap: 20px; color: var(--text-muted); font-size: 14px; font-weight: 600; flex-wrap: wrap; align-items: center; }
+
+  /* ---------- heat (aging made visible) ---------- */
+  /* heat levels applied inline via background — amber = aging, an information color */
+
+  table.board { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.board thead th { text-align: left; font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  table.board td { padding: 11px 12px; border-bottom: 1px solid var(--border); }
+  table.board tbody tr { cursor: pointer; }
+  table.board tbody tr:last-child td { border-bottom: 0; }
+
+  /* ---------- phone frame ---------- */
+  .phoneswrap { display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 412px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 14px 14px 20px; }
+  .phone .postlabel { text-align: center; color: var(--text-muted); font-size: 11px; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* ---------- technician one-card flow ---------- */
+  .techcard { border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+  .techcard .plate { font-size: 30px; }
+  .megabtn { width: 100%; min-height: 64px; font-size: 19px; font-weight: 800; border-radius: 14px; background: var(--action); color: #fff; border: 0; cursor: pointer; margin-top: 14px; }
+  .megabtn:hover { background: var(--action-hover); }
+  .secrow { display: flex; gap: 8px; margin-top: 10px; }
+  .secrow button { flex: 1; min-height: 48px; font-size: 14px; font-weight: 700; border-radius: 12px; background: var(--surface); border: 1px solid var(--action); color: var(--action); cursor: pointer; }
+  .dots { text-align: center; margin: 12px 0 4px; }
+  .dots .d { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--border); margin: 0 4px; }
+  .dots .d.on { background: var(--action); }
+  .cardnav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .cardnav button { border: 0; background: none; color: var(--action); font-weight: 700; font-size: 14px; cursor: pointer; padding: 8px; }
+
+  /* ---------- photos & voice (dummy evidence) ---------- */
+  .photostrip { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0; }
+  figure.photo { margin: 0; flex: 0 0 auto; width: 128px; }
+  figure.photo svg { width: 128px; height: 96px; border-radius: 10px; display: block; border: 1px solid var(--border); }
+  figure.photo figcaption { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gallery figure.photo { width: 100%; }
+  .gallery figure.photo svg { width: 100%; height: 120px; }
+  .voice { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--text); background: var(--surface); cursor: pointer; white-space: nowrap; }
+  .voice .bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+  .voice .bars i { display: block; width: 3px; background: var(--action); border-radius: 2px; height: 40%; }
+  .voice .bars i:nth-child(2) { height: 90%; } .voice .bars i:nth-child(3) { height: 60%; }
+  .voice .bars i:nth-child(4) { height: 100%; } .voice .bars i:nth-child(5) { height: 50%; }
+  .voice.playing .bars i { animation: eq .5s ease-in-out infinite alternate; }
+  .voice.playing .bars i:nth-child(2) { animation-delay: .1s; } .voice.playing .bars i:nth-child(3) { animation-delay: .2s; }
+  .voice.playing .bars i:nth-child(4) { animation-delay: .05s; } .voice.playing .bars i:nth-child(5) { animation-delay: .15s; }
+  @keyframes eq { from { transform: scaleY(.4); } to { transform: scaleY(1); } }
+
+  /* ---------- loose ends + the knot tie (THE one animation) ---------- */
+  .inbox-item { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .inbox-item + .inbox-item { margin-top: 10px; }
+  .inbox-item .what { font-weight: 700; }
+  .inbox-item .meta { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+  .knot path { stroke: var(--brand); stroke-width: 3; fill: none; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  .tying .knot path { animation: tie .6s ease-out forwards; }
+  @keyframes tie { to { stroke-dashoffset: 0; } }
+
+  /* ---------- manager: exceptions only ---------- */
+  .exc { border-left: 4px solid var(--st-wait-tx); }
+  .exc.excdanger { border-left-color: var(--st-danger-tx); }
+  .allclear { text-align: center; padding: 48px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .allclear .big { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .rolebar { display: grid; grid-template-columns: 130px 1fr 70px; gap: 10px; align-items: center; font-size: 13px; margin-top: 8px; }
+  .rolebar .track { height: 8px; background: var(--page); border-radius: 4px; overflow: hidden; }
+  .rolebar .fill { height: 100%; background: var(--action); border-radius: 4px; }
+
+  /* ---------- scan modal / job peek ---------- */
+  .overlay { position: fixed; inset: 0; background: rgba(28,43,58,.45); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .overlay .panel { background: var(--surface); border-radius: 16px; max-width: 560px; width: 100%; max-height: 88vh; overflow: auto; padding: 22px 24px; }
+  .viewfinder { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .viewfinder svg { display: block; width: 100%; height: 200px; }
+  .scanline { position: absolute; left: 0; right: 0; height: 3px; background: var(--action); opacity: .85; animation: scan 1.2s linear infinite; }
+  @keyframes scan { 0% { top: 8%; } 50% { top: 88%; } 100% { top: 8%; } }
+
+  /* owner story */
+  .steps { display: flex; margin: 18px 0 6px; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); margin: 0 auto 6px; position: relative; z-index: 2; }
+  .step.donept .dot { background: var(--action); border-color: var(--action); }
+  .step.now .dot { border-color: var(--action); box-shadow: 0 0 0 4px #EEF3F9; }
+  .step .lb { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .step.now .lb { color: var(--action); font-weight: 800; }
+  .step::after { content: ""; position: absolute; top: 6px; left: 50%; width: 100%; height: 2px; background: var(--border); }
+  .step:last-child::after { display: none; }
+  .step.donept::after { background: var(--action); }
+  ul.timeline { list-style: none; margin: 0; padding: 0; }
+  ul.timeline li { position: relative; padding: 0 0 16px 22px; border-left: 2px solid var(--border); margin-left: 6px; }
+  ul.timeline li::before { content: ""; position: absolute; left: -6px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--text-muted); }
+  ul.timeline li:last-child { padding-bottom: 0; }
+  ul.timeline .t { color: var(--text-muted); font-size: 12px; }
+  .frozen { background: var(--st-neutral-bg); color: var(--st-neutral-tx); border-radius: 12px; padding: 12px 16px; font-weight: 600; font-size: 14px; }
+
+  #toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 70; max-width: 90vw; }
+  #toast.show { opacity: 1; }
+  .empty { text-align: center; color: var(--text-muted); padding: 34px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
+  .empty .big { font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .backlink { display: inline-block; margin-bottom: 12px; color: var(--action); font-weight: 700; cursor: pointer; background: none; border: 0; font-size: 14px; padding: 0; }
+  .kv { display: grid; grid-template-columns: 120px 1fr; gap: 6px 12px; font-size: 14px; }
+  .kv .k { color: var(--text-muted); }
+  @media (max-width: 700px) { .visiontag { display: none; } nav.tabs { overflow-x: auto; } }
+</style>
+</head>
+<body>
+<header><div class="bar" id="appbar"></div></header>
+<main id="app"></main>
+<div id="toast"></div>
+<div id="modal"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Knot — DESIGN VISION mock. Separate from knot-v1-ui-flow.html.
+   Same model spine (stages, blockers, acknowledged handoffs), but the
+   UI takes the eight swings: wall board, heat-aging, one-card tech
+   flow, photo/voice evidence (dummy), owner story + Approve, "loose
+   ends" + knot-tie animation, plate-scan intake, exceptions-only
+   manager. UI only — nothing uploads, nothing persists.
+   ===================================================================== */
+
+const MIN = 60e3, HR = 3600e3, DAY = 24 * HR;
+const NOW = Date.now();
+const STAGES = ["registered", "assigned", "in_progress", "done", "delivered"];
+const STAGE_LABEL = { registered: "Registered", assigned: "Assigned", in_progress: "In progress", done: "Done", delivered: "Delivered", cancelled: "Cancelled" };
+const STAGE_NORM_H = { registered: 2, assigned: 4, in_progress: 24, done: 24 }; /* expected hours per stage — heat starts past this */
+
+const TECHS = ["Arif", "Kumar", "Wei Loon"];
+const PEOPLE = { service_advisor: "Mira", parts_advisor: "Hafiz", workshop_manager: "Ah Seng" };
+const MODES = [
+  { id: "wall",             label: "Wall board",       who: "TV on the floor · zero interaction" },
+  { id: "service_advisor",  label: "Service advisor",  who: "Mira · front desk · PC" },
+  { id: "technician",       label: "Technician",       who: "one card at a time · phone" },
+  { id: "parts_advisor",    label: "Parts advisor",    who: "Hafiz · warehouse · phone" },
+  { id: "workshop_manager", label: "Workshop manager", who: "exceptions only · PC" },
+  { id: "owner_view",       label: "Vehicle owner",    who: "story link · phone · one button max" },
+];
+const BLOCKER_CATALOG = [
+  { id: "hold_payment",  label: "Hold for payment",             raisedBy: "service_advisor", clearedBy: "service_advisor" },
+  { id: "waiting_parts", label: "Waiting on parts",             raisedBy: "technician",      clearedBy: "parts_advisor" },
+  { id: "cust_approval", label: "Waiting on customer approval", raisedBy: "service_advisor", clearedBy: "service_advisor" },
+];
+const cat = id => BLOCKER_CATALOG.find(b => b.id === id);
+const roleLabel = r => (MODES.find(x => x.id === r) || { label: r }).label;
+
+/* ---------------- dummy photo + voice components (UI only) ---------------- */
+function photoSVG(kind) {
+  const defs = {
+    clutch:   { cap: "Clutch kit — worn friction plate", art: '<circle cx="64" cy="46" r="30" fill="#5C6670"/><circle cx="64" cy="46" r="18" fill="#3A4756"/><circle cx="64" cy="46" r="6" fill="#8A95A1"/><circle cx="64" cy="20" r="4" fill="#8A95A1"/><circle cx="88" cy="34" r="4" fill="#8A95A1"/><circle cx="88" cy="58" r="4" fill="#8A95A1"/><circle cx="64" cy="72" r="4" fill="#8A95A1"/><circle cx="40" cy="58" r="4" fill="#8A95A1"/><circle cx="40" cy="34" r="4" fill="#8A95A1"/>' },
+    pad_worn: { cap: "Front-left pad — 2 mm left", art: '<rect x="30" y="30" width="68" height="16" rx="3" fill="#8A95A1"/><rect x="30" y="48" width="68" height="7" rx="2" fill="#5C6670"/><text x="64" y="76" font-size="11" fill="#B8C0C9" text-anchor="middle" font-family="sans-serif">2mm</text>' },
+    pad_new:  { cap: "New pads fitted", art: '<rect x="30" y="26" width="68" height="16" rx="3" fill="#8A95A1"/><rect x="30" y="46" width="68" height="22" rx="3" fill="#B8C0C9"/>' },
+    leak:     { cap: "Oil seep — front gasket", art: '<rect x="24" y="22" width="80" height="30" rx="6" fill="#5C6670"/><ellipse cx="64" cy="70" rx="30" ry="9" fill="#3A4756"/><path d="M60 52 q4 8 0 14" stroke="#3A4756" stroke-width="5" fill="none"/>' },
+    radiator: { cap: "Radiator — corroded core", art: '<rect x="34" y="22" width="60" height="52" rx="5" fill="#5C6670"/><g stroke="#8A95A1" stroke-width="3"><line x1="42" y1="28" x2="42" y2="68"/><line x1="52" y1="28" x2="52" y2="68"/><line x1="62" y1="28" x2="62" y2="68"/><line x1="72" y1="28" x2="72" y2="68"/><line x1="82" y1="28" x2="82" y2="68"/></g>' },
+    engine:   { cap: "Engine bay — before work", art: '<rect x="26" y="30" width="76" height="40" rx="8" fill="#5C6670"/><circle cx="48" cy="50" r="10" fill="#8A95A1"/><circle cx="80" cy="50" r="10" fill="#8A95A1"/><rect x="40" y="22" width="48" height="10" rx="4" fill="#3A4756"/>' },
+    car_done: { cap: "Washed & ready for pickup", art: '<path d="M28 62 q6-18 22-18 h28 q16 0 22 18 z" fill="#8A95A1"/><rect x="22" y="60" width="84" height="10" rx="5" fill="#5C6670"/><circle cx="44" cy="72" r="7" fill="#3A4756"/><circle cx="84" cy="72" r="7" fill="#3A4756"/><path d="M50 44 h28 l6 12 h-40 z" fill="#B8C0C9"/>' },
+  };
+  const d = defs[kind] || defs.engine;
+  return { cap: d.cap, svg: '<svg viewBox="0 0 128 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + d.cap + '"><rect width="128" height="96" fill="#2B3A4A"/>' + d.art + '<rect x="0" y="82" width="128" height="14" fill="rgba(0,0,0,.35)"/><text x="6" y="92" font-size="8" fill="#DDE3E9" font-family="sans-serif">PHOTO · dummy</text></svg>' };
+}
+const photoThumb = (kind, cap) => { const p = photoSVG(kind); return '<figure class="photo">' + p.svg + "<figcaption>" + esc(cap || p.cap) + "</figcaption></figure>"; };
+const voiceChip = sec => '<span class="voice" onclick="playVoice(this,' + sec + ')"><span class="bars"><i></i><i></i><i></i><i></i><i></i></span>Voice note · 0:' + String(sec).padStart(2, "0") + " · Play</span>";
+function playVoice(el, sec) { el.classList.add("playing"); setTimeout(() => el.classList.remove("playing"), Math.min(sec, 3) * 1000); }
+
+const KNOT_SVG = '<svg class="knot" viewBox="0 0 64 32" width="52" height="26" xmlns="http://www.w3.org/2000/svg"><path pathLength="100" d="M2,16 C14,16 18,6 28,6 C40,6 40,26 30,26 C22,26 22,12 32,12 C42,12 46,16 62,16"/></svg>';
+
+/* ---------------- seed data ---------------- */
+let seq = 1000; const uid = () => "e" + (seq++);
+let nextJobNo = 1059;
+const jobs = [
+  { id: "j1", number: "J-1058", plate: "WXY 4821", vehicle: "Perodua Myvi 1.5", customer: "Lim Chee Keong", phone: "012-000 0000", complaint: "Grinding noise when braking", stage: "registered", createdAt: NOW - 30 * MIN, token: "k7f2w", gallery: [] },
+  { id: "j2", number: "J-1057", plate: "VBP 7734", vehicle: "Proton X50", customer: "Nurul Ain", phone: "012-000 0000", complaint: "Aircond blows warm", stage: "assigned", createdAt: NOW - 2.5 * HR, token: "m3q9z", gallery: [] },
+  { id: "j3", number: "J-1056", plate: "PKD 903", vehicle: "Toyota Hilux 2.8", customer: "Maju Hardware Sdn Bhd", phone: "012-000 0000", complaint: "Clutch slipping under load", stage: "in_progress", createdAt: NOW - 3.2 * DAY, token: "p8d1x", gallery: [{ kind: "clutch" }] },
+  { id: "j4", number: "J-1055", plate: "JSK 5512", vehicle: "Honda City", customer: "Tan Mei Ling", phone: "012-000 0000", complaint: "60k service + brake pads", stage: "in_progress", createdAt: NOW - 6 * HR, token: "r2v6c", gallery: [{ kind: "pad_worn" }] },
+  { id: "j5", number: "J-1054", plate: "BMR 2210", vehicle: "Nissan Navara", customer: "Roslan bin Ahmad", phone: "012-000 0000", complaint: "Overheating on highway", stage: "in_progress", createdAt: NOW - 9 * HR, token: "t5n4h", gallery: [{ kind: "radiator" }] },
+  { id: "j6", number: "J-1053", plate: "SGP 66", vehicle: "BMW 320i", customer: "David Wong", phone: "012-000 0000", complaint: "Oil leak, front gasket", stage: "done", createdAt: NOW - 1.5 * DAY, token: "w9b7j", gallery: [{ kind: "leak" }, { kind: "pad_new", cap: "Gasket replaced — dry after test run" }] },
+  { id: "j7", number: "J-1052", plate: "MCK 7", vehicle: "Toyota Alphard", customer: "Mdm. Chong Siew Lin", phone: "012-000 0000", complaint: "Full service before balik kampung", stage: "delivered", createdAt: NOW - 2 * DAY, token: "q4z8p", gallery: [{ kind: "engine" }, { kind: "car_done" }] },
+];
+
+const stageT = [
+  { id: uid(), jobId: "j1", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 30 * MIN, needsAck: null, ackAt: null, ackBy: null },
+
+  { id: uid(), jobId: "j2", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 2.5 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j2", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 2 * HR, needsAck: null, ackAt: null, ackBy: null },
+
+  { id: uid(), jobId: "j3", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 3.2 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j3", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 3.1 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j3", from: "assigned", to: "in_progress", by: "Arif", byRole: "technician", at: NOW - 3 * DAY, needsAck: "service_advisor", ackAt: NOW - 2.9 * DAY, ackBy: "Mira" },
+
+  { id: uid(), jobId: "j4", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 6 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j4", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 5.5 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j4", from: "assigned", to: "in_progress", by: "Kumar", byRole: "technician", at: NOW - 5 * HR, needsAck: "service_advisor", ackAt: NOW - 4.8 * HR, ackBy: "Mira" },
+
+  { id: uid(), jobId: "j5", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 9 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j5", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 8.5 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j5", from: "assigned", to: "in_progress", by: "Kumar", byRole: "technician", at: NOW - 8 * HR, needsAck: "service_advisor", ackAt: NOW - 7.5 * HR, ackBy: "Mira" },
+
+  { id: uid(), jobId: "j6", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 1.5 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j6", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 1.4 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j6", from: "assigned", to: "in_progress", by: "Arif", byRole: "technician", at: NOW - 1.3 * DAY, needsAck: "service_advisor", ackAt: NOW - 1.2 * DAY, ackBy: "Mira" },
+  { id: uid(), jobId: "j6", from: "in_progress", to: "done", by: "Arif", byRole: "technician", at: NOW - 2 * HR, needsAck: "service_advisor", ackAt: null, ackBy: null,
+    att: [{ t: "photo", kind: "pad_new", cap: "Gasket replaced — dry after test run" }] },
+
+  { id: uid(), jobId: "j7", from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: NOW - 2 * DAY, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j7", from: "registered", to: "assigned", by: "Mira", byRole: "service_advisor", at: NOW - 2 * DAY + 1 * HR, needsAck: null, ackAt: null, ackBy: null },
+  { id: uid(), jobId: "j7", from: "assigned", to: "in_progress", by: "Wei Loon", byRole: "technician", at: NOW - 2 * DAY + 2 * HR, needsAck: "service_advisor", ackAt: NOW - 2 * DAY + 2.5 * HR, ackBy: "Mira",
+    att: [{ t: "photo", kind: "engine", cap: "Engine bay — before work" }] },
+  { id: uid(), jobId: "j7", from: "in_progress", to: "done", by: "Wei Loon", byRole: "technician", at: NOW - 1.2 * DAY, needsAck: "service_advisor", ackAt: NOW - 1.1 * DAY, ackBy: "Mira",
+    att: [{ t: "photo", kind: "car_done", cap: "Washed & ready for pickup" }, { t: "voice", sec: 8 }] },
+  { id: uid(), jobId: "j7", from: "done", to: "delivered", by: "Mira", byRole: "service_advisor", at: NOW - 1 * DAY, needsAck: null, ackAt: null, ackBy: null },
+];
+
+const blockerT = [
+  { id: uid(), jobId: "j3", blockerId: "waiting_parts", action: "raised", note: "Clutch kit for 2.8 diesel — master + slave cylinder too", by: "Arif", byRole: "technician", at: NOW - 26 * HR, needsAck: { role: "parts_advisor", person: null }, ackAt: null, ackBy: null,
+    att: [{ t: "photo", kind: "clutch", cap: "Clutch kit — worn friction plate" }, { t: "voice", sec: 9 }] },
+  { id: uid(), jobId: "j5", blockerId: "cust_approval", action: "raised", note: "Radiator replacement needed — RM 850. Customer to approve.", by: "Mira", byRole: "service_advisor", at: NOW - 3 * HR, needsAck: { role: "service_advisor", person: null }, ackAt: NOW - 3 * HR, ackBy: "Mira",
+    att: [{ t: "photo", kind: "radiator", cap: "Radiator — corroded core" }] },
+  { id: uid(), jobId: "j6", blockerId: "hold_payment", action: "raised", note: "Awaiting bank transfer confirmation", by: "Mira", byRole: "service_advisor", at: NOW - 90 * MIN, needsAck: { role: "service_advisor", person: null }, ackAt: NOW - 90 * MIN, ackBy: "Mira" },
+];
+
+const jobMech = [
+  { id: uid(), jobId: "j2", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 2 * HR, ackAt: null, removedAt: null },
+  { id: uid(), jobId: "j3", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 3.1 * DAY, ackAt: NOW - 3.05 * DAY, removedAt: null },
+  { id: uid(), jobId: "j4", mechanic: "Kumar", primary: true, by: "Mira", at: NOW - 5.5 * HR, ackAt: NOW - 5.3 * HR, removedAt: null },
+  { id: uid(), jobId: "j5", mechanic: "Kumar", primary: true, by: "Mira", at: NOW - 8.5 * HR, ackAt: NOW - 8.3 * HR, removedAt: null },
+  { id: uid(), jobId: "j6", mechanic: "Arif", primary: true, by: "Mira", at: NOW - 1.4 * DAY, ackAt: NOW - 1.38 * DAY, removedAt: null },
+  { id: uid(), jobId: "j7", mechanic: "Wei Loon", primary: true, by: "Mira", at: NOW - 2 * DAY + 1 * HR, ackAt: NOW - 2 * DAY + 1.1 * HR, removedAt: null },
+];
+
+/* ---------------- state ---------------- */
+const state = { mode: "wall", tech: "Arif", view: "home", cardIdx: 0, peekId: null, ownerJobId: null };
+
+/* ---------------- queries ---------------- */
+const job = id => jobs.find(j => j.id === id);
+const isActive = j => !["delivered", "cancelled"].includes(j.stage);
+function activeBlockers(id) {
+  return blockerT.filter(t => t.jobId === id && t.action === "raised" &&
+    !blockerT.some(x => x.jobId === id && x.action === "resolved" && x.blockerId === t.blockerId && x.at > t.at));
+}
+const crewOf = id => jobMech.filter(m => m.jobId === id && !m.removedAt);
+const lastStageAt = id => Math.max(...stageT.filter(t => t.jobId === id).map(t => t.at));
+function heat(j) { /* 0..1 — how far past the stage norm this job is */
+  if (!isActive(j)) return 0;
+  const norm = (STAGE_NORM_H[j.stage] || 24) * HR;
+  const ratio = (Date.now() - lastStageAt(j.id)) / norm;
+  return Math.max(0, Math.min(1, (ratio - 1) / 2));
+}
+const heatStyle = j => { const h = heat(j); return h ? ' style="background:color-mix(in srgb, var(--surface) ' + Math.round(100 - h * 55) + '%, var(--st-wait-bg))"' : ""; };
+function looseEnds() { /* every unacknowledged handoff on an active job */
+  const items = [];
+  stageT.filter(t => !t.ackAt && t.needsAck).forEach(t => items.push({ kind: "stage", id: t.id, at: t.at, jobId: t.jobId, waitRole: "service_advisor", waitWho: "Service advisor", what: STAGE_LABEL[t.from] + " → " + STAGE_LABEL[t.to] + " by " + t.by }));
+  blockerT.filter(t => !t.ackAt && t.needsAck).forEach(t => items.push({ kind: "blocker", id: t.id, at: t.at, jobId: t.jobId, waitRole: t.needsAck.role, waitWho: t.needsAck.person || roleLabel(t.needsAck.role), what: (t.action === "resolved" ? "Resolved" : "Raised") + " “" + cat(t.blockerId).label + "” by " + t.by }));
+  jobMech.filter(m => !m.ackAt && !m.removedAt).forEach(m => items.push({ kind: "mech", id: m.id, at: m.at, jobId: m.jobId, waitRole: "technician", waitWho: m.mechanic, what: "Assignment to " + m.mechanic + " not accepted", person: m.mechanic }));
+  return items.filter(it => isActive(job(it.jobId))).sort((a, b) => a.at - b.at);
+}
+const myLoose = () => looseEnds().filter(it =>
+  state.mode === "technician" ? it.waitRole === "technician" && (!it.person || it.person === state.tech) && (it.kind !== "blocker" || true) :
+  it.waitRole === state.mode);
+
+/* ---------------- ONE DOOR (trimmed for the mock — look & feel focus) ---------------- */
+function actorName() { return state.mode === "technician" ? state.tech : (PEOPLE[state.mode] || "Ah Seng"); }
+function door(action, jobId, payload) {
+  const j = job(jobId); const t = Date.now();
+  const who = actorName(); const role = state.mode === "wall" ? "workshop_manager" : state.mode;
+  const push = (arr, row) => { arr.push(row); };
+  if (action === "assign") {
+    push(jobMech, { id: uid(), jobId, mechanic: payload.mechanic, primary: true, by: who, at: t, ackAt: null, removedAt: null });
+    push(stageT, { id: uid(), jobId, from: "registered", to: "assigned", by: who, byRole: role, at: t, needsAck: null, ackAt: null, ackBy: null });
+    j.stage = "assigned"; return ok(payload.mechanic + " assigned — a loose end until they accept.");
+  }
+  if (action === "start" || action === "done_stage") {
+    const to = action === "start" ? "in_progress" : "done";
+    const from = action === "start" ? "assigned" : "in_progress";
+    if (j.stage !== from) return no("Job is " + STAGE_LABEL[j.stage] + " — illegal move.");
+    if (action === "start") crewOf(jobId).filter(m => m.mechanic === who && !m.ackAt).forEach(m => { m.ackAt = t; });
+    push(stageT, { id: uid(), jobId, from, to, by: who, byRole: role, at: t, needsAck: role === "technician" ? "service_advisor" : null, ackAt: null, ackBy: null, att: payload && payload.att });
+    j.stage = to; return ok(to === "done" ? "Done — job frozen. Loose end until the front desk ties it." : "Work started.");
+  }
+  if (action === "deliver") {
+    if (j.stage !== "done") return no("Delivery happens from Done.");
+    const ab = activeBlockers(jobId);
+    if (ab.length) return no("Loose ends first: " + ab.map(r => cat(r.blockerId).label).join(", ") + ".");
+    push(stageT, { id: uid(), jobId, from: "done", to: "delivered", by: who, byRole: role, at: t, needsAck: null, ackAt: null, ackBy: null });
+    j.stage = "delivered"; return ok("Delivered. The story page is now a frozen service record.");
+  }
+  if (action === "raise_blocker") {
+    const c = cat(payload.blockerId);
+    if (activeBlockers(jobId).some(r => r.blockerId === c.id)) return no("Already active on this job.");
+    push(blockerT, { id: uid(), jobId, blockerId: c.id, action: "raised", note: payload.note || "", by: who, byRole: role, at: t, needsAck: { role: c.clearedBy, person: null }, ackAt: c.clearedBy === role ? t : null, ackBy: c.clearedBy === role ? who : null, att: payload.att });
+    return ok("Blocker raised — in the " + roleLabel(c.clearedBy).toLowerCase() + "’s court.");
+  }
+  if (action === "resolve_blocker") {
+    const raise = blockerT.find(x => x.id === payload.raiseId);
+    if (!raise.ackAt) { raise.ackAt = t; raise.ackBy = who; }
+    push(blockerT, { id: uid(), jobId, blockerId: raise.blockerId, action: "resolved", note: payload.note || "", by: who, byRole: role, at: t,
+      needsAck: raise.byRole === role ? null : { role: raise.byRole, person: raise.byRole === "technician" ? raise.by : null },
+      ackAt: raise.byRole === role ? t : null, ackBy: raise.byRole === role ? who : null, att: payload.att });
+    return ok("“" + cat(raise.blockerId).label + "” resolved.");
+  }
+  if (action === "owner_approve") { /* the one owner action — resolves the approval blocker via token */
+    const raise = blockerT.find(x => x.jobId === jobId && x.blockerId === "cust_approval" && x.action === "raised" &&
+      !blockerT.some(r => r.jobId === jobId && r.blockerId === "cust_approval" && r.action === "resolved" && r.at > x.at));
+    if (!raise) return no("Nothing awaiting your approval.");
+    push(blockerT, { id: uid(), jobId, blockerId: "cust_approval", action: "resolved", note: "Approved by the vehicle owner via status link", by: "Vehicle owner (link)", byRole: "owner_token", at: t,
+      needsAck: { role: "service_advisor", person: null }, ackAt: null, ackBy: null });
+    return ok("Approved — the workshop has been notified. Work continues.");
+  }
+  return no("Unknown action.");
+  function ok(m) { toast(m); render(); return true; }
+  function no(m) { toast(m); return false; }
+}
+function ackEvent(kind, id) {
+  const t = Date.now(); const who = actorName();
+  if (kind === "stage") { const e = stageT.find(x => x.id === id); e.ackAt = t; e.ackBy = who; }
+  if (kind === "blocker") { const e = blockerT.find(x => x.id === id); e.ackAt = t; e.ackBy = who; }
+  if (kind === "mech") { const e = jobMech.find(x => x.id === id); e.ackAt = t; }
+  render();
+}
+/* the ONE animation in the app: acknowledging ties the knot */
+function tieAndAck(btn, kind, id) {
+  btn.disabled = true; btn.innerHTML = KNOT_SVG; btn.classList.add("tying");
+  btn.style.background = "none"; btn.style.border = "0";
+  setTimeout(() => { ackEvent(kind, id); toast("Tied. No longer a loose end."); }, 680);
+}
+
+/* ---------------- helpers ---------------- */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function ago(ts) { const d = Date.now() - ts; if (d < HR) return Math.max(1, Math.round(d / MIN)) + "m"; if (d < DAY) return Math.round(d / HR) + "h"; return (d / DAY).toFixed(d < 2 * DAY ? 1 : 0).replace(".0", "") + "d"; }
+function toast(m) { const el = document.getElementById("toast"); el.textContent = m; el.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2800); }
+const stageBadge = s => '<span class="badge st-' + s + '">' + STAGE_LABEL[s] + "</span>";
+const blockerChips = id => activeBlockers(id).map(r => '<span class="badge bl">' + esc(cat(r.blockerId).label) + "</span>").join(" ");
+const looseChip = id => looseEnds().some(it => it.jobId === id) ? '<span class="badge loose">Loose end</span>' : "";
+const attHTML = att => !att || !att.length ? "" :
+  '<div class="photostrip" style="margin-top:8px">' + att.map(a => a.t === "photo" ? photoThumb(a.kind, a.cap) : '<span style="align-self:center">' + voiceChip(a.sec) + "</span>").join("") + "</div>";
+
+/* ---------------- render ---------------- */
+function render() {
+  renderBar();
+  const app = document.getElementById("app");
+  const m = state.mode;
+  app.className = (m === "wall" || m === "service_advisor" || m === "workshop_manager") ? "" : "narrow";
+  let html = "";
+  if (m === "wall") html = vWall();
+  else if (m === "service_advisor") html = state.peekId ? vJobPeek(state.peekId) : (state.view === "inbox" ? vInboxSA() : state.view === "intake" ? vIntake() : vBoardSA());
+  else if (m === "technician") html = phone(vTechCard());
+  else if (m === "parts_advisor") html = phone(vParts());
+  else if (m === "workshop_manager") html = state.peekId ? vJobPeek(state.peekId) : vExceptions();
+  else if (m === "owner_view") html = phone(state.ownerJobId ? vOwnerStory(state.ownerJobId) : vOwnerPicker());
+  app.innerHTML = html;
+  const f = document.getElementById("f-plate"); if (f) f.focus();
+}
+function renderBar() {
+  const m = state.mode;
+  const tabs = m === "service_advisor" ? [["board", "Board"], ["inbox", "Loose ends", myLoose().length], ["intake", "New job"]] : [];
+  const nav = tabs.map(([v, l, n]) => '<button class="' + (state.view === v && !state.peekId ? "on" : "") + '" onclick="setView(\'' + v + '\')">' + l + (n ? '<span class="cnt">' + n + "</span>" : "") + "</button>").join("");
+  const menu = MODES.map(x => '<button class="' + (x.id === m ? "on" : "") + '" onclick="setMode(\'' + x.id + '\')">' + x.label + '<div class="who">' + x.who + "</div></button>").join("");
+  document.getElementById("appbar").innerHTML =
+    '<span class="wordmark" onclick="setMode(\'wall\')"><span class="k">K</span>not</span><span class="visiontag">design vision</span>' +
+    '<nav class="tabs">' + nav + "</nav>" +
+    (m === "wall" ? '<button class="ghost" onclick="playFloor()">Play floor activity</button>' : "") +
+    '<details class="roledd" id="roledd"><summary>Viewing as: ' + roleLabel(m) + (m === "technician" ? " · " + state.tech : "") + ' ▾</summary><div class="menu">' + menu + "</div></details>";
+}
+const phone = inner => '<div class="phoneswrap"><div class="phone"><div class="postlabel">' + roleLabel(state.mode) + " · phone</div>" + inner + "</div></div>";
+
+/* ---- 1. WALL BOARD — beats the whiteboard ---- */
+function vWall() {
+  const act = jobs.filter(isActive);
+  const score = j => (looseEnds().some(it => it.jobId === j.id) ? 100 : 0) + (activeBlockers(j.id).length ? 50 : 0) + heat(j) * 40;
+  const sorted = act.slice().sort((a, b) => score(b) - score(a));
+  const le = looseEnds();
+  const cards = sorted.map(j => {
+    const loose = le.filter(it => it.jobId === j.id);
+    return '<div class="wallcard' + (loose.length ? " pulse" : "") + '"' + heatStyle(j) + ">" +
+      '<span class="plate">' + esc(j.plate) + '</span><div class="veh">' + esc(j.vehicle) + " · " + j.number + "</div>" +
+      stageBadge(j.stage) +
+      '<div class="chips">' + blockerChips(j.id) +
+      loose.map(it => '<span class="badge loose">' + esc(it.waitWho) + " hasn’t picked up</span>").join("") + "</div>" +
+      '<div class="agetx">' + STAGE_LABEL[j.stage] + " for <strong>" + ago(lastStageAt(j.id)) + "</strong>" +
+      (crewOf(j.id).length ? " · " + crewOf(j.id).map(c => esc(c.mechanic)).join(", ") : " · unassigned") + "</div></div>";
+  }).join("");
+  return '<div class="wallhead"><h1>Weld &amp; Wrench — live board</h1><span class="live">● LIVE</span><span class="clock" id="wallclock">' + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + "</span></div>" +
+    '<div class="wallgrid">' + cards + "</div>" +
+    '<div class="wallfoot"><span>' + act.length + " active</span><span>" + act.filter(j => activeBlockers(j.id).length).length + " blocked</span><span>" + le.length + " loose ends</span>" +
+    '<span style="margin-left:auto">Amber background = sitting in a stage past its norm. Pulsing = a handoff nobody picked up. Nobody logs in — the board is just alive.</span></div>';
+}
+/* scripted floor activity so the wall feels alive */
+function playFloor() {
+  if (playFloor.on) return; playFloor.on = true;
+  const steps = [
+    ["Kumar finishes JSK 5512…", () => door("done_stage", "j4", { att: [{ t: "photo", kind: "pad_new", cap: "New pads fitted" }] })],
+    ["Mira ties the loose end on SGP 66…", () => { const e = stageT.find(t => t.jobId === "j6" && t.to === "done" && !t.ackAt); if (e) ackEvent("stage", e.id); toast("Mira acknowledged — tied."); }],
+    ["Hafiz resolves the clutch-kit wait on PKD 903…", () => { const r = blockerT.find(t => t.jobId === "j3" && t.action === "raised" && t.blockerId === "waiting_parts"); door("resolve_blocker", "j3", { raiseId: r.id, note: "Kit arrived — bay 2", att: [{ t: "photo", kind: "clutch", cap: "New kit on the bench" }] }); }],
+    ["Arif accepts VBP 7734…", () => { const m2 = jobMech.find(x => x.jobId === "j2" && !x.ackAt); if (m2) ackEvent("mech", m2.id); toast("Arif accepted — tied."); }],
+    ["Floor activity demo done. Reload the page to reset.", () => {}],
+  ];
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i >= steps.length) { clearInterval(iv); playFloor.on = false; return; }
+    toast(steps[i][0]); steps[i][1](); render(); i++;
+  }, 2600);
+}
+
+/* ---- 2. SA board with heat + loose-end chips ---- */
+function vBoardSA() {
+  const rows = jobs.filter(isActive).sort((a, b) => b.createdAt - a.createdAt).map(j =>
+    "<tr onclick=\"peek('" + j.id + "')\"" + heatStyle(j) + ">" +
+    '<td class="jobno">' + j.number + '</td><td class="plate">' + esc(j.plate) + "</td><td>" + esc(j.vehicle) + "</td><td>" + esc(j.customer) + "</td>" +
+    "<td>" + stageBadge(j.stage) + "</td><td>" + (blockerChips(j.id) || '<span class="jobno">—</span>') + "</td>" +
+    "<td>" + (crewOf(j.id).map(c => esc(c.mechanic)).join(", ") || '<span class="jobno">unassigned</span>') + "</td>" +
+    "<td>" + ago(lastStageAt(j.id)) + "</td><td>" + looseChip(j.id) + "</td></tr>").join("");
+  return "<h1>Job board</h1><p class='sub'>Row background heats up as a job sits past its stage norm — you feel the stall before you read it.</p>" +
+    '<table class="board"><thead><tr><th>Job</th><th>Plate</th><th>Vehicle</th><th>Customer</th><th>Stage</th><th>Blockers</th><th>Crew</th><th>In stage</th><th></th></tr></thead><tbody>' + rows + "</tbody></table>";
+}
+
+/* ---- loose ends inbox with knot-tie ---- */
+function vInboxSA() {
+  const items = myLoose();
+  const head = "<h1>Loose ends</h1><p class='sub'>Handoffs waiting on you. Acknowledging one ties it — a good knot doesn’t slip.</p>";
+  if (!items.length) return head + '<div class="empty"><div class="big">No loose ends</div>Everything handed to you has been tied.</div>';
+  return head + items.map(it => {
+    const j = job(it.jobId);
+    return '<div class="inbox-item"><div><div class="what">' + esc(it.what) + '</div><div class="meta"><span class="plate">' + esc(j.plate) + "</span> · " + esc(j.vehicle) + " · " + ago(it.at) + ' ago</div></div><div class="btnrow">' +
+      '<button class="btn-q" onclick="peek(\'' + j.id + '\')">View</button>' +
+      '<button class="btn-o" onclick="tieAndAck(this,\'' + it.kind + "','" + it.id + '\')">Tie it — acknowledged</button></div></div>';
+  }).join("");
+}
+
+/* ---- 7. intake with plate scan ---- */
+function vIntake() {
+  return "<h1>New job</h1><p class='sub'>Point the camera at the plate — returning cars fill themselves in. Fifteen seconds, not a minute.</p>" +
+    '<div class="card"><div class="btnrow" style="margin-bottom:16px"><button class="btn" onclick="openScan()">Scan plate</button><span class="hint">or type it —</span></div>' +
+    '<form onsubmit="return submitIntake(event)" class="stack">' +
+    '<div><label class="f" for="f-plate">Plate</label><input type="text" id="f-plate" required placeholder="WXY 1234" autocomplete="off"></div>' +
+    '<div><label class="f" for="f-vehicle">Vehicle</label><input type="text" id="f-vehicle" required placeholder="Make & model"></div>' +
+    '<div><label class="f" for="f-customer">Customer</label><input type="text" id="f-customer" required placeholder="Person or company"></div>' +
+    '<div><label class="f" for="f-complaint">Complaint</label><input type="text" id="f-complaint" placeholder="What they reported"></div>' +
+    '<div id="returning"></div>' +
+    '<div class="btnrow"><button type="submit" class="btn">Register job</button></div></form></div>';
+}
+function openScan() {
+  document.getElementById("modal").innerHTML =
+    '<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="panel">' +
+    "<h2 style='margin-top:0'>Scanning…</h2>" +
+    '<div class="viewfinder"><svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="140" fill="#2B3A4A"/><rect x="70" y="45" width="180" height="50" rx="6" fill="#DDE3E9"/><text x="160" y="78" font-size="26" font-family="monospace" font-weight="bold" fill="#1C2B3A" text-anchor="middle">MCK 7</text></svg><div class="scanline"></div></div>' +
+    '<p class="hint" style="margin-top:10px">Camera mock — no real capture, UI only.</p></div></div>';
+  setTimeout(() => {
+    closeModal();
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+    set("f-plate", "MCK 7"); set("f-vehicle", "Toyota Alphard"); set("f-customer", "Mdm. Chong Siew Lin");
+    const ret = document.getElementById("returning");
+    if (ret) ret.innerHTML = '<div class="card" style="background:var(--st-info-bg);border-color:var(--st-info-bg)"><strong style="color:var(--st-info-tx)">Returning vehicle</strong><div style="color:var(--st-info-tx);font-size:13px">Last visit ' + ago(job("j7").createdAt) + ' ago — “Full service before balik kampung” (J-1052, delivered). History attaches to this job automatically.</div></div>';
+    toast("Plate recognised: MCK 7 — details filled in.");
+  }, 1600);
+}
+function closeModal() { document.getElementById("modal").innerHTML = ""; }
+function submitIntake(e) {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const id = "j" + Math.random().toString(36).slice(2, 8); const t = Date.now();
+  jobs.push({ id, number: "J-" + (nextJobNo++), plate: v("f-plate").toUpperCase(), vehicle: v("f-vehicle"), customer: v("f-customer"), phone: "—", complaint: v("f-complaint") || "—", stage: "registered", createdAt: t, token: Math.random().toString(36).slice(2, 7), gallery: [] });
+  stageT.push({ id: uid(), jobId: id, from: null, to: "registered", by: "Mira", byRole: "service_advisor", at: t, needsAck: null, ackAt: null, ackBy: null });
+  toast("Registered in seconds. Next: assign.");
+  state.peekId = id; render(); return false;
+}
+
+/* ---- 3. technician: one card at a time ---- */
+function vTechCard() {
+  const mine = jobs.filter(j => isActive(j) && crewOf(j.id).some(m => m.mechanic === state.tech))
+    .sort((a, b) => (crewOf(a.id).some(m => !m.ackAt) ? -1 : 1) - (crewOf(b.id).some(m => !m.ackAt) ? -1 : 1));
+  const picker = '<div class="btnrow" style="margin-bottom:10px;justify-content:center"><label class="f" style="margin:0">You are:</label><select style="width:auto" onchange="setTech(this.value)">' + TECHS.map(t => "<option " + (t === state.tech ? "selected" : "") + ">" + t + "</option>").join("") + "</select></div>";
+  if (!mine.length) return picker + '<div class="empty"><div class="big">Bench clear</div>Your next job appears here the moment it’s assigned — full screen, one button.</div>';
+  state.cardIdx = Math.min(state.cardIdx, mine.length - 1);
+  const j = mine[state.cardIdx];
+  const mech = crewOf(j.id).find(m => m.mechanic === state.tech);
+  const unaccepted = mech && !mech.ackAt;
+  const blocked = activeBlockers(j.id);
+  const evPhotos = [];
+  stageT.concat(blockerT).filter(t => t.jobId === j.id && t.att).forEach(t => t.att.forEach(a => evPhotos.push(a)));
+  (j.gallery || []).forEach(g => evPhotos.push({ t: "photo", kind: g.kind, cap: g.cap }));
+
+  let mega = "";
+  if (unaccepted) mega = '<button class="megabtn" onclick="ackEvent(\'mech\',\'' + mech.id + '\');toast(\'Accepted — it’s yours.\')">Accept this job</button>';
+  else if (j.stage === "assigned") mega = '<button class="megabtn" onclick="door(\'start\',\'' + j.id + '\',{})">Start work</button>';
+  else if (j.stage === "in_progress") mega = '<button class="megabtn" onclick="door(\'done_stage\',\'' + j.id + '\',{})">Mark done</button>';
+  else mega = '<div class="frozen" style="text-align:center;margin-top:14px">Done — frozen. Front desk takes it from here.</div>';
+
+  const nav = mine.length > 1 ?
+    '<div class="cardnav"><button onclick="swipeCard(-1)">‹ Prev</button><span class="jobno">Job ' + (state.cardIdx + 1) + " of " + mine.length + '</span><button onclick="swipeCard(1)">Next ›</button></div>' : "";
+  const dots = mine.length > 1 ? '<div class="dots">' + mine.map((x, i) => '<span class="d' + (i === state.cardIdx ? " on" : "") + '"></span>').join("") + "</div>" : "";
+
+  return picker + nav +
+    '<div class="techcard"' + heatStyle(j) + '>' +
+    '<div class="btnrow" style="justify-content:space-between">' + stageBadge(j.stage) + '<span class="jobno">' + j.number + "</span></div>" +
+    '<span class="plate" style="display:block;margin:8px 0 2px">' + esc(j.plate) + "</span>" +
+    "<div>" + esc(j.vehicle) + "</div>" +
+    '<div style="margin:10px 0;font-size:16px">“' + esc(j.complaint) + "”</div>" +
+    (blocked.length ? '<div class="chips" style="margin:8px 0">' + blockerChips(j.id) + "</div>" : "") +
+    (evPhotos.length ? attHTML(evPhotos) : "") +
+    mega +
+    (j.stage === "in_progress" && !unaccepted ?
+      '<div class="secrow">' +
+      '<button onclick="addEvidence(\'' + j.id + '\',\'photo\')">Add photo</button>' +
+      '<button onclick="addEvidence(\'' + j.id + '\',\'voice\')">Voice note</button>' +
+      '<button onclick="raiseParts(\'' + j.id + '\')">Raise blocker</button></div>' : "") +
+    "</div>" + dots +
+    '<p class="hint" style="text-align:center;margin-top:12px">One card, one button. The list is gone — your current job IS the screen.</p>';
+}
+function swipeCard(d) { state.cardIdx = Math.max(0, state.cardIdx + d); render(); }
+function addEvidence(jobId, type) {
+  const j = job(jobId);
+  if (type === "photo") { j.gallery.push({ kind: "engine", cap: "Added by " + state.tech + " just now (dummy)" }); toast("Photo attached — the owner’s page shows it too."); }
+  else { j.gallery.push({ kind: "voice" }); toast("Voice note attached (dummy) — no typing with greasy hands."); }
+  if (type === "voice") j.gallery.pop(); /* voice lives on events in this mock; keep gallery photos-only */
+  if (type === "voice") { const e = stageT.filter(t => t.jobId === jobId).pop(); e.att = (e.att || []).concat([{ t: "voice", sec: 7 }]); }
+  render();
+}
+function raiseParts(jobId) {
+  door("raise_blocker", jobId, { blockerId: "waiting_parts", note: "Raised from the floor — details in voice note", att: [{ t: "voice", sec: 6 }] });
+}
+
+/* ---- parts advisor queue (evidence-first) ---- */
+function vParts() {
+  const open = blockerT.filter(t => t.action === "raised" && cat(t.blockerId).clearedBy === "parts_advisor" &&
+    !blockerT.some(x => x.action === "resolved" && x.jobId === t.jobId && x.blockerId === t.blockerId && x.at > t.at));
+  const head = "<h1>Blocker queue</h1><p class='sub'>What the floor is waiting on — with the photo and voice note, not a scribble.</p>";
+  if (!open.length) return head + '<div class="empty"><div class="big">Nothing waiting on parts</div>The floor is running clean.</div>';
+  return head + '<div class="stack">' + open.map(t => {
+    const j = job(t.jobId);
+    return '<div class="card">' +
+      '<div class="btnrow" style="justify-content:space-between"><span class="plate" style="font-size:17px">' + esc(j.plate) + '</span><span class="badge bl">' + esc(cat(t.blockerId).label) + "</span></div>" +
+      "<div>" + esc(j.vehicle) + ' · <span class="jobno">' + j.number + "</span></div>" +
+      '<div class="hint">Raised by ' + esc(t.by) + " · " + ago(t.at) + " ago" + (t.ackAt ? " · tied (acknowledged)" : "") + "</div>" +
+      (t.note ? '<div style="margin-top:6px">“' + esc(t.note) + "”</div>" : "") + attHTML(t.att) +
+      '<div class="stack" style="margin-top:12px">' +
+      (!t.ackAt ? '<button class="btn-o" style="width:100%;min-height:48px" onclick="tieAndAck(this,\'blocker\',\'' + t.id + '\')">Tie it — I’m on it</button>' : "") +
+      '<input type="text" id="note-' + t.id + '" placeholder="Resolution note">' +
+      '<button class="btn" style="width:100%;min-height:48px" onclick="door(\'resolve_blocker\',\'' + t.jobId + "',{raiseId:'" + t.id + '\',note:document.getElementById(\'note-' + t.id + '\').value})">Mark resolved</button></div></div>';
+  }).join("") + "</div>";
+}
+
+/* ---- 8. manager: exceptions only ---- */
+function vExceptions() {
+  const exc = [];
+  looseEnds().filter(it => Date.now() - it.at > 30 * MIN).forEach(it =>
+    exc.push({ jobId: it.jobId, danger: Date.now() - it.at > 3 * HR, title: "Handoff not picked up — " + ago(it.at), why: it.what + ". Waiting on " + it.waitWho + "." }));
+  jobs.filter(isActive).forEach(j => activeBlockers(j.id).filter(b => Date.now() - b.at > 4 * HR).forEach(b =>
+    exc.push({ jobId: j.id, danger: Date.now() - b.at > DAY, title: "Blocked " + ago(b.at) + " — " + cat(b.blockerId).label, why: (b.note || "No detail given") + " (" + roleLabel(cat(b.blockerId).clearedBy).toLowerCase() + "’s court)" })));
+  jobs.filter(isActive).filter(j => heat(j) > 0.5 && !exc.some(e => e.jobId === j.id)).forEach(j =>
+    exc.push({ jobId: j.id, danger: false, title: "Stalling — " + STAGE_LABEL[j.stage] + " for " + ago(lastStageAt(j.id)), why: "Well past the usual time for this stage." }));
+
+  const nMoving = jobs.filter(isActive).length - new Set(exc.map(e => e.jobId)).size;
+  const list = exc.length ? exc.map(e => {
+    const j = job(e.jobId);
+    return '<div class="card exc' + (e.danger ? " excdanger" : "") + '" style="margin-bottom:10px">' +
+      '<div class="btnrow" style="justify-content:space-between"><strong>' + esc(e.title) + '</strong><button class="btn-q" onclick="peek(\'' + j.id + '\')">Open</button></div>' +
+      '<div class="hint" style="font-size:13px"><span class="plate">' + esc(j.plate) + "</span> · " + esc(j.vehicle) + " — " + esc(e.why) + "</div></div>";
+  }).join("") : "";
+
+  const health = '<div class="card"><h2 style="margin-top:0">Handoff health — by role, never by person</h2>' +
+    '<p class="hint" style="margin-top:-4px">Median time to tie a handoff, this week (sample). Process health, not a leaderboard — per-person rankings are deliberately not built.</p>' +
+    bar("Front desk", 12, 90) + bar("Technicians", 28, 90) + bar("Parts", 65, 90) + "</div>";
+  function bar(l, mins, max) { return '<div class="rolebar"><span>' + l + '</span><div class="track"><div class="fill" style="width:' + Math.round(mins / max * 100) + '%"></div></div><span class="jobno">' + mins + "m</span></div>"; }
+
+  return "<h1>Needs you</h1><p class='sub'>Only exceptions surface here. The wall board answers “where is everything” — this answers “what needs me.”</p>" +
+    (exc.length ? list : "") +
+    '<div class="allclear" style="margin-top:10px"><div class="big">' + (exc.length ? nMoving + " other jobs are moving normally" : "Nothing needs you") + "</div>" +
+    '<span class="hint">' + (exc.length ? "They stay out of your way until they don’t." : nMoving + " jobs moving normally. Go walk the floor for fun, not out of fear.") + "</span></div>" + health;
+}
+
+/* ---- job peek (SA / manager) ---- */
+function vJobPeek(id) {
+  const j = job(id);
+  const ab = activeBlockers(id);
+  const events = [];
+  stageT.filter(t => t.jobId === id).forEach(t => events.push({ at: t.at, html: (t.from ? STAGE_LABEL[t.from] + " → " : "") + "<strong>" + STAGE_LABEL[t.to] + "</strong> by " + esc(t.by), att: t.att, pend: t.needsAck && !t.ackAt }));
+  blockerT.filter(t => t.jobId === id).forEach(t => events.push({ at: t.at, html: (t.action === "raised" ? "Raised" : "Resolved") + " <strong>" + esc(cat(t.blockerId).label) + "</strong> by " + esc(t.by) + (t.note ? " — “" + esc(t.note) + "”" : ""), att: t.att, pend: t.needsAck && !t.ackAt }));
+  jobMech.filter(m => m.jobId === id).forEach(m => events.push({ at: m.at, html: "<strong>" + esc(m.mechanic) + "</strong> assigned by " + esc(m.by), pend: !m.ackAt }));
+  events.sort((a, b) => b.at - a.at);
+
+  let actions = "";
+  if (j.stage === "registered") actions = '<div class="btnrow"><select id="mech" style="width:auto;min-width:150px">' + TECHS.map(t => "<option>" + t + "</option>").join("") + '</select><button class="btn" onclick="door(\'assign\',\'' + id + '\',{mechanic:document.getElementById(\'mech\').value})">Assign mechanic</button></div>';
+  else if (j.stage === "done") actions = '<button class="btn" onclick="door(\'deliver\',\'' + id + '\',{})">Mark delivered</button>' +
+    (ab.some(x => x.blockerId === "hold_payment") ? ' <button class="btn-o" onclick="door(\'resolve_blocker\',\'' + id + "',{raiseId:'" + ab.find(x => x.blockerId === "hold_payment").id + '\',note:\'Payment received\'})">Payment received — clear hold</button>' : "");
+
+  return '<button class="backlink" onclick="unpeek()">← Back</button>' +
+    '<div class="btnrow" style="justify-content:space-between;align-items:flex-start">' +
+    '<div><h1><span class="plate">' + esc(j.plate) + '</span> <span class="jobno">' + j.number + "</span></h1><p class='sub'>" + esc(j.vehicle) + " · " + esc(j.customer) + "</p></div>" +
+    "<div>" + stageBadge(j.stage) + " " + blockerChips(id) + "</div></div>" +
+    (actions ? '<div class="card">' + actions + "</div>" : "") +
+    '<div class="stack" style="margin-top:12px">' +
+    '<div class="card"><h2 style="margin-top:0">Story so far</h2><ul class="timeline">' +
+    events.map(e => "<li><div>" + e.html + (e.pend ? ' <span class="badge loose">loose end</span>' : "") + '</div><div class="t">' + ago(e.at) + " ago</div>" + attHTML(e.att) + "</li>").join("") + "</ul></div>" +
+    '<div class="card"><h2 style="margin-top:0">Owner link</h2><span class="jobno mono">knot.app/s/' + j.token + '</span> <button class="btn-q" onclick="state.mode=\'owner_view\';state.ownerJobId=\'' + id + '\';state.peekId=null;render()">Preview the story page</button></div></div>';
+}
+
+/* ---- 5. owner: story page, one button max ---- */
+function vOwnerPicker() {
+  return "<h1>Open a status link</h1><p class='sub'>Pick a car to simulate tapping its link. BMR 2210 has something waiting for YOUR answer.</p>" +
+    '<div class="stack">' + jobs.slice().sort((a, b) => b.createdAt - a.createdAt).map(j =>
+      '<div class="card" style="cursor:pointer" onclick="state.ownerJobId=\'' + j.id + '\';render()"><div class="btnrow" style="justify-content:space-between"><span class="plate" style="font-size:17px">' + esc(j.plate) + "</span>" + stageBadge(j.stage) +
+      "</div><div>" + esc(j.vehicle) + "</div>" +
+      (activeBlockers(j.id).some(b => b.blockerId === "cust_approval") ? '<span class="badge loose">Your approval needed</span>' : "") + "</div>").join("") + "</div>";
+}
+function vOwnerStory(id) {
+  const j = job(id);
+  const delivered = j.stage === "delivered";
+  const idx = STAGES.indexOf(j.stage);
+  const steps = '<div class="steps">' + STAGES.map((s, i) => '<div class="step ' + (i < idx ? "donept" : i === idx ? "now" : "") + '"><div class="dot"></div><div class="lb">' + STAGE_LABEL[s] + "</div></div>").join("") + "</div>";
+  const approval = activeBlockers(id).find(b => b.blockerId === "cust_approval");
+  const approveCard = approval ?
+    '<div class="card" style="border-color:var(--action)"><strong>Your approval is needed</strong>' +
+    '<div style="margin:6px 0">' + esc(approval.note) + "</div>" + attHTML(approval.att) +
+    '<button class="btn" style="width:100%;min-height:52px;margin-top:12px" onclick="door(\'owner_approve\',\'' + id + '\',{})">Approve — go ahead</button>' +
+    '<p class="hint" style="text-align:center">Prefer to talk first? Call us — 03-0000 0000. This is the only button this page will ever have.</p></div>' : "";
+  const feed = [];
+  stageT.filter(t => t.jobId === id).forEach(t => feed.push({ at: t.at, txt: { registered: "Checked in at the workshop", assigned: "Mechanic assigned", in_progress: "Work started", done: "Work completed", delivered: "Collected — thank you!" }[t.to], att: t.att }));
+  blockerT.filter(t => t.jobId === id).forEach(t => feed.push({ at: t.at, txt: t.action === "raised" ? "Paused — " + cat(t.blockerId).label.toLowerCase() : "Resumed — " + cat(t.blockerId).label.toLowerCase() + " settled", att: t.att }));
+  feed.sort((a, b) => b.at - a.at);
+  const gallery = (j.gallery || []).length ? '<div class="card"><h2 style="margin-top:0">Photos from the workshop</h2><div class="gallery">' + j.gallery.map(g => photoThumb(g.kind, g.cap)).join("") + "</div></div>" : "";
+  return '<button class="backlink" onclick="state.ownerJobId=null;render()">← All links</button>' +
+    '<div style="text-align:center"><div class="jobno">Weld &amp; Wrench Workshop</div><div class="plate" style="font-size:26px;margin:4px 0">' + esc(j.plate) + "</div><div>" + esc(j.vehicle) + "</div></div>" +
+    (delivered ? '<div class="frozen" style="margin:14px 0;text-align:center">Service record — completed ' + ago(lastStageAt(id)) + " ago. This page is now permanent. Keep the link.</div>" : steps) +
+    (delivered ? "" : '<p style="text-align:center;margin:12px 0">' + { registered: "Your car is checked in and waiting to be assigned.", assigned: "A mechanic has been assigned to your car.", in_progress: "Work on your car is in progress.", done: "Work is complete — we’ll contact you for pickup." }[j.stage] + "</p>") +
+    approveCard + gallery +
+    '<div class="card" style="margin-top:12px"><h2 style="margin-top:0">' + (delivered ? "What was done" : "Updates") + '</h2><ul class="timeline">' +
+    feed.map(e => "<li><div>" + esc(e.txt) + '</div><div class="t">' + ago(e.at) + " ago</div>" + attHTML(e.att) + "</li>").join("") + "</ul></div>" +
+    '<p class="hint" style="text-align:center;margin-top:14px">No app, no login, nothing to install.' + (delivered ? "<br>Your car’s history stays with this link." : "") + "</p>";
+}
+
+/* ---------------- wiring ---------------- */
+function setMode(m) { state.mode = m; state.view = m === "service_advisor" ? "board" : "home"; state.peekId = null; state.ownerJobId = null; state.cardIdx = 0; closeDD(); render(); }
+function setView(v) { state.view = v; state.peekId = null; render(); }
+function setTech(t) { state.tech = t; state.cardIdx = 0; render(); }
+function peek(id) { state.peekId = id; render(); }
+function unpeek() { state.peekId = null; render(); }
+function closeDD() { const d = document.getElementById("roledd"); if (d) d.removeAttribute("open"); }
+document.addEventListener("click", e => { const d = document.getElementById("roledd"); if (d && d.hasAttribute("open") && !d.contains(e.target)) d.removeAttribute("open"); });
+setInterval(() => { const c = document.getElementById("wallclock"); if (c) c.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }, 30e3);
+
+render();
+</script>
+</body>
+</html>
