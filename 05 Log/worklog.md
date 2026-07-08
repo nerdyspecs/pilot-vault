@@ -1,11 +1,68 @@
 ---
 type: log
-updated: 2026-07-08
+updated: 2026-07-08 (Session 9)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-08 · Session 9 — Sprint 1 Phase C1: seed personas + RLS live (S1.8–S1.9)
+
+**Summary.** Closed out RLS ([[ADR-007 Row-Level Security pulled into Sprint 1]]), executed
+**explain-first** per the builder's request to actually understand the mechanism before it
+landed, not just approve a diff. Seeds (Phase C0), S1.8 (app DB role), and S1.9 (policies +
+wiring) all built and committed. Builder separately cross-checked the work against three RLS
+gotchas learned in another session — two were already covered by the plan, one (`schema.rb`
+silently dropping `CREATE POLICY`) was a real gap, caught before it shipped and folded into
+Step 0.
+
+**Built:**
+- `db/seeds.rb` — one user per persona (owner, manager, 2 advisors, mechanic, the wrenching-
+  towkay with both edges, two edgeless v2 personas), idempotent, dev-only. Commit `7c30b95`.
+- **S1.8** — non-superuser `pilot_app` role (superusers **silently bypass RLS**, the #1
+  footgun); transferred DB/schema/table ownership; `database.yml` dev/test point at it;
+  dropped fixtures (needed superuser). Commit `94f9d7e`.
+- **S1.9** — `config.active_record.schema_format = :sql` first (schema.rb can't spell `CREATE
+  POLICY`, so it would silently vanish from the test snapshot); one migration landing `ENABLE`
+  + `FORCE ROW LEVEL SECURITY` + `CREATE POLICY tenant_isolation` together (never
+  policed-without-a-policy, which denies everyone) on `ownerships`/`employments` — `users`/
+  `workshops` stay global by design. Wired session-local `SET`/`RESET app.workshop_id` into
+  `set_current_context`, reset-first (closes the connection-pool leak) and set to the
+  *candidate* workshop before `access_for`'s lookup runs (those tables are now policed — an
+  unset GUC would hide real access, not just wrong-tenant rows). Commit `87c78b8`.
+
+**A live bug the money-proof caught:** first policy used a bare `current_setting(...)::bigint`
+cast. `RESET` on a custom (app-defined) GUC doesn't revert to "unset" — Postgres restores it to
+`''`, and `''::bigint` raises `PG::InvalidTextRepresentation` instead of denying the row. Fixed
+with `NULLIF(current_setting('app.workshop_id', true), '')::bigint`, folding both the
+never-set and the reset states down to the same NULL → no match → deny. Caught by actually
+running the reset step of the verification, not by reasoning about the SQL.
+
+**Verification (all against the live seed data, as `pilot_app`):** unset GUC → `Employment.count`
+== 0 though rows exist; GUC set to the seed workshop → exactly its rows (5 employments, 2
+ownerships); reset → back to 0; superuser `psql` still sees all (documented ops escape hatch);
+simulated the full access-door + GUC dance for all four seed personas (pure owner → granted,
+pure employment → granted, both-edges towkay → granted with both edges, edgeless bystander →
+denied) — all resolved correctly through live RLS, not mocked. Full suite green as `pilot_app`
+against the new `structure.sql`-built test DB.
+
+**Deviation from the original sprint-plan note:** S1.9 was originally written as
+transaction-local `set_config(..., true)`. Built session-local `SET` instead — Rails doesn't
+wrap a request in one transaction (each bare statement autocommits), so transaction-local would
+die before the next query in the *same* request. Session-local persists correctly through a
+request; the leak risk that transaction-local would have auto-closed is instead closed by
+resetting at the top of every request, before anything else runs.
+
+**Open:**
+- S1.10–S1.14 (flows, scoping convention, test batch) and S0.8 deploy remain parked, back to
+  builder-drive mode.
+- Model tests for `Ownership`/`Employment` still don't exist — S1.14 will need a test-side seam
+  for setting `app.workshop_id` (build-your-own-records tests will otherwise have their own
+  inserts hidden by the very policy just enabled). Flagged, not built.
+- Vault still has no offsite git remote.
 
 ---
 

@@ -115,15 +115,35 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       `users.yml` fixture (blank emails collided on the new unique index, dating to S0.4) and
       `home_controller_test.rb`'s leftover `home_show_url` (dating to S0.5's index rename).
       Commits `c3f0d36`, `efb919d`.)*
-- [ ] **S1.8** Postgres RLS setup: non-table-owning app DB role for the Rails connection
-      (default dev role owns its tables and **bypasses RLS** — the #1 gotcha) or
-      `FORCE ROW LEVEL SECURITY` as a fallback; `ENABLE ROW LEVEL SECURITY` on `ownerships`
-      and `employments` ([[ADR-007 Row-Level Security pulled into Sprint 1]]).
-- [ ] **S1.9** RLS policies + wiring: `CREATE POLICY` on each tenant table scoping to
-      `workshop_id = current_setting('app.workshop_id')::bigint`; the access door
-      (`set_current_context`) sets it every request via **transaction-local**
-      `set_config('app.workshop_id', ..., true)` — `true` is mandatory given connection
-      pooling, or tenant context could leak across pooled connections between requests.
+- [x] **S1.8** Postgres RLS setup: non-superuser, table-owning app DB role `pilot_app` (LOGIN);
+      `config/database.yml` dev/test point at it. *(2026-07-08: superusers **silently bypass**
+      RLS — the connection now runs as `pilot_app` (verified `superuser: false`) instead of the
+      macOS superuser, so RLS actually bites. Transferred DB/schema/table ownership; dropped
+      fixtures (`fixtures :all`) since fixture loading needs superuser privilege the app role
+      correctly lacks. Suite green as `pilot_app`. Commit `94f9d7e`.)*
+- [x] **S1.9** RLS policies + wiring. *(2026-07-08: `ENABLE` + `FORCE ROW LEVEL SECURITY` +
+      `CREATE POLICY tenant_isolation` landed together in one migration on `ownerships` and
+      `employments` (never policed-without-a-policy, which would deny everyone) — `users`/
+      `workshops` stay unpoliced by design, since the access door reads them before a tenant is
+      known. Policy: `workshop_id = NULLIF(current_setting('app.workshop_id', true), '')::bigint`
+      — the `NULLIF` guards a real gotcha: `RESET` on a custom GUC restores `''`, not `NULL`,
+      and a bare `::bigint` cast on `''` raises instead of denying.
+      Chose **session-local `SET`, reset-first every request** over transaction-local
+      `set_config(..., true)`: Rails doesn't wrap requests in one transaction (each bare
+      statement autocommits), so a transaction-local setting would die before the next query in
+      the same request. Session-local persists correctly within a request; the pool-leak risk is
+      closed by resetting `app.workshop_id` at the very top of `set_current_context` before
+      anything else runs, so a pooled connection can never carry a stale tenant into a new
+      request even if the prior one errored. The GUC is set to the *candidate* workshop **before**
+      `access_for`'s Ownership/Employment lookup (those tables are now policed — an unset GUC
+      would hide real access, not just wrong-tenant rows), then rolled back if access isn't
+      confirmed. Switched `config.active_record.schema_format = :sql` first — `schema.rb` has no
+      `CREATE POLICY` vocabulary and would silently drop RLS from the test DB snapshot.
+      Verified: unset GUC → 0 rows though data exists; GUC set to seed workshop → exactly its
+      rows (5 employments, 2 ownerships); reset → back to 0; superuser `psql` still sees all
+      (documented escape hatch); all four seed personas (pure owner, pure employment, both-edges
+      towkay, edgeless bystander) resolve correctly through the live access door. Suite green.
+      Commit `87c78b8`.)*
 - [ ] **S1.10** "Create your workshop" flow (post-signup, signed-in): `Workshop` + founder
       `Ownership` in **one transaction**. Signup itself stays thin (User only) — already true.
 - [ ] **S1.11** Minimal add-crew flow (v1-crude is fine): owner/manager enters an email →
