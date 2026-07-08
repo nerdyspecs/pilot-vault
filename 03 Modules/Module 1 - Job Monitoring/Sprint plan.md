@@ -17,8 +17,14 @@ that ends in something demoable.
 - **No gem without justifying why Rails' built-in isn't enough** — currently Devise only ([[Agent guide]]).
 - **Tenancy:** every workshop-owned table has `workshop_id`; never query it bare — always scope by
   `Current.workshop` ([[Design laws]] #2).
-- **Tests:** Rails-default Minitest — model tests (validations/associations), controller/request
-  tests, service tests for `JobService`.
+- **Tests (set 2026-07-08):** two layers, hollow middle. (1) **Minitest model unit tests** are
+  the *priority* — calculations live in models ([[Design laws]] #9), so they're fast, isolated,
+  and consistent everywhere reused. (2) **Capybara system tests** (`test/system/`, already
+  gemmed) for end-to-end flows — written once the pages exist. Controller/request tests
+  **deferred** (add when pages are present; low priority — pages are isolated, shared logic isn't).
+- **Per-sprint test-review ritual:** at each sprint's exit, list which models were created or
+  edited that sprint → decide whether unit tests need writing or revisiting. Tests need not be
+  written the moment code is; they're evaluated as a batch at sprint close.
 - **Commits** reference the sprint/task id (e.g. `S2.7`).
 - Each task links the design doc that explains the *why*.
 
@@ -129,10 +135,12 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
 - [ ] **S1.13** Scoping convention: a reusable scope like `for_current_workshop` (explicit, not
       `default_scope`) so no query runs bare ([[Design laws]] #2) — the app-level layer that
       RLS backstops, not replaces.
-- [ ] **S1.14** Tests: create-workshop creates the pair atomically · signup alone creates no
-      workshop · ending employment blocks access next request · cross-workshop access denied ·
-      bare user lands on personal home · **a query with no `WHERE workshop_id` still can't see
-      another tenant's rows** (proves the RLS backstop actually backs something up).
+- [ ] **S1.14** Tests, two layers (conventions above). **Model unit (Minitest):** create-workshop
+      creates the pair atomically · signup alone creates no workshop · `access_for` resolves
+      employment/ownership/both/none · ending employment blocks access · **a bare query (no
+      `WHERE workshop_id`) still can't see another tenant's rows** (RLS backstop). **System
+      (Capybara):** one end-to-end flow — sign up → create workshop → add crew → second user
+      signs in as crew → end employment → crew locked out next request.
 
 ---
 

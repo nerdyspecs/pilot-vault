@@ -61,6 +61,17 @@ updated.
 session, builder-drive mode. RLS work (S1.8–S1.9) should land before S1.10's create-workshop
 flow so the tenant tables are guarded from the first real write, not retrofitted after.
 
+**Also same day — testing philosophy locked + [[Design laws]] #9.** Builder set the test
+strategy; corrected the literal wording (Capybara is a system/feature tool, not a unit-test
+tool) into **two layers, hollow middle**: Minitest **model unit tests** are the priority
+(calculations belong in models, so shared logic stays consistent and unit-testable), Capybara
+**system tests** for end-to-end flows once pages exist, controller/request tests deferred
+(pages are isolated; shared logic isn't). New **Design Law #9 — Calculations live in the model
+layer** captures the architectural principle underneath. Added a **per-sprint test-review
+ritual** to the Sprint plan conventions (evaluate model changes at each sprint's close, write
+tests as a batch — not necessarily the moment code lands). S1.14 reframed into its two layers.
+No gem change — Capybara + selenium already in `group :test`.
+
 ---
 
 ## 2026-07-07 · Session 7 — Auth pages styled; ADR-006 (Ownership ≠ Employment)
