@@ -69,11 +69,15 @@ that ends in something demoable.
 
 ## Sprint 1 · Tenancy spine
 **Goal:** the multi-tenant foundation — [[ADR-004 Multi-tenant foundation]] as revised by
-[[ADR-006 Ownership separate from Employment]]. *(Rewritten 2026-07-07 per ADR-006: Ownership
-edge added, `owner` dropped from the role enum, bootstrap split into signup vs create-workshop,
-landing routes by edge count. Old S1.x numbering retired — no commits referenced it.)*
+[[ADR-006 Ownership separate from Employment]] and [[ADR-007 Row-Level Security pulled into
+Sprint 1]]. *(Rewritten 2026-07-07 per ADR-006: Ownership edge added, `owner` dropped from the
+role enum, bootstrap split into signup vs create-workshop, landing routes by edge count. Old
+S1.x numbering retired — no commits referenced it. **Renumbered again 2026-07-08 per ADR-007:**
+S1.8–S1.9 inserted for Postgres RLS; old S1.8–S1.12 shifted to S1.10–S1.14 — safe, none had
+commits yet. S1.1–S1.7 untouched, already committed.)*
 **Exit:** signup creates a bare user; "create workshop" creates `Workshop` + founder `Ownership`
-atomically; a 2nd user joins via employment; ending an employment kills access next request.
+atomically; a 2nd user joins via employment; ending an employment kills access next request;
+**a query with no `WHERE workshop_id` still cannot see another tenant's rows** (RLS backstop).
 
 - [x] **S1.1** Migration + model **Workshop** (`name`, timestamps). *(2026-07-08: `name`
       `null: false` + presence validation. Commit `6a7e82a`.)*
@@ -105,19 +109,30 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       `users.yml` fixture (blank emails collided on the new unique index, dating to S0.4) and
       `home_controller_test.rb`'s leftover `home_show_url` (dating to S0.5's index rename).
       Commits `c3f0d36`, `efb919d`.)*
-- [ ] **S1.8** "Create your workshop" flow (post-signup, signed-in): `Workshop` + founder
+- [ ] **S1.8** Postgres RLS setup: non-table-owning app DB role for the Rails connection
+      (default dev role owns its tables and **bypasses RLS** — the #1 gotcha) or
+      `FORCE ROW LEVEL SECURITY` as a fallback; `ENABLE ROW LEVEL SECURITY` on `ownerships`
+      and `employments` ([[ADR-007 Row-Level Security pulled into Sprint 1]]).
+- [ ] **S1.9** RLS policies + wiring: `CREATE POLICY` on each tenant table scoping to
+      `workshop_id = current_setting('app.workshop_id')::bigint`; the access door
+      (`set_current_context`) sets it every request via **transaction-local**
+      `set_config('app.workshop_id', ..., true)` — `true` is mandatory given connection
+      pooling, or tenant context could leak across pooled connections between requests.
+- [ ] **S1.10** "Create your workshop" flow (post-signup, signed-in): `Workshop` + founder
       `Ownership` in **one transaction**. Signup itself stays thin (User only) — already true.
-- [ ] **S1.9** Minimal add-crew flow (v1-crude is fine): owner/manager enters an email →
+- [ ] **S1.11** Minimal add-crew flow (v1-crude is fine): owner/manager enters an email →
       active `Employment` with a role; if no account exists yet, the person signs up first and
       the pending edge attaches. Ease first — the crew veto is passive ([[Positioning]]).
-- [ ] **S1.10** Landing routing by edge count (ADR-006 §4): `0` → personal home with
+- [ ] **S1.12** Landing routing by edge count (ADR-006 §4): `0` → personal home with
       "Create your workshop" CTA + "ask your boss to add you"; `1` workshop → straight to its
       dashboard; `>1` → context picker stored in session (still re-verified).
-- [ ] **S1.11** Scoping convention: a reusable scope like `for_current_workshop` (explicit, not
-      `default_scope`) so no query runs bare ([[Design laws]] #2).
-- [ ] **S1.12** Tests: create-workshop creates the pair atomically · signup alone creates no
+- [ ] **S1.13** Scoping convention: a reusable scope like `for_current_workshop` (explicit, not
+      `default_scope`) so no query runs bare ([[Design laws]] #2) — the app-level layer that
+      RLS backstops, not replaces.
+- [ ] **S1.14** Tests: create-workshop creates the pair atomically · signup alone creates no
       workshop · ending employment blocks access next request · cross-workshop access denied ·
-      bare user lands on personal home.
+      bare user lands on personal home · **a query with no `WHERE workshop_id` still can't see
+      another tenant's rows** (proves the RLS backstop actually backs something up).
 
 ---
 

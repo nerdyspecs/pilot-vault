@@ -36,10 +36,30 @@ index) and a leftover `home_show_url` test call (should've been renamed with S0.
 `show`→`index` swap). Suite is green.
 
 **Open:**
-- Phases C+D (S1.8 create-workshop, S1.9 add-crew, S1.10 edge-count landing, S1.11 scoping
-  convention, S1.12 real tests) deferred to a future session, back to builder-drive mode.
-- S0.8 deploy still waits on S1.12 passing (per the S0.8 deferral decision).
+- Phases C+D (now S1.10–S1.14 — see below) deferred to a future session, back to builder-drive
+  mode.
+- S0.8 deploy still waits on the final Sprint 1 test task passing.
 - Vault still has no offsite git remote.
+
+**Later same day — [[ADR-007 Row-Level Security pulled into Sprint 1]].** Explaining how the
+S1.5 partial index works under the hood surfaced the builder's real question: wanting
+schema-per-tenant/database-per-tenant for "commercial-grade" isolation. Walked through why the
+shared-table model (already locked, [[ADR-004 Multi-tenant foundation]]) beats schema-per-tenant
+even harder given the builder's own requirement — Job/Vehicle history must query *across*
+workshops, which schema-per-tenant makes worse, not better. The real want was a database-enforced
+guarantee, not physical separation — **Postgres Row-Level Security** gives that on the shared
+model. Builder chose to pull it into Sprint 1 now (cheapest while only 2 tenant tables exist)
+rather than leave it as ADR-004's "later hardening."
+
+**Sprint plan renumbered again:** S1.8–S1.9 inserted for RLS (role/enable, then policies +
+`set_config` wiring into the access door); old S1.8–S1.12 shifted to S1.10–S1.14 (safe — none
+had commits). Exit criterion gained a clause: a bare query with no `WHERE workshop_id` still
+can't leak across tenants. ADR-004 annotated (RLS clause superseded); [[Decisions]] index
+updated.
+
+**Open (updated):** Sprint 1 remaining work is now S1.8–S1.14, all deferred to a future
+session, builder-drive mode. RLS work (S1.8–S1.9) should land before S1.10's create-workshop
+flow so the tenant tables are guarded from the first real write, not retrofitted after.
 
 ---
 

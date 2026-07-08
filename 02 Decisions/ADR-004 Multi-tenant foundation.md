@@ -23,6 +23,11 @@ From the 2026-07-03 foundation session. Resolves the open "User model + tenancy"
 > per-request re-verification stand (the access check now resolves Employment OR Ownership,
 > through one method).
 
+> **Note (2026-07-08):** the "RLS later as additive hardening" clause is **superseded** by
+> [[ADR-007 Row-Level Security pulled into Sprint 1]] — RLS is now built alongside the
+> tenant tables in Sprint 1, not deferred. Shared-DB tenancy and schema-per-tenant's
+> rejection both stand (reinforced, in fact).
+
 ## Decision
 - **Workshop** is the tenant. One shared DB, `workshop_id` on every tenant-scoped table.
   App-level scoping via `Current.workshop` (ActiveSupport::CurrentAttributes). RLS later as
