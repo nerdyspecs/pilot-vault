@@ -1,11 +1,50 @@
 ---
 type: log
-updated: 2026-07-08 (Session 9)
+updated: 2026-07-09 (Session 10)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-09 · Session 10 — Post-S1.9 codebase audit vs vault requirements
+
+**Summary.** Builder asked for a read-only sweep of the whole app against the vault's Design
+laws and working-mode rules (readability, no smart solutions, vanilla Rails) — a check, not a
+build session. Found one real bug and several small cleanups; all confirmed and fixed with
+sign-off per item rather than as a bundled diff.
+
+**Real bug — `db:seed` broken by RLS.** The `tenant_isolation` policy (S1.9) is `cmd = ALL`
+with an empty `WITH CHECK`, so Postgres falls back to the `USING` clause for inserts too.
+Seeds run outside a request, so nothing sets `app.workshop_id` — every `Ownership`/`Employment`
+insert was silently denied by RLS the moment S1.9 landed, breaking the idempotency the seeds
+file claimed. Fixed: seeds set the GUC once after the workshop exists, reset at the end.
+Verified `bin/rails db:seed` twice, identical counts. **Lesson, now on record**: any
+non-request write path (seeds, console, future background jobs, S1.14 tests) must set the GUC
+itself — RLS doesn't know about Rails request boundaries, only Postgres sessions.
+
+**Cleanup (builder approved each item individually):**
+- `application.css` comment still pointed at `docs/01 Context/...` — stale from the earlier
+  `docs/` → `vault/` rename. Fixed.
+- Deleted dead scaffold: `hello_controller.js` (Stimulus demo, unused; app is declared
+  no-JS), `home_helper.rb` (empty generated module).
+- `routes.rb`: dropped leftover generator comments that sat above the real `root` route and
+  read like unresolved decisions ("`# root "posts#index"`").
+- `database.yml`: dropped the generator's commented `#username: pilot` block under
+  `development:` — contradicted the live `username: pilot_app` in `default:` from S1.8.
+- `application.html.slim`: `notice` and `alert` rendered as identical muted text — an error
+  was indistinguishable from an FYI, and inconsistent with `auth.html.slim`'s correct
+  `.alert-info`/`.alert-warning`. Now matches.
+
+**Explicitly declined by builder — left as-is:** Gemfile (`jbuilder`, `stimulus-rails` kept;
+stimulus may be needed later), `~> 8.0.4` version pin. `Workshop#users` naming and empty
+model-test stubs flagged as future considerations only, not changed.
+
+**Commits:** `47e2397` (seeds fix), `84d6a55` (cruft cleanup), `15a958a` (flash styling).
+
+**Open:** same S1.10–S1.14 backlog as Session 9; nothing new deferred by this audit.
 
 ---
 
