@@ -345,7 +345,9 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 **Exit:** a manager dashboard + an owner mobile health summary.
 
 - [ ] **S8.1** Design pass: which reports (time-in-stage, time-blocked-by-role, time-to-acknowledge,
-      workshop health).
+      workshop health). *(Candidate from 2026-07-12 timeline talk: per-job **parallel-lanes view** —
+      stage/blocker/crew lanes on a proportional time axis, "where did the time go?" Same tracker
+      rows as `Job#timeline`, purely a second rendering — no data work needed.)*
 - [ ] **S8.2** Scopes/queries per metric — **queries, not tables** ([[Design laws]] #3).
 - [ ] **S8.3** Manager dashboard (PC); owner mobile health summary ([[Tech stack]] device posture).
 - [ ] **S8.4** Tests: each metric query is correct against seed data.
