@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-04
+updated: 2026-07-12
 ---
 # Event log
 The immutable, timestamped history that powers all the time math. **Append-only — never edited.**
@@ -15,6 +15,12 @@ Three trackers, each append-only, each carrying acknowledgement ([[ADR-005 Ackno
 
 There is **no single grand events table** — that would be event-sourcing, more than this needs.
 A job's *timeline* = the three trackers, merged by timestamp at read time.
+
+**In code this read is `Job#timeline`** *(named 2026-07-12 — builder's call: "event log" is
+programmer vocabulary, fine for this doc, wrong for code a workshop person reads; `history`
+rejected because Sprint 6's vehicle history would overload the word)*. Arrives in layers:
+Sprint 2 merges stage + crew rows (ack columns dormant), Sprint 3 splices in blocker rows,
+Sprint 4 lights up acknowledgement — the method and view never change shape, they gain rows.
 
 ## What it powers
 - **Time-in-stage** — gap between consecutive `JobStageTransition`s.
