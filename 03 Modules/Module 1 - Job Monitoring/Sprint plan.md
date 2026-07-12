@@ -159,7 +159,8 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       persona's note → exactly their own edges; INSERT with only the user note → denied.
       ADR-007 annotated with two dated footnotes (this addition + the S1.9 session-local-`SET`
       deviation, on record for the first time). Commit `b19c14e`.)*
-- [x] **S1.10** "Create your workshop" flow. *(2026-07-12: `Workshop.create_with_founder!`
+- [x] **S1.10** "Create your workshop" flow. *(2026-07-12: `Workshop.create_with_owner!`
+      (renamed from `create_with_founder!` pre-Sprint-2 — "owner" is the ADR-006 governance term)
       creates the pair in one transaction, using `SET LOCAL app.workshop_id` inside the
       transaction so the RLS-policed Ownership insert can see its own policy — dies
       automatically at commit/rollback, no manual reset. `WorkshopsController` (new/create/show)

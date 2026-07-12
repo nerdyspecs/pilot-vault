@@ -74,7 +74,7 @@ Turbo race, a native-dialog auto-dismiss) were all caught by actually running th
   `app.user_id` GUC. ADR-007 got its first dated footnotes here — including the overdue
   correction that S1.9 built session-local `SET`, not the transaction-local pattern the ADR's
   ops note had called mandatory.
-- **S1.10:** `Workshop.create_with_founder!` — the pair created atomically, `SET LOCAL` inside
+- **S1.10:** `Workshop.create_with_owner!` (later renamed from `create_with_founder!`) — the pair created atomically, `SET LOCAL` inside
   the transaction so the RLS-policed Ownership insert can see its own policy without any
   manual reset. The dashboard shell.
 - **S1.11:** admin-side add-crew — found account → instant Employment; no account → a

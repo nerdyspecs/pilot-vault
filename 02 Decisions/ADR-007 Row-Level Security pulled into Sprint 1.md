@@ -87,3 +87,9 @@ only: reads about yourself, never writes — writes still require workshop conte
 alternative: un-policing the edge tables as "access metadata, not tenant data" — simpler, but
 walks back this ADR a day after verification and leaves Sprint 2 without a live worked
 example.
+
+**2026-07-12 (pre-Sprint-2) — method rename note.** The transaction-local `SET LOCAL` example
+cited above (footnote 2026-07-08) lived in a method then named `Workshop.create_with_founder!`;
+it was renamed **`Workshop.create_with_owner!`** — "founder" named a status the schema never
+tracks (all owners are equal Ownership rows), so it aligned to the ADR-006 governance term
+*owner*. RLS mechanics unchanged.
