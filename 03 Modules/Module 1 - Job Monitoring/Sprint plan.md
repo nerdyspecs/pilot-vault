@@ -181,7 +181,9 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       (`Current.ownership || workshop_manager?`). One live bug caught and fixed in this same
       session: `InvitationsController#create`/`#refire` double-redirected because
       `add_or_invite` already redirects on both branches → `DoubleRenderError`. Commit
-      `b892ba0`.)*
+      `b892ba0`.)* **⚠ Superseded 2026-07-12 by [[ADR-008 Crew joining requires acceptance]]:**
+      the "account exists → active Employment immediately" behaviour is replaced — joining is now
+      bilateral (invitee accepts). Reworked in **S1.15**. `Employment#end!` (unilateral) stands.
 - [x] **S1.12** Landing routing by edge count (ADR-006 §4). *(2026-07-12:
       `User#accessible_workshops` — explicit two-step (`ownerships | active employments`),
       `|` de-dups the wrenching towkay's double edge; works pre-context via S1.12-pre's
@@ -223,6 +225,16 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       helper) and headless Chrome auto-dismissing the "End" button's native confirm dialog
       (used Capybara's `accept_confirm` to drive the real dialog rather than stripping it).
       16 tests + 1 system test green; seeds still idempotent. Commit `4a61ce4`.)*
+- [ ] **S1.15** Crew acceptance flow ([[ADR-008 Crew joining requires acceptance]]) — reworks
+      S1.11's instant-employment into a consent step. `Invitation` gains a `status` enum
+      (`pending → fired → accepted/declined`) + nullable `user_id` (set when `fired`). Admin
+      "add crew": account exists → `fired`; no account → `pending`; manual "Invite again"
+      flips `pending → fired` once the account appears (no signup auto-fire — RLS-aligned, ADR-008
+      §5). Invitee sees `fired` invites on their landing page (Accept → active `Employment`;
+      Decline → `declined`, shown to admin). Own-rows RLS policy on `invitations`
+      (`user_id = app.user_id`) so the invitee can read their own row pre-membership (mirrors
+      S1.12-pre). `Employment#end!` unchanged (unilateral). **Sequencing vs Sprint 2 TBD** —
+      decide when updating the build plan.
 
 ---
 

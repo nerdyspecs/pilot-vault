@@ -65,5 +65,11 @@ per-request re-verification) is unchanged.
 - What can an Ownership *do* in-app in v1 beyond governance? Read-everything oversight is
   implied by device posture; exact permission surface to be settled when the board is built.
 
+## Superseded in part
+- **2026-07-12 — [[ADR-008 Crew joining requires acceptance]].** Decision 2's onboarding split
+  stands, but the add-crew mechanic it implied (S1.11: an active `Employment` created the instant
+  a matching email is entered, no invitee say) is replaced. Joining is now bilateral — the
+  invitee accepts — while termination stays unilateral. The rest of this ADR is untouched.
+
 ## Related
-- [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[Positioning]] · [[Sprint plan]]
+- [[ADR-004 Multi-tenant foundation]] · [[ADR-008 Crew joining requires acceptance]] · [[Design laws]] · [[Positioning]] · [[Sprint plan]]

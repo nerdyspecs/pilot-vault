@@ -1,11 +1,48 @@
 ---
 type: log
-updated: 2026-07-12 (Session 12)
+updated: 2026-07-12 (Session 13)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-12 · Session 13 — Sprint 2 kickoff (owner rename); ADR-008 crew acceptance
+
+**Summary.** Started executing the approved Sprint 2 plan. Phase 0 done: `create_with_founder!`
+→ `create_with_owner!` ("founder" named a status the schema never tracks; the row confusion was
+a symptom of a misnamed concept, same species as the JobService problem). App commit `55951f4`,
+vault `f82b19a`, 15 model tests green. Then a design detour that turned into a real decision.
+
+**ADR-008 — crew joining requires acceptance.** Reviewing the S1.11 add-crew flow, the builder
+questioned why the `Invitation` row exists at all when the invitee is never contacted. Digging in
+surfaced the actual issue: the flow *drafts* a crew member (creates an active `Employment` the
+instant a matching email is entered) with no consent — which (a) risks a typo silently employing a
+stranger, and (b) contradicts Knot's own handshake philosophy. Builder's resolution, and the
+keystone: **joining is bilateral (invitee accepts), termination is unilateral (no ack)** — consent
+to bind, no veto on unbind, exactly like real employment. Auto-fire-on-signup was considered and
+rejected as RLS-hostile (cross-tenant, email-keyed lookup at signup); manual "Invite again" stays
+because it runs inside the admin's own tenant context. Nice side effect: with an accept step, the
+name `Invitation` becomes *honest* again — the naming itch was the missing handshake all along, so
+no rename needed; `pending → fired → accepted/declined` becomes a status enum.
+
+Two things flagged and worked through before deciding: (1) the invitee needs an **own-rows RLS
+policy** on `invitations` to see their own `fired` row pre-membership — same chicken-and-egg as
+S1.12-pre, not optional. (2) This is a **Positioning-level** change — but narrower than first
+stated: the *passive veto* in Positioning is about **adoption** (crew stop updating), which an
+accept step doesn't touch; what changes is the S1.11 "no invitee-facing UI" interpretation, plus a
+new *membership consent* promise. Kept the operational handshake (ADR-005) and the membership
+accept explicitly distinct so "handshake" doesn't come to mean two things in copy.
+
+**Recorded (vault-first, before touching the build plan):** ADR-008 written; Decisions index +
+ADR-006 "superseded in part" footnote; Positioning updated (adoption-veto vs membership-consent,
+handshake disambiguation); Sprint plan S1.11 footnoted + new **S1.15** task added.
+
+**Open:** sequencing — build S1.15 (acceptance) before resuming the Sprint 2 job engine, or after?
+The approved build plan (`.claude/plans/…`) still needs revising to reflect S1.15. `S1` tag
+still pending.
 
 ---
 

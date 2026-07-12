@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-07-06
+updated: 2026-07-12
 ---
 # Brand positioning
 Locked 2026-07-06 (worked out interactively — options pressure-tested, choices deliberate).
@@ -32,7 +32,12 @@ is the product/brand. Nothing internal needs renaming.)*
 - **Buyer:** small independent workshop **owner-boss** (Malaysia first). Decides alone;
   pragmatic — money, control, reputation.
 - **Veto:** the crew — and the veto is **passive**: they don't refuse, they just stop updating.
-  Ease beats persuasion.
+  Ease beats persuasion. *(This is about **adoption** — daily use. It is **not** membership:
+  as of 2026-07-12 ([[ADR-008 Crew joining requires acceptance]]) **joining** a workshop is
+  consensual — the invitee accepts a one-time invite — while **removal** stays the boss's
+  unilateral call. Consent to bind, no veto on unbind. The one-tap accept is trivial, one-time
+  friction that never touches the daily-update ease this veto is really about; it buys consent
+  and mis-add safety.)*
 - **Real competitor:** doing nothing. The whiteboard is free and "mostly works." Every claim
   must survive *"why pay to replace what's free?"* — so we never sell the replacement, we sell
   what the whiteboard can't do.
@@ -43,7 +48,9 @@ is the product/brand. Nothing internal needs renaming.)*
    the shop stops living in one person's head.
 3. **Crew insurance (ease first):** updating Knot is faster than walking to the board.
    Secondary: the handshake protects whoever did their part — *unvalidated, keep out of copy
-   until tested.*
+   until tested.* *(This "handshake" = the **operational** job-handoff ack ([[ADR-005 Acknowledged
+   handoffs in V1]]) — distinct from the **membership** accept in ADR-008. Two different acts;
+   don't let "handshake" mean both in copy.)*
 4. **Kicker:** your customers watch their own car's progress — **the one thing no whiteboard
    can ever do.** The calls stop. *(Build dependency: "the calls stop" needs the ETA field
    staying in V1 — [[Product gaps]] #1, Sprint task S6.6 — or the owner still calls to ask "when".)*
