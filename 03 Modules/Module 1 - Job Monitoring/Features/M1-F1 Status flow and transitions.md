@@ -2,15 +2,30 @@
 id: M1-F1
 type: feature
 module: M1
-status: draft
-updated: 2026-07-04
+status: settled
+updated: 2026-07-12
 ---
 # M1-F1 — Status flow & role-gated transitions
 
 ## Goal
 Move a job through its [[Stage model]] stages, each transition permitted only for the right
-Employment role, **all through ONE DOOR** (a single service object — [[Design laws]] #7). Every
+Employment role, **all through ONE DOOR** (`JobActions` — [[Design laws]] #7). Every
 ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged handoffs in V1]]).
+
+## Settled 2026-07-12 (pre-Sprint-2 design session, builder decisions)
+- **Job creation goes through the door too** — `JobActions` owns it. Creation is already a
+  multi-record motion (Job + the `nil → registered` transition) and will grow (jobsheet
+  values in Sprint 6; a possible parts list later). No `Job.create!` from controllers.
+- **`in_progress → assigned` (the backward/reassignment move): service_advisor** (+
+  workshop_manager/owner as always). It is a handoff, so it acknowledges like any other
+  once Sprint 4 lands.
+- **Assignment eligibility: active `technician` employment only; primary-only in v1.**
+  The `primary` boolean column exists from day one but helpers stay dormant.
+- **No cancel from `done`.** Done is frozen, not active; its only exit is `delivered`.
+  The two terminals are `delivered` (success) and `cancelled` (died before done).
+- **Concurrency guards deferred** (stage-change race + `lock_version`) — see
+  [[Deferred design]]; failure mode is loud (double transitions visible in the log),
+  fix is one line in the one door.
 
 ## Permission matrix (v1)
 | Role | Stage transitions (via ONE DOOR) | Blockers | Crew |

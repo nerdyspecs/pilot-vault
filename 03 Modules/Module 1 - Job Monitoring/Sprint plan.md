@@ -243,9 +243,14 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       assigned_by_id, removed_at, acknowledged_at, acknowledged_by_id`.
 - [ ] **S2.7** **`JobActions`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
       role gate, and lock-on-Done (reject edits once `done/delivered/cancelled`); writes the transition.
+      *(Settled 2026-07-12: job **creation** goes through the door too — multi-record motion, will
+      grow. Concurrency row lock consciously deferred — see [[Deferred design]].)*
 - [ ] **S2.8** Allow-list transition map + role gate, per the [[M1-F1 Status flow and transitions]] matrix.
+      *(Settled 2026-07-12: `in_progress → assigned` = service_advisor; no cancel from `done` —
+      done's only exit is `delivered`. See M1-F1's "Settled" section.)*
 - [ ] **S2.9** `JobActions#assign_mechanic` — creates a primary `JobMechanic` **and** moves
-      `registered → assigned` in one motion.
+      `registered → assigned` in one motion. *(Settled 2026-07-12: assignee must hold an active
+      `technician` employment; primary-only in v1, helpers dormant.)*
 - [ ] **S2.10** Log the `nil → registered` transition at job creation (clean entry timestamp).
 - [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
       buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).

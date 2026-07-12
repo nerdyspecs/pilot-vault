@@ -34,8 +34,25 @@ lives in the method names. Renamed across Sprint plan, Design laws #9, CLAUDE.md
 names the class, so no footnotes needed. Extract-when-it-hurts noted for any action that
 later outgrows the class.
 
-**Open:** Sprint 2 plan not yet drafted — the five design questions above come first.
-`S1` tag still pending explicit builder confirmation.
+**All five questions settled (builder answers, same session — recorded in M1-F1's new
+"Settled" section + sprint-plan task notes):**
+1. Job creation goes **through `JobActions`** — already multi-record (Job + `nil→registered`
+   transition), will grow (jobsheet Sprint 6, possible parts list later).
+2. `in_progress → assigned` = **service_advisor** (+ manager/owner); it's a handoff, so it
+   acknowledges like the rest once Sprint 4 lands.
+3. Assignment: **active `technician` employments only, primary-only in v1** — the `primary`
+   column exists but helpers stay dormant.
+4. **No cancel from `done`** — two terminals, `delivered` (success) and `cancelled` (died
+   before done); done's only exit is delivered.
+5. **Stage-change row lock deferred to backlog** (builder call, brain-budget honest). Talked
+   through the real-life concern — SA and tech "editing the same job" concurrently — and why
+   the model dissolves most of it: append-only trackers mean most edits are inserts into
+   different tables, which can't collide; the mutable surface is basically the stage column;
+   worst case is loud (double transition in the log), fix is one `with_lock` line in the one
+   door, cost of waiting doesn't compound. New dated entry in [[Deferred design]] with the
+   revisit trigger.
+
+**Open:** Sprint 2 plan drafting is next. `S1` tag still pending explicit builder confirmation.
 
 ---
 
