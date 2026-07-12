@@ -1,11 +1,41 @@
 ---
 type: log
-updated: 2026-07-12 (Session 11)
+updated: 2026-07-12 (Session 12)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-12 · Session 12 — Sprint 2 design talk; `JobService` → `JobActions`
+
+**Summary.** Pre-plan design conversation for Sprint 2 (the job engine). Walked the risks
+before writing any plan: the service's API shape is a one-way door (raise vs return; who the
+actor is, given roles live on Employment but owners have none); ONE DOOR is convention, not
+DB-enforced; "Done freezes" really means the allow-list from `done` has exactly one exit
+(`delivered`); every new tenant table needs its RLS policy in its own creation migration;
+enum integers are forever. Five design questions left open for the builder (creation through
+the door? · who may move `in_progress → assigned`? · assignment eligibility · cancel-from-done
+· row lock in the service now vs later).
+
+**Decision — `JobService` renamed `JobActions` (builder-driven, before any code).** The
+builder — a workshop manager — flagged that "service" in workshop language means the repair
+itself (oil change, maintenance), so `JobService` read as "the service performed on the job"
+and had been quietly confusing all along. It would also collide with a plausible future
+`Service` catalog entity. Builder first proposed splitting into per-action classes
+(`JobCreate`, `JobTransition`, …) for granular self-describing names; rejected after talking
+it through — every action shares the same guards (actor-role resolution, Done-freeze check,
+change+log in one transaction), so a split means either duplicating the guards or building a
+base-class mini-framework, and the door stops being one auditable file. Resolution: one
+class, granular **verb methods** (`change_stage`, `assign_mechanic`, …) — the granularity
+lives in the method names. Renamed across Sprint plan, Design laws #9, CLAUDE.md; no ADR
+names the class, so no footnotes needed. Extract-when-it-hurts noted for any action that
+later outgrows the class.
+
+**Open:** Sprint 2 plan not yet drafted — the five design questions above come first.
+`S1` tag still pending explicit builder confirmation.
 
 ---
 

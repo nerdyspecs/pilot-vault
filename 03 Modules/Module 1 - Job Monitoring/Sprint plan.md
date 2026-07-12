@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-08
+updated: 2026-07-12
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -12,8 +12,13 @@ that ends in something demoable.
 ## Conventions (read once)
 - **Vanilla Rails MVC.** Models (AR: associations, validations, scopes) · controllers (thin, RESTful)
   · views (ERB + Hotwire) · routes (RESTful). No extra layers.
-- **The one exception:** all job state changes go through a single **service object** — `JobService`
-  (`app/services/job_service.rb`), a plain PORO. This is **ONE DOOR** ([[Design laws]] #7).
+- **The one exception:** all job state changes go through a single **service object** — `JobActions`
+  (`app/services/job_actions.rb`), a plain PORO. This is **ONE DOOR** ([[Design laws]] #7).
+  *(Renamed from `JobService` 2026-07-12, before any code existed: in workshop language a
+  "service" is the repair itself — the old name confused the builder, the domain expert, and
+  collided with a likely future `Service` catalog entity. One class, granular verb methods —
+  builder rejected a per-action class split to keep the shared guards and the door auditable
+  in one file.)*
 - **No gem without justifying why Rails' built-in isn't enough** — currently Devise only ([[Agent guide]]).
 - **Tenancy:** every workshop-owned table has `workshop_id`; never query it bare — always scope by
   `Current.workshop` ([[Design laws]] #2).
@@ -223,7 +228,7 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
 ## Sprint 2 · Job engine (ONE DOOR)
 **Goal:** the job spine + state machine — see [[Job]], [[Stage model]], [[M1-F1 Status flow and transitions]].
 Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake is Sprint 6).
-**Exit:** move a job through stages via `JobService` (illegal moves rejected); assign a mechanic; Done freezes the job.
+**Exit:** move a job through stages via `JobActions` (illegal moves rejected); assign a mechanic; Done freezes the job.
 
 - [ ] **S2.1** Migration + model **Customer** (minimal): `workshop_id, kind:integer(person/company),
       name, phone, email`. Scoped.
@@ -236,14 +241,14 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.
 - [ ] **S2.6** Migration + model **JobMechanic**: `workshop_id, job_id, user_id, primary:boolean,
       assigned_by_id, removed_at, acknowledged_at, acknowledged_by_id`.
-- [ ] **S2.7** **`JobService`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
+- [ ] **S2.7** **`JobActions`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
       role gate, and lock-on-Done (reject edits once `done/delivered/cancelled`); writes the transition.
 - [ ] **S2.8** Allow-list transition map + role gate, per the [[M1-F1 Status flow and transitions]] matrix.
-- [ ] **S2.9** `JobService#assign_mechanic` — creates a primary `JobMechanic` **and** moves
+- [ ] **S2.9** `JobActions#assign_mechanic` — creates a primary `JobMechanic` **and** moves
       `registered → assigned` in one motion.
 - [ ] **S2.10** Log the `nil → registered` transition at job creation (clean entry timestamp).
 - [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
-      buttons calling `JobService`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
+      buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
 - [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·
       assignment one-motion · `nil→registered` logged.
 
@@ -256,7 +261,7 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       cleared_by_role`. **Seed "Hold For Payment"** (`raised_by/cleared_by: service_advisor`).
 - [ ] **S3.2** Migration + model **JobBlockerTransition**: `workshop_id, job_id, blocker_id,
       action:integer(raised/resolved), note, created_by_id, acknowledged_at, acknowledged_by_id`.
-- [ ] **S3.3** Extend `JobService`: `raise_blocker` / `resolve_blocker` — check the actor's role against
+- [ ] **S3.3** Extend `JobActions`: `raise_blocker` / `resolve_blocker` — check the actor's role against
       the catalog's `raised_by_role` / `cleared_by_role` (manager/owner always override).
 - [ ] **S3.4** `Job#active_blockers` scope: raises with no later matching resolve (a query, [[Design laws]] #3).
 - [ ] **S3.5** Controller + views: raise a blocker (pick from catalog + note), resolve a blocker, show
@@ -270,7 +275,7 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 **Goal:** the differentiator — see [[ADR-005 Acknowledged handoffs in V1]]. ⚠️ **Decide Product-gap #5
 (partial-adoption) before building** ([[Product gaps]]). **Exit:** handoffs land in the receiver's inbox; ack clears them; stale ones flag.
 
-- [ ] **S4.1** `JobService#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on a
+- [ ] **S4.1** `JobActions#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on a
       `JobStageTransition` / `JobMechanic` / `JobBlockerTransition`.
 - [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · mechanic added →
       that mechanic · blocker raised → the `cleared_by_role` holder(s).

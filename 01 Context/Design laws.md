@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-07-08
+updated: 2026-07-12
 ---
 # Design laws
 Invariants — never violate. Adopted from the 2026-07-03 foundation session.
@@ -19,7 +19,7 @@ ADRs record *choices*; these are the *rules* every choice must obey.
 8. **A Done job is immutable.** History is append-only — you never edit a finished job; corrections
    open a **new** job. Vehicle owners are read-only everywhere.
 9. **Calculations live in the model layer.** Business logic and derived values belong on models
-   (or POROs like `JobService`), never in controllers or views — so they are unit-testable in
+   (or POROs like `JobActions`), never in controllers or views — so they are unit-testable in
    isolation and consistent everywhere they're reused. Controllers stay thin; a calculation you
    can't call without a request is in the wrong place. *(Added 2026-07-08; underpins the
    model-unit-test-first strategy — see [[Sprint plan]] conventions.)*
