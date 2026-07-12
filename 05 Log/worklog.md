@@ -1,11 +1,67 @@
 ---
 type: log
-updated: 2026-07-09 (Session 10)
+updated: 2026-07-12 (Session 11)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-12 · Session 11 — Sprint 1 closed: S1.10–S1.14 (flows, scoping, tests)
+
+**Summary.** Closed out Sprint 1 in one planned run, pausing for approval after each phase.
+Builder revised the add-crew design mid-plan (accept-step → admin-side pending reminders,
+passive crew veto preserved) and cross-checked the plan against three RLS gotchas learned in
+another session before approving — two were already covered, the reasoning for the third
+(session-local `SET`, not transaction-local) got its first proper writeup. Every flow was
+driven live in a real browser before being called done — the plan called for it, and it paid
+off: a double-render bug in `InvitationsController` and two system-test-only bugs (an async
+Turbo race, a native-dialog auto-dismiss) were all caught by actually running the thing.
+
+**Built (full detail on each in [[Sprint plan]]):**
+- **S1.12-pre (unplanned):** own-rows RLS policies — landing routing needs to list a user's
+  own edges before any workshop is selected, and the existing tenant policy alone hid them
+  (chicken-and-egg). Second permissive policy, `FOR SELECT` only, keyed to a new
+  `app.user_id` GUC. ADR-007 got its first dated footnotes here — including the overdue
+  correction that S1.9 built session-local `SET`, not the transaction-local pattern the ADR's
+  ops note had called mandatory.
+- **S1.10:** `Workshop.create_with_founder!` — the pair created atomically, `SET LOCAL` inside
+  the transaction so the RLS-policed Ownership insert can see its own policy without any
+  manual reset. The dashboard shell.
+- **S1.11:** admin-side add-crew — found account → instant Employment; no account → a
+  persistent pending reminder with "Invite again". `Employment#end!` soft-ends (history
+  stays, access dies via the existing door). One bug found and fixed the same session: a
+  double-redirect in the invitations controller.
+- **S1.12:** landing routing by edge count — 0/1/>1, the 1-edge auto-route being the daily
+  case, the personal home doubling as the context picker for >1. This is what finally let the
+  full S1.10–S1.12 journey be exercised together in the browser, not phase by phase.
+- **S1.13:** `WorkshopScoped` concern (`for_current_workshop`) — actually wired into the
+  Phase 2 controllers, not left declared-and-unused.
+- **S1.14:** 16 model/unit tests plus one real end-to-end Capybara system test in headless
+  Chrome. The RLS backstop test does what ADR-007 promised back in Session 8: a bare query
+  with no `WHERE workshop_id` at all still can't see another tenant's row.
+
+**What the live/system testing actually caught, not just what it confirmed:**
+- `InvitationsController#create`/`#refire` called `redirect_to` after `add_or_invite` had
+  already redirected on both branches → `DoubleRenderError`, caught the first time the invite
+  form was submitted in the browser.
+- The system test's own sign-out step failed first: `click_button "Sign out"` is an async
+  Turbo submission, and the next `visit` was racing ahead of it, landing on a
+  still-authenticated "You are already signed in." page. Fixed with an explicit
+  wait-for-signed-out helper.
+- Headless Chrome dismisses native `confirm()` dialogs by default, which would have silently
+  no-op'd the "End employment" button under system test. Used Capybara's `accept_confirm`
+  block to actually drive the dialog, rather than stripping the confirm out of the UI to make
+  testing easier.
+
+**Open:**
+- Sprint 1 is functionally complete. Exit check + `S1` tag still pending explicit builder
+  confirmation before cutting it.
+- Sprint 2 (job engine, ONE DOOR) is next up in the Sprint plan.
+- S0.8 deploy remains parked.
+- Vault still has no offsite git remote.
 
 ---
 

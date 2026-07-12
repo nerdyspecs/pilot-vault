@@ -62,3 +62,28 @@ tenancy model itself is unchanged and, if anything, reinforced.
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[ADR-006 Ownership separate from Employment]] ·
   [[Rejected alternatives]] · [[Design laws]] · [[Sprint plan]]
+
+---
+
+## Footnotes (dated — ADRs are never edited, only annotated)
+
+**2026-07-08 (S1.9 implementation) — session-local `SET`, not transaction-local.** The ops
+note above turned out backwards in practice: Rails does **not** wrap a request in one
+transaction (each bare statement autocommits), so transaction-local `set_config(..., true)`
+evaporates before the next query *within the same request*. Built instead: session-local
+`SET app.workshop_id`, wiped **reset-first at the top of every request** in
+`set_current_context` — the pool-leak risk the note worried about is closed by the reset, not
+by transaction locality. Transaction-local `SET LOCAL` remains the right tool *inside* an
+explicit transaction (used by `Workshop.create_with_founder!`, S1.10).
+
+**2026-07-12 (S1.12 pre-work) — second permissive policy `own_rows`.** Landing routing
+(ADR-006 §4) must list a user's own edges *before* any workshop is selected — with only
+`tenant_isolation`, no `app.workshop_id` means zero rows and every user looks edgeless
+(chicken-and-egg). Added `own_rows FOR SELECT` on `ownerships`/`employments`:
+`user_id = current_setting('app.user_id')` (a second GUC set at sign-in). Postgres ORs
+permissive policies — visible if in-workshop-context OR about-you. Slack-shaped: you can
+always list your own workspaces, you only see inside the one you've opened. `FOR SELECT`
+only: reads about yourself, never writes — writes still require workshop context. Rejected
+alternative: un-policing the edge tables as "access metadata, not tenant data" — simpler, but
+walks back this ADR a day after verification and leaves Sprint 2 without a live worked
+example.

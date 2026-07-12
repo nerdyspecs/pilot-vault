@@ -144,23 +144,79 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       (documented escape hatch); all four seed personas (pure owner, pure employment, both-edges
       towkay, edgeless bystander) resolve correctly through the live access door. Suite green.
       Commit `87c78b8`.)*
-- [ ] **S1.10** "Create your workshop" flow (post-signup, signed-in): `Workshop` + founder
-      `Ownership` in **one transaction**. Signup itself stays thin (User only) — already true.
-- [ ] **S1.11** Minimal add-crew flow (v1-crude is fine): owner/manager enters an email →
-      active `Employment` with a role; if no account exists yet, the person signs up first and
-      the pending edge attaches. Ease first — the crew veto is passive ([[Positioning]]).
-- [ ] **S1.12** Landing routing by edge count (ADR-006 §4): `0` → personal home with
-      "Create your workshop" CTA + "ask your boss to add you"; `1` workshop → straight to its
-      dashboard; `>1` → context picker stored in session (still re-verified).
-- [ ] **S1.13** Scoping convention: a reusable scope like `for_current_workshop` (explicit, not
-      `default_scope`) so no query runs bare ([[Design laws]] #2) — the app-level layer that
-      RLS backstops, not replaces.
-- [ ] **S1.14** Tests, two layers (conventions above). **Model unit (Minitest):** create-workshop
-      creates the pair atomically · signup alone creates no workshop · `access_for` resolves
-      employment/ownership/both/none · ending employment blocks access · **a bare query (no
-      `WHERE workshop_id`) still can't see another tenant's rows** (RLS backstop). **System
-      (Capybara):** one end-to-end flow — sign up → create workshop → add crew → second user
-      signs in as crew → end employment → crew locked out next request.
+- [x] **S1.12-pre** Own-rows RLS policies (unplanned, surfaced by S1.12's needs).
+      *(2026-07-12: landing routing must list a user's own edges before any workshop is
+      selected — `tenant_isolation` alone hid them (no `app.workshop_id` yet → 0 rows → every
+      user looked edgeless). Added a second permissive policy `own_rows FOR SELECT` on
+      `ownerships`/`employments`, keyed to a new `app.user_id` GUC set at sign-in. Postgres ORs
+      permissive policies — visible if in-workshop-context OR about-you. `FOR SELECT` only:
+      reads about yourself, never writes. Verified as `pilot_app`: no notes → 0/0; each seed
+      persona's note → exactly their own edges; INSERT with only the user note → denied.
+      ADR-007 annotated with two dated footnotes (this addition + the S1.9 session-local-`SET`
+      deviation, on record for the first time). Commit `b19c14e`.)*
+- [x] **S1.10** "Create your workshop" flow. *(2026-07-12: `Workshop.create_with_founder!`
+      creates the pair in one transaction, using `SET LOCAL app.workshop_id` inside the
+      transaction so the RLS-policed Ownership insert can see its own policy — dies
+      automatically at commit/rollback, no manual reset. `WorkshopsController` (new/create/show)
+      behind singular `resource :workshop`; `require_workshop!` (built S1.7, unused until now)
+      gates `#show`. Dashboard shell takes over the "No jobs yet" card from `home/index`.
+      Verified live: signed-in edgeless user → create → both rows persisted together (confirmed
+      via direct SQL) → redirected to dashboard. Commit `a3be58b`.)*
+- [x] **S1.11** Admin-side add-crew with pending reminders — **flow revised by the builder
+      2026-07-09**, replacing the original "person signs up, pending edge attaches" idea:
+      admin enters email+role; account exists → active `Employment` created immediately;
+      no account yet → an `Invitation` row persists as a visible pending reminder on the crew
+      page with "Invite again", admin re-fires once the account exists. No invitee-facing UI
+      at all — the crew veto stays fully passive ([[Positioning]]). *(2026-07-12:
+      `invitations` table + its `tenant_isolation` policy land in the same migration that
+      creates the table (ADR-007 gotcha 1 — never policed-without-a-policy). `Employment#end!`
+      (soft-end, `ended_at`) — access dies on the crew member's next request via the existing
+      access door, not by deleting history. New `require_manager!` guard
+      (`Current.ownership || workshop_manager?`). One live bug caught and fixed in this same
+      session: `InvitationsController#create`/`#refire` double-redirected because
+      `add_or_invite` already redirects on both branches → `DoubleRenderError`. Commit
+      `b892ba0`.)*
+- [x] **S1.12** Landing routing by edge count (ADR-006 §4). *(2026-07-12:
+      `User#accessible_workshops` — explicit two-step (`ownerships | active employments`),
+      `|` de-dups the wrenching towkay's double edge; works pre-context via S1.12-pre's
+      own-rows policy. `home#index`: `0` edges → personal home with "Create your workshop" CTA
+      + "ask your boss" note; `1` edge on a fresh sign-in → auto-selected into session,
+      straight to the dashboard (the daily case); `>1` → the same personal home lists every
+      workshop as a select button (no separate picker page — UI still assumes ≤1 in v1).
+      The `session[:workshop_id].nil?` guard on the 1-edge branch is what makes "step back to
+      personal home" possible without a redirect loop. `WorkshopsController#select` verifies
+      the id against `accessible_workshops.find` before writing the session claim; the access
+      door still re-verifies every request regardless (ADR-004/006 §3 — the session is never
+      trusted alone). Verified the **full S1.10–S1.12 journey live in-browser**: sign-in →
+      auto-route to dashboard → Crew page → invite nonexistent email → pending →
+      account created → refire → active → end → sign back in → correctly locked out to the
+      0-edge personal home. Commit `f6a76b0`.)*
+- [x] **S1.13** Scoping convention. *(2026-07-12: `WorkshopScoped` concern —
+      `for_current_workshop` scope, explicit not `default_scope` (Design laws #2 — hidden
+      magic surprises on create/unscope/joins; nil `Current.workshop` → matches no real row,
+      fails closed). Included in `Employment`, `Ownership`, `Invitation`; switched the S1.11
+      controllers' in-context reads to it so the convention is live, not declared-and-unused.
+      Confirmed `find_or_create_by!` on the scoped relation auto-populates `workshop_id` via
+      Rails' scope-attribute inference — checked via direct SQL, not assumed. Commit
+      `d9ac032`.)*
+- [x] **S1.14** Tests, two layers. *(2026-07-12: `as_tenant`/`as_user` test helpers set/reset
+      the respective RLS GUC around a block — model tests run outside a request, so nothing
+      else would. **Model unit:** create-workshop creates the pair atomically (and a forced
+      Ownership failure rolls the Workshop back too, proven via `assert_no_difference`) ·
+      signup alone → no edges · `access_for` resolves employment/ownership/both/none across
+      four personas · ending employment blocks access while ownership alone still grants it ·
+      `accessible_workshops` de-dups the towkay · **the RLS backstop test**: two tenants
+      seeded, a bare `Employment.count` with no `WHERE workshop_id` at all still can't see the
+      other tenant's row, and sees zero rows with no tenant note set — the test ADR-007
+      promised, proving the backstop backs something up rather than re-testing the app filter.
+      **System (Capybara, real headless Chrome):** the full journey — sign up → create
+      workshop → invite pending → second person signs up separately (not auto-added) →
+      re-fire → active → signs in straight to dashboard → owner ends employment → locked out
+      next sign-in. Two bugs only this level of test caught: an async Turbo sign-out race
+      (`click_button` returns before the fetch completes — fixed with a wait-for-signed-out
+      helper) and headless Chrome auto-dismissing the "End" button's native confirm dialog
+      (used Capybara's `accept_confirm` to drive the real dialog rather than stripping it).
+      16 tests + 1 system test green; seeds still idempotent. Commit `4a61ce4`.)*
 
 ---
 
