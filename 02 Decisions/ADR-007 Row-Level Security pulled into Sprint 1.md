@@ -93,3 +93,20 @@ cited above (footnote 2026-07-08) lived in a method then named `Workshop.create_
 it was renamed **`Workshop.create_with_owner!`** — "founder" named a status the schema never
 tracks (all owners are equal Ownership rows), so it aligned to the ADR-006 governance term
 *owner*. RLS mechanics unchanged.
+
+**2026-07-14 (Session 15 audit) — scope note: why `workshops` and `users` carry no RLS.**
+The audit found this ADR records what gets policed but never why the two global tables don't
+— closing that gap here. Neither has a `workshop_id` to police on: they are what tenancy is
+*made of* (the tenant and the global person), not things inside it. And both must be readable
+with **zero GUC notes set**, non-negotiably: Devise sign-in finds the `users` row by email
+*before* authentication (before `app.user_id` can exist), and claim-verification reads the
+candidate `workshops` row *before* the tenant note is confirmable (`set_current_context` —
+policing it would deadlock the very check that legitimizes the note). Their guard is the app
+layer, which is both **necessary** (above) and **sufficient**: no user-reachable path renders
+either table bare — the session workshop claim is access-door-verified before anything shows,
+and `users` is thin by law (ADR-006), so its worst leak is "this email exists". That leak
+does exist in miniature at the app layer (invite flow's two flash messages form an
+account-enumeration oracle — [[Risk ledger]] R10, accepted for v1). If workshops ever needed
+DB-level hiding, the shape is an edge-based `own_rows`-species policy
+(`id IN (my ownerships/employments)`) — but v1 has no surface that lists workshops bare, so
+it buys nothing today. See [[Job visibility]] for the per-party map on the policed side.

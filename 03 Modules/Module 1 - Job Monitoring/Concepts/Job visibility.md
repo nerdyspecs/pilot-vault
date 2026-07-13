@@ -50,6 +50,10 @@ CREATE POLICY company_read ON jobs FOR SELECT
                          JOIN company_employments ce ON ce.company_id = c.company_id
                          WHERE ce.user_id = <app.user_id note>));
 ```
+*(The two **global** tables — `workshops`, `users` — carry no RLS at all: deliberate, and
+load-bearing for sign-in and claim-verification. Reasoned in
+[[ADR-007 Row-Level Security pulled into Sprint 1]]'s 2026-07-14 footnote.)*
+
 Four keys, ORed. Only `tenant_isolation` opens writes (`FOR SELECT` policies are never
 consulted for writes) — and even then, state changes go through `JobActions` on top
 ([[Design laws]] #7). Every read key resolves **from the person inward**: start at the

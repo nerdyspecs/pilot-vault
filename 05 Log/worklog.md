@@ -62,6 +62,21 @@ every read key resolves from the person inward (`app.user_id` → claim → the 
 `customer_id` anchor). Sprint 7's token-page×RLS wrinkle (unauthenticated page can't even
 look up the job under fail-closed RLS) flagged in [[Deferred design]].
 
+**Addendum 2 — audit pass + the risk ledger promoted to a file.** Re-ran the consistency
+ritual: vault clean (all wikilinks resolve — one false positive, a literal backticked
+`[[link]]` in Session 14's own prose; "founder" rule holds everywhere; frontmatter current),
+code↔vault exact (22 tests green; live `pg_policies` = the documented 3 edge tables × 2
+policies, ENABLE+FORCE all true; cited commits real). One genuine gap found: the vault never
+recorded *why* `workshops`/`users` are un-policed — closed with a dated ADR-007 footnote
+(they're what tenancy is made of; sign-in and claim-verification must read them noteless;
+app-layer guard is necessary and sufficient; `users` thin-by-law caps the worst leak at
+email-existence). The audit + builder's "who can query what?" question surfaced four new
+risks → **[[Risk ledger]] created** (R-numbers were load-bearing but lived only in Session
+14's narrative; now a lookup table, R1–R10): R7 duplicate fired invitations across an email
+change (uniqueness is workshop+email, not workshop+user → two Accept cards, second = 500),
+R8 role-swap under an open card, R9 accept-vs-destroy 404, R10 account-enumeration oracle in
+the invite flash messages. All backlog-grade; no code changed.
+
 **Open (carried).** ADR-009 edges (trapped-owner, law-vs-ADR, PDPA trigger); Company×RLS =
 v2 design pass (framed, not designed); `S1` tag; S0.8 deploy revisit; next build = Sprint 2
 Phase 1 (kickoff decisions: R5 one-active-job-per-vehicle + confirm the customer stamp).
