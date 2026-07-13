@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-12
+updated: 2026-07-13
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -86,7 +86,7 @@ role enum, bootstrap split into signup vs create-workshop, landing routes by edg
 S1.x numbering retired — no commits referenced it. **Renumbered again 2026-07-08 per ADR-007:**
 S1.8–S1.9 inserted for Postgres RLS; old S1.8–S1.12 shifted to S1.10–S1.14 — safe, none had
 commits yet. S1.1–S1.7 untouched, already committed.)*
-**Exit:** signup creates a bare user; "create workshop" creates `Workshop` + founder `Ownership`
+**Exit:** signup creates a bare user; "create workshop" creates `Workshop` + owner `Ownership`
 atomically; a 2nd user joins via employment; ending an employment kills access next request;
 **a query with no `WHERE workshop_id` still cannot see another tenant's rows** (RLS backstop).
 
