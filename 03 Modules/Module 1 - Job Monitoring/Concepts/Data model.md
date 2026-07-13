@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-04
+updated: 2026-07-13
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -64,6 +64,13 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 
 ## v2 — additive, do not build
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.
+  *(2026-07-13, builder: Company also gets its own **governance edge** (`CompanyOwnership`-style),
+  mirroring Workshop's Ownership — both are instances of one reusable pattern: organisation ─
+  membership edges ─ people, governance on top. Same **pattern**, never the same **table**:
+  Workshop is the tenant and the RLS boundary; Company is a *customer* whose vehicles cross
+  workshop boundaries. Merging them into one "organisation" entity would tangle tenancy at the
+  root. ⚠ Open for the v2 design pass: how RLS serves Company reads **across** tenanted
+  workshops — see worklog Session 14.)*
 - **Owner logins:** `customers.user_id` (nullable = unclaimed); check constraint — `user_id` and `company_id` never both set.
 - **Fleet** (grouping inside Company) — replaces the old v1 "Group" idea.
 - **Global vehicle identity** (plate/VIN) → cross-shop history, owner-side read only.

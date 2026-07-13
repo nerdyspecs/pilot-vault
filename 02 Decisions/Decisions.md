@@ -23,7 +23,12 @@ See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, 
 
 ## Open questions (not yet decided)
 Not decisions yet. When one is settled, promote it to a numbered ADR.
-- _(none currently)_
+- **Account deletion semantics → ADR-009 pending** (discussion 2026-07-13, worklog Session 14).
+  Leaning: lifetime invariant "a workshop cannot exist without an Ownership" (builder's
+  strengthening of ADR-006 §2's birth-time rule) + append-only history ⇒ deletion refused for
+  any account holding edges/history; bare users delete freely; anonymization is the PDPA-era
+  path. Still open: the trapped-owner edge (v1 has no workshop-delete or ownership-transfer),
+  law vs ADR placement, PDPA trigger.
 
 **Resolved:**
 - ~~Exact job stages~~ → defined in [[Stage model]]. Kept deliberately adjustable (add/remove as we learn), so **not** frozen as an ADR.

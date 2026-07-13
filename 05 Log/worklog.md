@@ -1,11 +1,62 @@
 ---
 type: log
-updated: 2026-07-13 (Session 13)
+updated: 2026-07-13 (Session 14)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-13 · Session 14 — Post-close audit: risk pass, R2 guard, deletion design (ADR-009 pending)
+
+**Summary.** Builder-requested full audit after S1.15 closed: vault currency, reasoning
+coherence, code↔vault connectivity, then an honest risk review of everything built. Vault
+passed with three mechanical defects, all fixed same session (`f89dc06`): four wikilinks broken
+by line-wrapping (Obsidian can't resolve a split `[[link]]`), a *genuinely stale* Open-questions
+item still describing the pre-ADR-006 bootstrap (missed by two revision sweeps), and ADR-006 §4
+lacking a footnote for S1.15c's landing-guard refinement. Code↔vault: all cited commits exist,
+RLS policy inventory matches the docs exactly (3 tables × 2 policies), invariants hold.
+
+**Risk review produced six findings (R1–R6), ranked.** R2 fixed immediately (`bd7e079`):
+`Invitation#accept!`/`#decline!` carry their own RLS key (`SET LOCAL`), so row security cannot
+catch a caller misusing them — the state rules now live *inside* the bypass (refuse any
+non-fired invitation) plus a validation that every non-pending status carries its matched user.
+Principle worth keeping: **any method that bypasses RLS must enforce its own preconditions.**
+Backlogged/parked: R3 (GUC writes are interpolated SQL — integer-sourced today, harden the
+pattern before it grows), R4 (double-accept race — DB index holds, unrescued 500), R5 (decide
+"one active job per vehicle" at S2 Phase 1 kickoff), R6 (invitation email display can drift
+from a renamed account — cosmetic).
+
+**R1 — account deletion — became a design discussion (ADR-009 pending, see [[Decisions]]).**
+Devise's stock `registerable` ships a live `DELETE /users`; nobody had decided what deletion
+*means*, so today it means `dependent: :destroy` accidents: an ownerless workshop (breaks
+ADR-006), erased employment history (breaks append-only), and an FK crash from any fired
+invitation. Two builder moves shaped the answer:
+- **The invariant reword (right, and load-bearing):** "a workshop can never exist without a
+  user" (birth-time, ADR-006 §2) strengthened to **"a workshop cannot exist without an
+  Ownership" — a lifetime invariant**. The last-owner rule then *derives* instead of being
+  policy: deletion refused not because we chose to refuse, but because the invariant forbids
+  the result. Enforcement is app-level at the only two gates that ever remove Ownership rows
+  (account deletion now; owner-removal/transfer when built).
+- **The organisation pattern (right, with a named trap):** Workshop and Company (v2) share one
+  shape — organisation ─ membership edges ─ people, governance on top — so Company gets its own
+  governance edge in v2 ([[Data model]] updated). The trap, caught in discussion: same shape ≠
+  same entity. Workshop IS the tenant/RLS boundary; Company is a *customer* whose vehicles
+  cross those boundaries. A merged "organisation" table would tangle tenancy at the root.
+- **The incompleteness, patched in reasoning:** the invariant covers governance only — a
+  technician holds no Ownership, so protecting *their* history needs the second principle
+  (append-only history). Deletion rule = refuse when **either** principle would be violated
+  ⇒ bare users delete freely, everyone else refused; anonymization is the PDPA-era upgrade
+  (the User row survives for every FK; the person inside it leaves).
+
+**Open (for ADR-009):** the trapped-owner edge — v1 has no workshop-delete and no ownership
+transfer, so a solo owner cannot delete their account at all; acceptable for v1 but must be
+stated. Law vs ADR placement for the invariant. A concrete PDPA/anonymize trigger. **Next
+discussion (builder-flagged): how RLS serves Company reads across tenanted workshops** — noted
+in [[Data model]]'s v2 sketch; ADR-007 already hints at the answer (shared tables were chosen
+partly *because* physical separation makes cross-tenant reads worse).
 
 ---
 
