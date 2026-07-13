@@ -28,6 +28,19 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   and whether that's a real delete, soft delete, or disable is itself TBD). Pre-launch the
   trap has zero occupants; "contact support" bridges v1. Revisit when designing workshop
   lifecycle (close/transfer) — likely v2. See [[Risk ledger]] R1 / ADR-009.
+- **PDPA / anonymization — the whole question (2026-07-14, builder ruling: after v1 is up).**
+  Everything is additive (scrub columns, no schema change), so deferring costs nothing
+  structurally. **Trigger: anonymization must exist before the first real workshop's data
+  enters the system** — that's the moment Knot becomes a *processor* of someone else's
+  customers, the heavier PDPA role. Two insights preserved so future-us doesn't re-derive:
+  (1) **data user vs processor split** — for accounts (users/edges) Knot is the data user and
+  requests land on us; for customers/vehicles/jobs the *workshop* is the data user and Knot
+  processes on its behalf, so requests land on the workshop; (2) anonymization is therefore
+  **two features**: Knot-side (scrub a User, keep the edge/history skeleton — the ADR-009
+  path) and workshop-side (a crew-facing tool to scrub a Customer, keep the job history as
+  business records — retention principle covers that). At trigger time also re-check the 2024
+  PDPA amendments (breach notification, DPO, portability, processor liability) and add a
+  privacy-notice line at signup. See [[ADR-009 Account deletion is refusal-first]].
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either

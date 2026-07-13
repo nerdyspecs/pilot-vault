@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-07-12
+updated: 2026-07-14
 ---
 # Decisions
 Why the product is built the way it is. **One file per decision (ADR).** Once accepted, an
@@ -18,19 +18,17 @@ New structural choice → new ADR with the next number.
 - [[ADR-006 Ownership separate from Employment]] — Ownership edge (governance) split from Employment (operations); signup creates the person, workshop creation is a post-signup act; access resolved through one door
 - [[ADR-007 Row-Level Security pulled into Sprint 1]] — database-enforced tenant isolation (Postgres RLS) built alongside the tenant tables, not deferred; schema-per-tenant re-examined and rejected again
 - [[ADR-008 Crew joining requires acceptance]] — joining a workshop is bilateral (invitee accepts); leaving is unilateral (termination needs no ack); the `Invitation` becomes a `pending → fired → accepted/declined` state machine; supersedes ADR-006's passive add-crew clause
+- [[ADR-009 Account deletion is refusal-first]] — **carries the lifetime invariant: a workshop cannot exist without an Ownership.** Deletion refused for accounts with edges/history (derived from that invariant + append-only history); bare accounts delete freely; last owner can never delete while the workshop stands (escape routes parked); PDPA/anonymization deferred with a dated trigger
 
 See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 
 ## Open questions (not yet decided)
 Not decisions yet. When one is settled, promote it to a numbered ADR.
-- **Account deletion semantics → ADR-009 pending** (discussion 2026-07-13, worklog Session 14).
-  Leaning: lifetime invariant "a workshop cannot exist without an Ownership" (builder's
-  strengthening of ADR-006 §2's birth-time rule) + append-only history ⇒ deletion refused for
-  any account holding edges/history; bare users delete freely; anonymization is the PDPA-era
-  path. Still open: the trapped-owner edge (v1 has no workshop-delete or ownership-transfer),
-  law vs ADR placement, PDPA trigger.
+- *(none currently)*
 
 **Resolved:**
+- ~~Account deletion semantics~~ → promoted to [[ADR-009 Account deletion is refusal-first]]
+  (2026-07-14; all three open edges ruled — escape routes and PDPA parked in [[Deferred design]]).
 - ~~Exact job stages~~ → defined in [[Stage model]]. Kept deliberately adjustable (add/remove as we learn), so **not** frozen as an ADR.
 
 *(Feature-level questions, like the owner notification channel, live with their module — see [[Open questions]] in Module 1 — not here.)*

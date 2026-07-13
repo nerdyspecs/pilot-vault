@@ -77,9 +77,26 @@ change (uniqueness is workshop+email, not workshop+user → two Accept cards, se
 R8 role-swap under an open card, R9 accept-vs-destroy 404, R10 account-enumeration oracle in
 the invite flash messages. All backlog-grade; no code changed.
 
-**Open (carried).** ADR-009 edges (trapped-owner, law-vs-ADR, PDPA trigger); Company×RLS =
-v2 design pass (framed, not designed); `S1` tag; S0.8 deploy revisit; next build = Sprint 2
-Phase 1 (kickoff decisions: R5 one-active-job-per-vehicle + confirm the customer stamp).
+**Addendum 3 — ADR-009 written: all three edges ruled.** The builder ruled each edge:
+(1) **trapped owner** → refusal itself settled (last owner can never delete while the
+workshop stands — derives from the lifetime invariant); the *escape routes*
+(add-owner-then-leave vs delete-workshop-first; real vs soft delete vs disable) are
+functional design, parked in [[Deferred design]] (`321bf26`). (2) **Placement** → the
+invariant "a workshop cannot exist without an Ownership" is a *design decision*, so it lives
+**inside ADR-009**, not Design laws (laws stay at 9); the [[Decisions]] index line names the
+invariant so it's findable without opening the ADR. (3) **PDPA** → the whole question waits
+for v1 to be up ("a decision is early only if something we're about to build could contradict
+it — nothing can; it's all additive"); parked in [[Deferred design]] with the trigger
+(*anonymization must exist before the first real workshop's data enters — the moment Knot
+becomes a processor of someone else's customers*) plus the two preserved insights (data-user
+vs processor split; anonymization = two features, Knot-side for users + workshop-side for
+customers). **[[ADR-009 Account deletion is refusal-first]] accepted**; index updated (Open
+questions now empty); [[Risk ledger]] R1 → decided, guard code pending. Next code step: the
+~10-line destroy guard (builder drives, spec to follow).
+
+**Open (carried).** Company×RLS = v2 design pass (framed, not designed); `S1` tag; S0.8
+deploy revisit; R1 guard code; next build = Sprint 2 Phase 1 (kickoff decisions: R5
+one-active-job-per-vehicle + confirm the customer stamp).
 
 ---
 
