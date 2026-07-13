@@ -1,11 +1,59 @@
 ---
 type: log
-updated: 2026-07-13 (Session 14)
+updated: 2026-07-14 (Session 15)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-14 · Session 15 — Company×RLS drill-down; two misconceptions corrected; job stamps its customer
+
+**Summary.** Continuation of Session 14's flagged discussion (how RLS serves Company reads
+across tenanted workshops). Pure design session, no code. Three concepts straightened, one
+data-model decision recorded ([[Data model]] Resolved).
+
+**The Company×RLS drill-down.** Why Company is inherently cross-tenant: one real fleet =
+one per-tenant Customer row *per workshop it visits*; the v2 `Company` (global, like User)
+claims them via `customers.company_id`. A fleet manager's core query ("all my vans, all
+workshops") is unservable under `tenant_isolation` alone — no single `app.workshop_id` fits,
+and no GUC set means zero rows. The v2 shape is the own_rows species: an **additional
+permissive `FOR SELECT` policy** keyed through `app.user_id` → company membership, ORed next
+to `tenant_isolation`. Two genuinely open v2 problems: (1) policies whose `USING` subqueries
+read other *policed* tables (policy-chasing-policy; escapes = SECURITY DEFINER helper or
+denormalizing the claim onto readable rows); (2) the projection question — companies probably
+get a narrow slice (stage/ETA/vehicle, the token-page shape), not `SELECT jobs` wholesale;
+what a workshop consents to expose to a customer who also visits competitors is positioning
+as much as engineering.
+
+**Two builder misconceptions corrected (the useful kind — both imagined *more* separation
+than exists).** (1) "Jobs have no RLS / the DB is effectively public" — wrong: every tenant
+table incl. jobs gets ENABLE+FORCE+`tenant_isolation` (Sprint 2 plan Phase 1). RLS fails
+**closed**: cross-org reads return *zero rows silently*, never leak — v2's work is punching
+deliberate read-only holes, not plugging accidental ones. (2) "customer id 1 can exist in
+both workshop A and B" — wrong: shared tables, one global PK sequence; per-tenant ID
+namespaces are the schema-per-tenant world ADR-007 rejected. `workshop_id` is a stamp on
+globally-unique rows, not a namespace. Per-tenant uniqueness exists only on business keys
+(`unique(workshop_id, plate)`). Shared real-world identity is expressed by claim columns
+(`customers.company_id`), never by colliding IDs. Also re-taught from the shipped code: the
+two-key door (tenant_isolation OR own_rows, edge tables only; jobs = one key in v1) and the
+landing-page motivation for own_rows.
+
+**Decision — job stamps its customer (recorded in [[Data model]] Resolved; re-confirm at S2
+Phase 1 kickoff alongside R5).** Builder caught the sold-vehicle hole: `job.vehicle.customer`
+derives history through a mutable pointer — selling the car rewrites who past jobs were for.
+Cure = the law-#8 move: stamp the fact when it's true. Job becomes triple-stamped
+(`workshop_id + vehicle_id + customer_id`), customer written once at registration, one
+creation-time validation (must equal the vehicle's customer at birth; divergence only ever
+arises later, by reassignment). Also pins mid-job notification targets. `VehicleOwnership`
+period-edges rejected for v1. Sprint 2 plan file amended so the decision surfaces at the Job
+migration.
+
+**Open (carried).** ADR-009 edges (trapped-owner, law-vs-ADR, PDPA trigger); Company×RLS =
+v2 design pass (framed, not designed); `S1` tag; S0.8 deploy revisit; next build = Sprint 2
+Phase 1 (kickoff decisions: R5 one-active-job-per-vehicle + confirm the customer stamp).
 
 ---
 

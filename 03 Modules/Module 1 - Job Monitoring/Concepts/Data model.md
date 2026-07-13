@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-13
+updated: 2026-07-14
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -17,7 +17,7 @@ User (thin login) ─*─ Employment ─*─ Workshop (tenant)
 
 Workshop ─*─ Customer (person | company; name, phone, email)
 Workshop ─*─ Vehicle ── belongs_to Customer (required)
-Vehicle  ─*─ Job     ── double-stamped: workshop_id + vehicle_id
+Vehicle  ─*─ Job     ── triple-stamped: workshop_id + vehicle_id + customer_id
 Job      ─*─ JobSheetFieldValue
 Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
 
@@ -32,7 +32,8 @@ Workshop ─*─ Blocker                  (workshop's blocker catalog)
 - **Employment** — User↔Workshop edge + role + `ended_at`. See [[ADR-004 Multi-tenant foundation]].
 - **Customer** — tenant-scoped owner *record* (not a login). `kind: person | company`; holds `name, phone, email` directly.
 - **Vehicle** — tenant-scoped; `belongs_to :customer` (required). Plate normalized (strip/upcase); `unique(workshop_id, plate)`. VIN = optional identity.
-- **Job** — tenant-scoped, `belongs_to :vehicle`. The tracked unit ([[Job]]). Per-visit.
+- **Job** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
+  registration — see Resolved below). The tracked unit ([[Job]]). Per-visit.
 - **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).
 - **JobStageTransition / JobBlockerTransition / JobMechanic** — the three job event trackers, each with ack columns ([[Event log]], [[ADR-005 Acknowledged handoffs in V1]]).
 - **Blocker** — the workshop's catalog of blocker types, each with `raised_by_role`/`cleared_by_role` (seed "Hold For Payment"); all state lives in `JobBlockerTransition` ([[Blocker]]).
@@ -61,6 +62,18 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 
 ## Resolved
 - **Vehicle key:** registration = lookup key; VIN = optional identity. `make/model/year/origin` loose → seed v2 `VehicleModel`.
+- **Job stamps its customer** *(2026-07-14, builder — raise again at S2 Phase 1 kickoff,
+  alongside R5)*. Vehicles change owners: if a job's customer is only reachable through
+  `job.vehicle.customer`, selling the car retroactively rewrites who every past job was for —
+  history derived through a **mutable pointer** violates the same append-only principle behind
+  [[Design laws]] #8 (frozen answers) and ADR-009's leaning. So `jobs.customer_id` is written
+  **once at registration** (fact at the moment it was true): `job.customer` = who brought the
+  car in and pays (immutable history); `vehicle.customer` = who owns it *now* (mutable
+  present). They legitimately diverge after a sale — that divergence is the correct answer.
+  One creation-time validation: the stamped customer must equal the vehicle's customer at
+  registration (divergence may only arise later, by reassignment — never at birth). Also pins
+  the job's notification target ("External" side) against mid-job reassignment. A
+  `VehicleOwnership` period-edge table was considered and rejected for v1 (over-engineering).
 
 ## v2 — additive, do not build
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.
