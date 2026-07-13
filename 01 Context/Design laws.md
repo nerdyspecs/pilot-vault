@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-07-12
+updated: 2026-07-13
 ---
 # Design laws
 Invariants — never violate. Adopted from the 2026-07-03 foundation session.
@@ -23,6 +23,10 @@ ADRs record *choices*; these are the *rules* every choice must obey.
    isolation and consistent everywhere they're reused. Controllers stay thin; a calculation you
    can't call without a request is in the wrong place. *(Added 2026-07-08; underpins the
    model-unit-test-first strategy — see [[Sprint plan]] conventions.)*
+   *(2026-07-13: reaffirmed — a separate action class is justified only when cross-model
+   orchestration, shared permission rules, and a mandatory audit log co-occur (e.g.
+   `JobActions`); single-aggregate commands stay on the model as bang methods. A `WorkshopActions`
+   layer was considered and rejected — see worklog Session 13.)*
 
 ## Related
 - [[Decisions]] · [[Rejected alternatives]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-005 Acknowledged handoffs in V1]]

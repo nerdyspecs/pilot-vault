@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-07-12 (Session 13)
+updated: 2026-07-13 (Session 13)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -40,9 +40,39 @@ accept explicitly distinct so "handshake" doesn't come to mean two things in cop
 ADR-006 "superseded in part" footnote; Positioning updated (adoption-veto vs membership-consent,
 handshake disambiguation); Sprint plan S1.11 footnoted + new **S1.15** task added.
 
-**Open:** sequencing — build S1.15 (acceptance) before resuming the Sprint 2 job engine, or after?
-The approved build plan (`.claude/plans/…`) still needs revising to reflect S1.15. `S1` tag
-still pending.
+**S1.15 built and closed (2026-07-12/13, sequencing settled: acceptance BEFORE the job
+engine — builder call, correct the invitations while in them).** Four sub-phases, each verified
+before moving on — full detail in the [[Sprint plan]] tick: `2bd38ca` (state machine + own_rows
+policy), `598b6c4` (fire/accept/decline — `SET LOCAL` inside the model transactions is what lets
+an edgeless invitee's policed writes through), `66d3137` (landing Accept/Decline card; the
+1-workshop auto-route now also waits for zero fired invites), `6e027b8`, `179671b` (seeds +
+4 model tests + system journey reworked). The whole loop was driven live in the browser twice —
+invite → fired → card → accept → dashboard → end → lockout. Mid-flight audit (builder-requested)
+found the vault and code fully aligned except two stale lines (fixed in this close-out) and
+produced two observations that became small fixes: a misleading predicate name became
+`User#employed_at?(workshop)`, and S1.14's annotation got a dated supersession footnote.
+
+**Also recorded this session (was floating unwritten):**
+- **Law #9 reaffirmed — no `WorkshopActions` command layer.** Builder proposed making workshop
+  creation a service for symmetry with `JobActions`, then pushed further: "methods in models
+  should strictly be about calculations." Worked through why that instinct (a real principle —
+  command–query separation) doesn't demand a new layer: in Rails, persistence *is* the model's
+  job, and CQS is honored by **naming** — bang commands (`create_with_owner!`, `end!`,
+  `accept!`) vs predicate/calculation queries (`employed_at?`, `active?`). The reusable door
+  test, now also footnoted on [[Design laws]] #9: a separate action class is justified only
+  when **cross-model orchestration + must-not-drift permissions + a mandatory audit log
+  co-occur** (JobActions: 3/3; workshop governance: 0/3 — stays on the model). Revisit trigger:
+  governance gaining an audit requirement.
+- **Style rule (builder):** never endless methods (`def foo = expr`) — always explicit
+  `def`/`end`, even one-liners. Recorded in CLAUDE.md working mode + assistant memory.
+- Naming hygiene wrap-up: the last living-doc "founder" (Sprint 1 exit criteria) fixed
+  (`c6dd549`); remaining occurrences are inside dated rename-records only, by design. The
+  retired Sprint 1 plan file (pre-rename vocabulary) deleted from the plans directory after it
+  kept resurfacing as a ghost in the desktop preview.
+
+**Open:** `S1` tag — Sprint 1 + S1.15 now fully closed, awaiting the builder's explicit go.
+S0.8 (deploy) — parked since "revisit when S1.12 passes"; overdue for a decision. Next build:
+Sprint 2 job engine, Phase 1 (Customer/Vehicle/Job spine), plan already approved.
 
 ---
 

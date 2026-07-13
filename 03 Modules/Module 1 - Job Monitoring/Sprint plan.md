@@ -225,7 +225,10 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       helper) and headless Chrome auto-dismissing the "End" button's native confirm dialog
       (used Capybara's `accept_confirm` to drive the real dialog rather than stripping it).
       16 tests + 1 system test green; seeds still idempotent. Commit `4a61ce4`.)*
-- [ ] **S1.15** Crew acceptance flow ([[ADR-008 Crew joining requires acceptance]]) — reworks
+      *(2026-07-13: the system test's "re-fire → active" journey was superseded by ADR-008 —
+      joining now requires the invitee's accept; test reworked under S1.15. The annotation
+      above records the flow as it was when ticked.)*
+- [x] **S1.15** Crew acceptance flow ([[ADR-008 Crew joining requires acceptance]]) — reworks
       S1.11's instant-employment into a consent step. `Invitation` gains a `status` enum
       (`pending → fired → accepted/declined`) + nullable `user_id` (set when `fired`). Admin
       "add crew": account exists → `fired`; no account → `pending`; manual "Invite again"
@@ -233,8 +236,18 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
       §5). Invitee sees `fired` invites on their landing page (Accept → active `Employment`;
       Decline → `declined`, shown to admin). Own-rows RLS policy on `invitations`
       (`user_id = app.user_id`) so the invitee can read their own row pre-membership (mirrors
-      S1.12-pre). `Employment#end!` unchanged (unilateral). **Sequencing vs Sprint 2 TBD** —
-      decide when updating the build plan.
+      S1.12-pre). `Employment#end!` unchanged (unilateral). *(Built 2026-07-12/13, **before**
+      the Sprint 2 job engine — builder call: correct the invitation flow while in it. Commits:
+      `2bd38ca` (state enum + user ref + own_rows policy), `598b6c4` (fire/accept/decline —
+      the RLS wrinkle: `accept!`/`decline!` `SET LOCAL` the tenant GUC inside their transaction,
+      since the invitee holds no edge yet and both policed writes would otherwise be denied),
+      `66d3137` (landing Accept/Decline card + crew status labels + the 1-workshop auto-route
+      now also requires no fired invites), `6e027b8` (`User#employed_at?(workshop)` replaces a
+      misleading controller predicate — employment-only on purpose: a pure owner stays
+      invitable as crew), `179671b` (seeds across states + 4 model tests incl. accept-atomicity
+      and own-rows isolation + system journey reworked). Accept/decline live in the same
+      `InvitationsController` with `except:`-scoped guards (builder call). Full flow verified
+      live in-browser twice; suite green: 19 model + 1 system.)*
 
 ---
 
