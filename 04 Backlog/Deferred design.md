@@ -19,6 +19,15 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   which can't collide. The fix is one line (`job.with_lock` around read-check-write) in the one
   door, so the cost of waiting doesn't compound. **Trigger to revisit:** a workshop reports a job
   that "changed twice at once", or the log shows two transitions out of the same stage.
+- **Trapped last owner — the escape routes from account deletion (2026-07-14).** Since a
+  workshop cannot exist without an Ownership (lifetime invariant, ADR-009), the **last owner
+  of a workshop can never delete their account** while the workshop stands — that refusal is
+  settled. What's parked is the *escape route*, a functional-design question: builder leaning
+  = either **add another owner, then remove yourself** (needs an add-owner flow — none in v1)
+  or **delete the workshop first, then the account** (needs workshop deletion — none in v1;
+  and whether that's a real delete, soft delete, or disable is itself TBD). Pre-launch the
+  trap has zero occupants; "contact support" bridges v1. Revisit when designing workshop
+  lifecycle (close/transfer) — likely v2. See [[Risk ledger]] R1 / ADR-009.
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either
