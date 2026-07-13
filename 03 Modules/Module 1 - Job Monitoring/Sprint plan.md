@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-13
+updated: 2026-07-14
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -257,12 +257,21 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
 Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake is Sprint 6).
 **Exit:** move a job through stages via `JobActions` (illegal moves rejected); assign a mechanic; Done freezes the job.
 
+- [ ] **S2.0b** ADR-009 destroy guard — replace Devise's stock `DELETE /users` path: bare
+      account (no edges, no history) → delete; anything else → refuse with the derived reason
+      ([[ADR-009 Account deletion is refusal-first]]; closes [[Risk ledger]] R1). Independent
+      of the spine — can land any time before Sprint 2 exit. *(added 2026-07-14)*
 - [ ] **S2.1** Migration + model **Customer** (minimal): `workshop_id, kind:integer(person/company),
       name, phone, email`. Scoped.
 - [ ] **S2.2** Migration + model **Vehicle** (minimal): `workshop_id, customer_id, plate, vin`;
       `belongs_to :customer`; normalize plate (strip/upcase); unique `(workshop_id, plate)`.
-- [ ] **S2.3** Migration + model **Job**: `workshop_id, vehicle_id, stage:integer, token`;
-      `belongs_to :workshop, :vehicle`; `has_secure_token :token`.
+- [ ] **S2.3** Migration + model **Job**: `workshop_id, vehicle_id, customer_id, stage:integer,
+      token`; `belongs_to :workshop, :vehicle, :customer`; `has_secure_token :token`.
+      *(2026-07-14: `customer_id` added — the triple-stamp, written once at registration with a
+      creation-time must-equal-vehicle's-customer validation; [[Data model]] §Resolved, the
+      sold-vehicle decision.)* **Kickoff gate before writing this migration:** decide
+      [[Risk ledger]] R5 (one active job per vehicle — if yes, partial unique index on
+      `jobs(vehicle_id)` over active stages) and confirm the customer stamp.
 - [ ] **S2.4** `stage` enum: `registered / assigned / in_progress / done / delivered / cancelled`.
 - [ ] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.
