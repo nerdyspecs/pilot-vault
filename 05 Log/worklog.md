@@ -51,6 +51,17 @@ arises later, by reassignment). Also pins mid-job notification targets. `Vehicle
 period-edges rejected for v1. Sprint 2 plan file amended so the decision surfaces at the Job
 migration.
 
+**Addendum — the visibility map written down ([[Job visibility]], new concept note).**
+Follow-up discussion enumerated the complete set of parties querying `jobs` — six scenarios,
+no seventh: crew (tenant_isolation, Sprint 2, the only one built now), landing (zero jobs,
+correct), private owner (`owner_read`, v2), company (`company_read`, v2), token holder
+(`token_read`, Sprint 7), stranger (fail-closed default). The walk-in is a *customer-record
+state* (unclaimed), not a query path — reached only via crew board + token link. Along the
+way: permissive policies OR per command; `FOR SELECT` keys are never consulted for writes;
+every read key resolves from the person inward (`app.user_id` → claim → the job's frozen
+`customer_id` anchor). Sprint 7's token-page×RLS wrinkle (unauthenticated page can't even
+look up the job under fail-closed RLS) flagged in [[Deferred design]].
+
 **Open (carried).** ADR-009 edges (trapped-owner, law-vs-ADR, PDPA trigger); Company×RLS =
 v2 design pass (framed, not designed); `S1` tag; S0.8 deploy revisit; next build = Sprint 2
 Phase 1 (kickoff decisions: R5 one-active-job-per-vehicle + confirm the customer stamp).

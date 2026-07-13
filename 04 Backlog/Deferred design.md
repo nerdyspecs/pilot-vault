@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-12
+updated: 2026-07-14
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -19,6 +19,12 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   which can't collide. The fix is one line (`job.with_lock` around read-check-write) in the one
   door, so the cost of waiting doesn't compound. **Trigger to revisit:** a workshop reports a job
   that "changed twice at once", or the log shows two transitions out of the same stage.
+- **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
+  is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
+  can't even look up the job by token (zero rows). Needs its own read key at build time: either
+  a token-keyed `FOR SELECT` policy (`USING (token = current_setting('app.job_token', true))`,
+  set before the lookup) or a `SECURITY DEFINER` lookup function. Purely additive — `token`
+  is stamped at birth (S2.3). Decide at Sprint 7 kickoff. See [[Job visibility]].
 - **Dark mode = steel-blue chrome (2026-07-05).** v1 ships light mode only (high-contrast, per
   device-posture decision). When dark mode comes, the dark theme's surfaces derive from the brand
   steel blue (~`#22456B` family) — chosen because the navy app-bar sample read as "dark mode" and
