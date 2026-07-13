@@ -1,7 +1,7 @@
 ---
 type: open-questions
 module: M1
-updated: 2026-07-04
+updated: 2026-07-13
 ---
 # Module 1 — Open questions
 Feature-level questions to resolve during feature design. These are **not** architecture
@@ -21,7 +21,11 @@ decisions — they're details of how a feature behaves.
 - **Blocker taxonomy** — ✅ resolved: no fixed taxonomy. `Blocker` is a **workshop-owned catalog**
   (`label`, `raised_by_role`, `cleared_by_role`); seed **"Hold For Payment"**. The workshop defines
   its own list rather than us guessing one.
-- **Bootstrap onboarding** — first signup creates `User` + `Workshop` + owner `Employment` in one transaction (see [[ADR-004 Multi-tenant foundation]]).
+- **Bootstrap onboarding** — ✅ superseded twice since this was written: signup creates the
+  *person only*; "create workshop" is a post-signup act creating `Workshop` + `Ownership`
+  ([[ADR-006 Ownership separate from Employment]]); crew joins via a fired invitation the
+  invitee must accept ([[ADR-008 Crew joining requires acceptance]]). *(Stale text fixed
+  2026-07-13 — it predated ADR-006 and was missed in both revision sweeps.)*
 
 Broader **product-design** gaps (ETA, aging jobs, partial-adoption, floor access, photos, etc.) —
 parked in [[Product gaps]] for a future review pass.

@@ -70,6 +70,9 @@ per-request re-verification) is unchanged.
   stands, but the add-crew mechanic it implied (S1.11: an active `Employment` created the instant
   a matching email is entered, no invitee say) is replaced. Joining is now bilateral — the
   invitee accepts — while termination stays unilateral. The rest of this ADR is untouched.
+- **2026-07-13 — §4 refinement (same ADR-008 consequence):** the 1-edge auto-route to the
+  dashboard now also requires the user to have **no fired invitations** — a pending
+  Accept/Decline card must be seen on the personal home, not skipped past. Built in S1.15c.
 
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[ADR-008 Crew joining requires acceptance]] · [[Design laws]] · [[Positioning]] · [[Sprint plan]]

@@ -80,8 +80,9 @@ that ends in something demoable.
 
 ## Sprint 1 · Tenancy spine
 **Goal:** the multi-tenant foundation — [[ADR-004 Multi-tenant foundation]] as revised by
-[[ADR-006 Ownership separate from Employment]] and [[ADR-007 Row-Level Security pulled into
-Sprint 1]]. *(Rewritten 2026-07-07 per ADR-006: Ownership edge added, `owner` dropped from the
+[[ADR-006 Ownership separate from Employment]] and
+[[ADR-007 Row-Level Security pulled into Sprint 1]]. *(Rewritten 2026-07-07 per ADR-006:
+Ownership edge added, `owner` dropped from the
 role enum, bootstrap split into signup vs create-workshop, landing routes by edge count. Old
 S1.x numbering retired — no commits referenced it. **Renumbered again 2026-07-08 per ADR-007:**
 S1.8–S1.9 inserted for Postgres RLS; old S1.8–S1.12 shifted to S1.10–S1.14 — safe, none had

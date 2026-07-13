@@ -48,9 +48,9 @@ is the product/brand. Nothing internal needs renaming.)*
    the shop stops living in one person's head.
 3. **Crew insurance (ease first):** updating Knot is faster than walking to the board.
    Secondary: the handshake protects whoever did their part — *unvalidated, keep out of copy
-   until tested.* *(This "handshake" = the **operational** job-handoff ack ([[ADR-005 Acknowledged
-   handoffs in V1]]) — distinct from the **membership** accept in ADR-008. Two different acts;
-   don't let "handshake" mean both in copy.)*
+   until tested.* *(This "handshake" = the **operational** job-handoff ack
+   ([[ADR-005 Acknowledged handoffs in V1]]) — distinct from the **membership** accept in
+   ADR-008. Two different acts; don't let "handshake" mean both in copy.)*
 4. **Kicker:** your customers watch their own car's progress — **the one thing no whiteboard
    can ever do.** The calls stop. *(Build dependency: "the calls stop" needs the ETA field
    staying in V1 — [[Product gaps]] #1, Sprint task S6.6 — or the owner still calls to ask "when".)*

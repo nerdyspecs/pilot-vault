@@ -345,8 +345,9 @@ No gem change — Capybara + selenium already in `group :test`.
 **Summary.** Devise's four auth pages got the Knot treatment (Slim + Bootstrap, dedicated
 no-appbar auth layout — one primary action per screen). Styling the sign-up page exposed a
 modeling flaw: my copy said "one account for the whole shop," which contradicts per-person
-identity. The discussion that followed produced **[[ADR-006 Ownership separate from
-Employment]]** — the biggest model revision since the foundation session.
+identity. The discussion that followed produced
+**[[ADR-006 Ownership separate from Employment]]** — the biggest model revision since the
+foundation session.
 
 **Decisions (all in ADR-006; ADR-004 annotated, [[Decisions]] index updated):**
 - **Ownership is its own edge** (`user_id` + `workshop_id`), not an Employment role.

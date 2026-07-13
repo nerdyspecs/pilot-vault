@@ -23,8 +23,8 @@ tenancy model itself is unchanged and, if anything, reinforced.
   builder's own stated requirement (Job/Vehicle history must query *across* workshops) and
   rejected harder: physical separation makes the cross-tenant queries the product actually
   needs (a vehicle's full service history) *worse*, not just operationally expensive.
-- **Mechanism:** the access door (`ApplicationController#set_current_context`, [[ADR-006
-  Ownership separate from Employment]] §3) sets a transaction-local Postgres session variable
+- **Mechanism:** the access door (`ApplicationController#set_current_context`,
+  [[ADR-006 Ownership separate from Employment]] §3) sets a transaction-local Postgres session variable
   (`set_config('app.workshop_id', ..., true)`) every request, from the same `Current.workshop`
   it already resolves. Policies filter on that variable. Requires a non-table-owning app DB
   role (Rails' default connection owns the tables it creates, which **bypasses RLS by
