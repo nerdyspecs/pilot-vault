@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-14
+updated: 2026-07-14
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -71,6 +71,9 @@ that ends in something demoable.
       verify the deployed login page loads. *(2026-07-08: builder decided — **deferred to
       Sprint 1's exit**. Deploy the skeleton+tenancy together; revisit when S1.12 passes.
       Prereq done: private GitHub remote `nerdyspecs/pilot` exists, `main` pushed.)*
+      *(2026-07-14: S1.12 long since passed, still un-deployed — builder re-parked to
+      **Sprint 2's exit** instead: ship the tenancy spine together with a demoable job
+      engine, one deploy instead of two. Prereqs unchanged.)*
 - [x] **S0.9** First commit(s), tagged `S0`. *(2026-07-08: branches unified — `v1-db-setup`
       fast-forwarded into `main` and deleted; `main` = `fc821b7` pushed to private GitHub +
       annotated tag `S0`. Note: GitHub immediately opened 3 dependabot PRs (Rails 8.1.3 +
@@ -257,10 +260,18 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
 Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake is Sprint 6).
 **Exit:** move a job through stages via `JobActions` (illegal moves rejected); assign a mechanic; Done freezes the job.
 
-- [ ] **S2.0b** ADR-009 destroy guard — replace Devise's stock `DELETE /users` path: bare
+- [x] **S2.0b** ADR-009 destroy guard — replace Devise's stock `DELETE /users` path: bare
       account (no edges, no history) → delete; anything else → refuse with the derived reason
       ([[ADR-009 Account deletion is refusal-first]]; closes [[Risk ledger]] R1). Independent
       of the spine — can land any time before Sprint 2 exit. *(added 2026-07-14)*
+      *(2026-07-14: built + live-verified in preview — `User#bare?` (edges only, active or
+      ended; invitations excluded — refined during implementation, see ADR-009 footnote)
+      gates a `before_destroy` guard with `prepend: true` (must run before
+      `dependent: :destroy`'s own callbacks); a matched invitation releases back to
+      `pending`/`user: nil` via new `Invitation#release!` rather than blocking. Friendly
+      refusal in a new `RegistrationsController#destroy`; model guard is the backstop.
+      Bare-account and owner-refusal paths both live-verified. 28/28 tests green. Commit
+      `0e135da`.)*
 - [ ] **S2.1** Migration + model **Customer** (minimal): `workshop_id, kind:integer(person/company),
       name, phone, email`. Scoped.
 - [ ] **S2.2** Migration + model **Vehicle** (minimal): `workshop_id, customer_id, plate, vin`;

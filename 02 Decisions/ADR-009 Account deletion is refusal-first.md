@@ -74,3 +74,15 @@ Knot-side for users, workshop-side for customers).
   [[ADR-008 Crew joining requires acceptance]] (the invitation FK that crashes stock destroy) ·
   [[Risk ledger]] R1 · [[Deferred design]] (trapped-owner escape routes; PDPA trigger) ·
   [[Design laws]] #8
+
+**2026-07-14 (S2.0b implementation) — invitations don't block deletion.** The Decision
+above listed "no non-pending Invitations" as part of bare-ness; refined during
+implementation review: an invitation is an **offer**, not a commitment — the commitment is
+the Employment it may create, and that's what's actually checked (`employments.none?`).
+Decisive case: [[ADR-008 Crew joining requires acceptance]]'s mistyped-email stranger must
+never have their account held hostage by someone else's typo. `User#bare?` now reads
+`ownerships.none? && employments.none?` only. A matched (fired or declined) invitation is
+instead **released** on destroy — back to `user: nil, status: :pending`, via new
+`Invitation#release!` — so the admin's record survives and the fact stays true ("no account
+for this email yet"). An accepted invitation can never be in play here: accepting created an
+Employment, which already blocks. Built + live-verified, commit `0e135da`.

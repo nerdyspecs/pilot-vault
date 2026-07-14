@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-07-14 (Session 15)
+updated: 2026-07-14
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -94,9 +94,28 @@ customers). **[[ADR-009 Account deletion is refusal-first]] accepted**; index up
 questions now empty); [[Risk ledger]] R1 → decided, guard code pending. Next code step: the
 ~10-line destroy guard (builder drives, spec to follow).
 
-**Open (carried).** Company×RLS = v2 design pass (framed, not designed); `S1` tag; S0.8
-deploy revisit; R1 guard code; next build = Sprint 2 Phase 1 (kickoff decisions: R5
-one-active-job-per-vehicle + confirm the customer stamp).
+**Addendum 4 — S1 tagged; S0.8 re-parked; S2.0b built and verified (commit `0e135da`).**
+Tag `S1` cut and pushed (`bd7e079`, includes S1.15 + the R2 guard) — mirrors `S0`. S0.8
+deploy re-parked a second time: S1.12 passed long ago with no deploy following, so the
+builder moved it to **Sprint 2's exit** deliberately (spine + a demoable job engine in one
+deploy) rather than let it drift further.
+
+Built the R1 guard: `User#bare?` (no ownerships, no employments — active or ended) gates a
+`before_destroy` with `prepend: true` (must run ahead of `dependent: :destroy`'s own
+callbacks, or the edges vanish before the guard can see them); `RegistrationsController`
+overrides Devise's destroy for a friendly refusal, model guard as backstop. **Refined
+mid-implementation** (plan review): invitations dropped from the bare-ness check — an offer
+isn't a commitment, only the Employment it might create is, and the ADR-008 mistyped-email
+stranger must never be hostage to someone else's typo. Matched invitations now *release* to
+`pending`/`user: nil` (new `Invitation#release!`) instead of blocking. ADR-009 footnoted
+with the refinement (ADRs never edited). Live-verified in preview both ways: a bare
+throwaway account destroys cleanly to the marketing root; the seeded owner
+(`workshop.owner@seed.local`) gets the exact refusal copy from the ADR, account and session
+intact. 28/28 tests green. [[Risk ledger]] R1 → fixed.
+
+**Open (carried).** Company×RLS = v2 design pass (framed, not designed); next build =
+Sprint 2 Phase 1, on its own plan (kickoff decisions: R5 one-active-job-per-vehicle + confirm
+the customer stamp).
 
 ---
 

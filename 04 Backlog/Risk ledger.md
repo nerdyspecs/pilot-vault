@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-14
+updated: 2026-07-14
 ---
 # Risk ledger
 Engineering risks and known sharp edges, numbered. Promoted out of worklog narrative
@@ -13,7 +13,7 @@ Severity: **high** = wrong data / broken invariant possible · **med** = ugly fa
 
 | ID | What | Severity | Status | Trigger to revisit |
 |----|------|----------|--------|--------------------|
-| R1 | **Account deletion undefined** — Devise `registerable` ships a live `DELETE /users`; `dependent: :destroy` would orphan workshops (breaks the lifetime Ownership invariant), erase employment history (breaks append-only), and FK-crash on any fired invitation | high | **decided — [[ADR-009 Account deletion is refusal-first]]** (2026-07-14); guard code pending | build the ~10-line guard (refuse with edges/history; bare users cascade-free), then mark fixed |
+| R1 | **Account deletion undefined** — Devise `registerable` ships a live `DELETE /users`; `dependent: :destroy` would orphan workshops (breaks the lifetime Ownership invariant), erase employment history (breaks append-only), and FK-crash on any fired invitation | high | **fixed `0e135da`** — [[ADR-009 Account deletion is refusal-first]]; `User#bare?` gates a prepended `before_destroy`; matched invitations release to pending rather than block | — |
 | R2 | **Invitation state machine unguarded in the model** — `accept!`/`decline!` carry their own RLS key (`SET LOCAL`), so row security can't catch misuse | med | **fixed `bd7e079`** — guards live inside the bypass; principle: *any method that bypasses RLS must enforce its own preconditions* | — |
 | R3 | **GUC writes are interpolated SQL** — all sources are integers today (`.to_i` in controller; model ids), but the pattern invites a future string | low | accepted for v1 | harden (quote/`set_config`) before any non-integer GUC (e.g. Sprint 7's `app.job_token`) |
 | R4 | **Double-accept race** — two concurrent `accept!` both pass the `fired?` guard; the DB's active-employment unique index holds (no corruption) but the loser gets an unrescued 500 | med | accepted for v1 | a real user reports it, or when a global error-page pass happens |
