@@ -25,4 +25,4 @@ Severity: **high** = wrong data / broken invariant possible · **med** = ugly fa
 | R10 | **Account-enumeration oracle in the invite flow** — the two flash messages ("awaiting their acceptance" vs "no account yet") let any workshop manager probe whether an email has a Knot account. Manager-gated; `users` is thin (ADR-006) so the leak is existence only. Devise stock flows have cousins (password-reset messaging) | low | accepted for v1 | pre-launch security pass; align wording with whatever Devise enumeration hardening is chosen |
 
 ## Related
-- [[Decisions]] (ADR-009 pending) · [[Deferred design]] (parked *design*, vs parked *risk* here) · worklog Sessions 14–15 (origin stories for R1–R10)
+- [[Decisions]] · [[Deferred design]] (parked *design*, vs parked *risk* here) · worklog Sessions 14–15 (origin stories for R1–R10)
