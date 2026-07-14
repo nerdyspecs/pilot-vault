@@ -49,10 +49,21 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   hard block at intake with the car on the lift is workflow poison. **The stamp itself
   stands** (gate 2, [[Data model]] §Resolved) — the door still *copies* the vehicle's
   customer by default; what's parked is only the law forbidding an explicit different
-  choice. Circle back when the intake UI exists (Phase 4 / Sprint 6): the likely shape is
-  soft — default to the vehicle's customer, allow an override with a visible "billed to X,
-  vehicle filed under Y" cue — decided with real screens in hand. See [[Job visibility]]
-  (the stamp still anchors v2 read keys; an override just means the *chosen* payer sees it).
+  choice. Circle back when the intake UI exists (Phase 4 / Sprint 6). **Recorded leaning
+  (2026-07-15, designed with the builder): a two-branch SA-facing confirm, not a generic
+  warning.** Happy path: registration number → vehicle → customer auto-fills (the door's
+  default-copy), no warning ever. On mismatch: "vehicle filed under Lim, billing Tan" with
+  two explicit choices — **[Just this visit]** (stamp only; file untouched — borrower/third-
+  party payer) vs **[Vehicle changed hands]** (also `vehicle.update!(customer:)` in the same
+  transaction — informal sale; future visits auto-fill right). Two buttons because the two
+  stories need different writes; one generic "confirm" would leave stale files and train
+  click-through. Mechanically: `register_job(customer: ...)` defaults to `vehicle.customer`;
+  cue = ids differ. Schema untouched — Phase 1 already supports it. **Consequences audited
+  2026-07-15:** (1) payer-with-no-vehicle became possible → Customer must restrict deletion
+  on **jobs directly**, not just vehicles (patched into Phase 1); (2) no ownership-change
+  log (accepted — the frozen stamps form a de facto timeline); (3) v2 nuance: a borrowed-car
+  job is visible to the payer, not the vehicle's owner — person-inward being consistent;
+  note it in the v2 design pass. See [[Job visibility]].
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either
