@@ -97,4 +97,4 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 - **Global vehicle identity** (plate/VIN) → cross-shop history, owner-side read only.
 
 ## Related
-- [[Job]] · [[Job visibility]] · [[Overview]] · [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]]
+- [[Job]] · [[Job visibility]] · [[Intake flow]] · [[Overview]] · [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]]

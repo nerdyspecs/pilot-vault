@@ -53,6 +53,15 @@ workflow poison. The stamp + the door's default-copy stand untouched; only the l
 an explicit different choice is parked ([[Deferred design]], revisit at intake UI with a
 soft-override shape). [[Data model]] amended with a dated note.
 
+**Addendum 2 — intake flow designed and documented ([[Intake flow]], new concept note).**
+Builder's structure (registration lookup → existing/new × phone verify) expanded into the
+full SA decision tree with every discussed case (courier, third-party payer, sold vehicle,
+new-phone dedup trap, second-car attach, company van, R5 in-house surfacing). Also from this
+discussion: the **household/shared claims** v2 feature (rides Company claim machinery —
+[[Data model]] v2 list) and the ask-inbound phone-verify form (never read the file's number
+aloud). Phase 1 schema already carries the whole flow; one candidate delta raised — phone
+canonicalization at storage, same lesson as registration_number.
+
 **Open (carried).** Company×RLS = v2 design pass; S0.8 deploy at Sprint 2 exit; R7 index
 decision (with R4's rescue); launch.json tidy-up (builder's call); Phase 1 build next.
 
