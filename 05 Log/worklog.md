@@ -113,6 +113,18 @@ throwaway account destroys cleanly to the marketing root; the seeded owner
 (`workshop.owner@seed.local`) gets the exact refusal copy from the ADR, account and session
 intact. 28/28 tests green. [[Risk ledger]] R1 → fixed.
 
+**Addendum 5 — pre-Sprint-2 audit: five findings, all small, none blocking.** Thorough
+vault↔code scan before Phase 1. Verified exact: links, founder rule, all 33 cited commit
+hashes, tests (28+1 green), live RLS = docs, seeds idempotent, 9/9 migrations, Bootstrap
+vendored, every code artifact vault-documented. Findings + rulings: (1) Risk ledger footer
+still said "ADR-009 pending" → fixed (`31079cc`). (2) `main` was ahead of GitHub → pushed
+(now `6c73972`). (3) Gemfile said `~> 8.0.4` while docs say "pinned 8.0.5" → **pinned
+exactly at 8.0.5** (builder: "decide directly, get it out of the way"; commit `6c73972`).
+(4) `app/views/pwa/` — Rails 8 default PWA templates (manifest + service worker; would let
+phones "install" Knot like an app), routeless and inert. Builder: **keep for now**; possibly
+relevant later (technicians live on phones). (5) `launch.json` housekeeping (stale dead
+entries from pre-move vault) — explained to builder, pending their call.
+
 **Open (carried).** Company×RLS = v2 design pass (framed, not designed); next build =
 Sprint 2 Phase 1, on its own plan (kickoff decisions: R5 one-active-job-per-vehicle + confirm
 the customer stamp).
