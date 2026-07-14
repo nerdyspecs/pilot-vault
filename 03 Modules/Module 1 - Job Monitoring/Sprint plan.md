@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-14
+updated: 2026-07-15
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -280,9 +280,13 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       token`; `belongs_to :workshop, :vehicle, :customer`; `has_secure_token :token`.
       *(2026-07-14: `customer_id` added — the triple-stamp, written once at registration with a
       creation-time must-equal-vehicle's-customer validation; [[Data model]] §Resolved, the
-      sold-vehicle decision.)* **Kickoff gate before writing this migration:** decide
-      [[Risk ledger]] R5 (one active job per vehicle — if yes, partial unique index on
-      `jobs(vehicle_id)` over active stages) and confirm the customer stamp.
+      sold-vehicle decision.)* **Kickoff gate — both ruled 2026-07-15:**
+      [[Risk ledger]] R5 → **refuse** (per-visit definition; partial unique index on
+      `jobs(vehicle_id) WHERE stage IN (0,1,2)`); customer stamp **confirmed** on
+      strengthened reasoning (persons query jobs through the frozen stamp, never through
+      the vehicle — see [[Job visibility]]). Also ruled at kickoff: Customer/Vehicle
+      deletion is **restrict, not cascade** (ADR-009's refusal-first, one level down);
+      `Job#timeline` + tracker associations move to Phase 2 beside their tables.
 - [ ] **S2.4** `stage` enum: `registered / assigned / in_progress / done / delivered / cancelled`.
 - [ ] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.

@@ -1,11 +1,50 @@
 ---
 type: log
-updated: 2026-07-14
+updated: 2026-07-15 (Session 16)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-15 · Session 16 — Phase 1 kickoff gates ruled; ready to plan the spine
+
+**Summary.** Pre-plan reasoning session ("what's on our plate"). All Phase 1 gate decisions
+ruled; vault recorded before the plan is drafted (house discipline). Next: the Phase 1 plan
+(S2.1–S2.4) on its own page.
+
+**Gate 2 — customer stamp CONFIRMED, on strengthened reasoning (the builder's own).** The
+stamp records a past-tense fact ("who brought the car in / who pays for this visit") that a
+present-tense pointer (`vehicle.customer_id`) can't answer honestly once vehicles change
+hands. Builder independently derived the `owner_read` query shape: *persons query jobs from
+the person inward through the frozen stamp; the vehicle is supporting information derived
+from the job, never the path* — canonized in [[Job visibility]]. Both privacy directions
+noted: sellers keep their history, buyers never inherit it. Validation is `on: :create` only
+(post-sale divergence is the correct data, not drift).
+
+**Gate 1 — R5 ruled: REFUSE (one active job per vehicle).** The per-visit definition of Job
+already implies it — a vehicle can't be in two visits at once; the partial unique index
+(`jobs(vehicle_id) WHERE stage IN (0,1,2)`) enforces the definition rather than adding
+policy. Edges cooperate: "waiting for parts" = a blocker (Sprint 3); the post-Done follow-up
+job stays legal (done/delivered aren't in the active set — law #8's correction flow).
+Consequence named: the stage integers become frozen **by schema**, not just convention.
+[[Risk ledger]] R5 → decided.
+
+**Two quieter rulings (old plan snippets predated ADR-009):** (1) **Customer/Vehicle
+deletion = restrict, not cascade** — ADR-009's refusal-first one level down: a customer with
+vehicles / a vehicle with jobs refuses deletion (the workshop's history); mistake-entries
+with nothing attached delete freely; PDPA-style requests are the parked workshop-side
+anonymization tool's job. (2) **`Job#timeline` + tracker associations move to Phase 2**
+beside the tables they read — sequencing hygiene, no design change.
+
+**Also this session (pre-gate):** the audit findings closed — Rails pinned exactly 8.0.5
+(`6c73972`), `main` pushed, Risk ledger footer fixed (`31079cc`), PWA files kept
+deliberately, launch.json cleanup explained and left to the builder.
+
+**Open (carried).** Company×RLS = v2 design pass; S0.8 deploy at Sprint 2 exit; R7 index
+decision (with R4's rescue); launch.json tidy-up (builder's call); next = Phase 1 plan.
 
 ---
 

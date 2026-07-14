@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-14
+updated: 2026-07-15
 ---
 # Job visibility
 Who can see (and touch) rows in the `jobs` table, and which RLS key serves each of them.
@@ -60,6 +60,15 @@ consulted for writes) — and even then, state changes go through `JobActions` o
 `app.user_id` note, walk the claim (`customers.user_id` direct, or `customers.company_id`
 → membership), test the job's frozen `customer_id` stamp. The stamp is the *anchor*, never
 the identity — identity lives on User/Company; the claim column on customers is the link.
+
+**The builder's formulation (2026-07-15, gate-2 confirmation — canonical):** *a person's
+jobs are queried from the person inward through the frozen stamp; the vehicle is supporting
+information derived from the job, never the path.* Person → claim → `jobs.customer_id`;
+`job.vehicle` rides along as display data. The privacy cut works both directions: after a
+sale, the old owner keeps their own service history and never sees the new owner's jobs —
+and vice versa. The vehicle-path query (`vehicle.jobs`, all visits regardless of payer)
+remains the *crew's* question, asked inside the workshop — same tables, different
+perspective, both true at once.
 
 ## Why this doesn't need re-litigating per sprint
 1. **Fail-closed default.** Any party without a key sees zero rows — forgetting someone
