@@ -31,7 +31,9 @@ Workshop ─*─ Blocker                  (workshop's blocker catalog)
 - **Workshop** — the tenant. Every tenant row carries `workshop_id`, queried via `Current.workshop` ([[Design laws]] #2).
 - **Employment** — User↔Workshop edge + role + `ended_at`. See [[ADR-004 Multi-tenant foundation]].
 - **Customer** — tenant-scoped owner *record* (not a login). `kind: person | company`; holds `name, phone, email` directly.
-- **Vehicle** — tenant-scoped; `belongs_to :customer` (required). Plate normalized (strip/upcase); `unique(workshop_id, plate)`. VIN = optional identity.
+- **Vehicle** — tenant-scoped; `belongs_to :customer` (required). **`registration_number`**
+  (renamed from "plate" 2026-07-15 — verbose JPJ term), canonicalized (ALL whitespace
+  collapsed + upcased); `unique(workshop_id, registration_number)`. VIN = optional identity.
 - **Job** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
   registration — see Resolved below). The tracked unit ([[Job]]). Per-visit.
 - **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).

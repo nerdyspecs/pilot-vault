@@ -272,12 +272,23 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       refusal in a new `RegistrationsController#destroy`; model guard is the backstop.
       Bare-account and owner-refusal paths both live-verified. 28/28 tests green. Commit
       `0e135da`.)*
-- [ ] **S2.1** Migration + model **Customer** (minimal): `workshop_id, kind:integer(person/company),
-      name, phone, email`. Scoped.
-- [ ] **S2.2** Migration + model **Vehicle** (minimal): `workshop_id, customer_id, plate, vin`;
-      `belongs_to :customer`; normalize plate (strip/upcase); unique `(workshop_id, plate)`.
-- [ ] **S2.3** Migration + model **Job**: `workshop_id, vehicle_id, customer_id, stage:integer,
+- [x] **S2.1** Migration + model **Customer** (minimal): `workshop_id, kind:integer(person/company),
+      name, phone, email`. Scoped. *(2026-07-15: built, commit `2c5ca91`. Two additions from
+      the session's rulings: **double restrict** — vehicles AND jobs directly, since payer≠file
+      makes vehicle-less payers possible; **contact keys canonicalized** — phone digits-only,
+      email stripped/downcased ([[Intake flow]]: phone is the person-lookup key).)*
+- [x] **S2.2** Migration + model **Vehicle** (minimal): `workshop_id, customer_id,
+      registration_number, vin`; `belongs_to :customer`; unique
+      `(workshop_id, registration_number)`. *(2026-07-15: built, commit `2c5ca91`. Renamed
+      `plate` → **`registration_number`** (builder: verbose JPJ term); canonical form collapses
+      ALL whitespace + upcases — "WVK 3721"/"wvk3721" are one vehicle. `has_many :jobs`
+      restrict.)*
+- [x] **S2.3** Migration + model **Job**: `workshop_id, vehicle_id, customer_id, stage:integer,
       token`; `belongs_to :workshop, :vehicle, :customer`; `has_secure_token :token`.
+      *(2026-07-15: built, commit `2c5ca91`. R5 index live:
+      `index_jobs_one_active_per_vehicle` — partial unique on `jobs(vehicle_id) WHERE stage
+      IN (0,1,2)`. No match validation, per the deferral below. Trackers + `#timeline` land
+      Phase 2.)*
       *(2026-07-14: `customer_id` added — the triple-stamp, written once at registration with a
       creation-time must-equal-vehicle's-customer validation; [[Data model]] §Resolved, the
       sold-vehicle decision.)* *(2026-07-15: the match **validation** deferred at plan review —
@@ -289,7 +300,9 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       the vehicle — see [[Job visibility]]). Also ruled at kickoff: Customer/Vehicle
       deletion is **restrict, not cascade** (ADR-009's refusal-first, one level down);
       `Job#timeline` + tracker associations move to Phase 2 beside their tables.
-- [ ] **S2.4** `stage` enum: `registered / assigned / in_progress / done / delivered / cancelled`.
+- [x] **S2.4** `stage` enum: `registered / assigned / in_progress / done / delivered / cancelled`.
+      *(2026-07-15: built with S2.3, commit `2c5ca91` — integers now frozen **by schema**
+      (the R5 index predicate references 0/1/2).)*
 - [ ] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.
 - [ ] **S2.6** Migration + model **JobMechanic**: `workshop_id, job_id, user_id, primary:boolean,

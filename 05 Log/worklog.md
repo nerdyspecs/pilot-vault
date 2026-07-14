@@ -62,8 +62,21 @@ discussion: the **household/shared claims** v2 feature (rides Company claim mach
 aloud). Phase 1 schema already carries the whole flow; one candidate delta raised — phone
 canonicalization at storage, same lesson as registration_number.
 
+**Addendum 3 — Phase 1 BUILT (S2.1–S2.4, commit `2c5ca91`).** The spine exists: Customer /
+Vehicle / Job, three migrations each carrying ENABLE+FORCE+`tenant_isolation` in-file
+(policy inventory now 6 tables: 3 edge ×2 policies + 3 spine ×1). Everything the session
+ruled is in the schema: `registration_number` canonical (whitespace-collapsed, upcased),
+contact keys canonical on Customer (phone digits-only — the person-key), double restrict on
+Customer (vehicles + jobs directly), triple-stamped Job with **no** match validation
+(deferred, [[Intake flow]]), R5's `index_jobs_one_active_per_vehicle` live (stage ints now
+schema-frozen), token minted at birth. Tests 28→**42** green (14 new: canonicalization
+collisions, vehicle-less payer restrict, stamp independence + freeze-through-sale, R5
+refuse + law-#8 follow-up, RLS backstops ×2, cross-workshop same-registration legality).
+Seeds idempotent (Lim + Speedy, 3 vehicles, 3 jobs across stages); no-GUC runner reads 0
+rows on all three tables. [[Risk ledger]] R5 → fixed. Next: Phase 2 (trackers + timeline).
+
 **Open (carried).** Company×RLS = v2 design pass; S0.8 deploy at Sprint 2 exit; R7 index
-decision (with R4's rescue); launch.json tidy-up (builder's call); Phase 1 build next.
+decision (with R4's rescue); launch.json tidy-up (builder's call); Phase 2 next.
 
 ---
 
