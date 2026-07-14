@@ -88,6 +88,12 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
   workshops — see worklog Session 14.)*
 - **Owner logins:** `customers.user_id` (nullable = unclaimed); check constraint — `user_id` and `company_id` never both set.
 - **Fleet** (grouping inside Company) — replaces the old v1 "Group" idea.
+- **Household / shared claims** *(2026-07-15, from the intake discussion)*: let two Users
+  see each other's claimed customer records ("Lim and his wife see each other's vehicles").
+  Same claim machinery as Company — a small membership edge over customer records — so it
+  rides the identical v2 rails (person → claim → frozen stamp), zero v1 cost. Motivating
+  case: a household's history legitimately split across two file cards; perfect intake can't
+  (and shouldn't) always prevent it — filing under "who deals with us" is correct routing.
 - **Global vehicle identity** (plate/VIN) → cross-shop history, owner-side read only.
 
 ## Related

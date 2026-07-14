@@ -58,7 +58,12 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   transaction — informal sale; future visits auto-fill right). Two buttons because the two
   stories need different writes; one generic "confirm" would leave stale files and train
   click-through. Mechanically: `register_job(customer: ...)` defaults to `vehicle.customer`;
-  cue = ids differ. Schema untouched — Phase 1 already supports it. **Consequences audited
+  cue = ids differ. Schema untouched — Phase 1 already supports it. **First-visit intake
+  (2026-07-15 addition):** the split-history window only exists on first visit (repeat visits
+  are anchored by registration-number lookup → customer auto-fills). Script: SA asks *"whose
+  file should this be under?"* and **looks up by phone number before creating a card** —
+  phone is the natural person-key the way registration number is the vehicle-key. Goal:
+  file under the responsible contact, once, consistently (not necessarily the legal owner). **Consequences audited
   2026-07-15:** (1) payer-with-no-vehicle became possible → Customer must restrict deletion
   on **jobs directly**, not just vehicles (patched into Phase 1); (2) no ownership-change
   log (accepted — the frozen stamps form a de facto timeline); (3) v2 nuance: a borrowed-car
