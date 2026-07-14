@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-14
+updated: 2026-07-15
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -41,6 +41,18 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   business records — retention principle covers that). At trigger time also re-check the 2024
   PDPA amendments (breach notification, DPO, portability, processor liability) and add a
   privacy-notice line at signup. See [[ADR-009 Account deletion is refusal-first]].
+- **Job↔vehicle customer-match validation (2026-07-15, builder: "a little too far — circle
+  back").** Phase 1 planned a create-time rule: the job's stamped `customer_id` must equal
+  `vehicle.customer_id` at registration (refuse "Lim's van billed to Speedy's file").
+  Parked as **too rigid without a recovery path**: legitimate mismatches exist (borrowed car
+  where the borrower pays, informal sale nobody filed, third party covering a repair), and a
+  hard block at intake with the car on the lift is workflow poison. **The stamp itself
+  stands** (gate 2, [[Data model]] §Resolved) — the door still *copies* the vehicle's
+  customer by default; what's parked is only the law forbidding an explicit different
+  choice. Circle back when the intake UI exists (Phase 4 / Sprint 6): the likely shape is
+  soft — default to the vehicle's customer, allow an override with a visible "billed to X,
+  vehicle filed under Y" cue — decided with real screens in hand. See [[Job visibility]]
+  (the stamp still anchors v2 read keys; an override just means the *chosen* payer sees it).
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either

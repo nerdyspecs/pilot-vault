@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-14
+updated: 2026-07-15
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -71,7 +71,9 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
   car in and pays (immutable history); `vehicle.customer` = who owns it *now* (mutable
   present). They legitimately diverge after a sale — that divergence is the correct answer.
   One creation-time validation: the stamped customer must equal the vehicle's customer at
-  registration (divergence may only arise later, by reassignment — never at birth). Also pins
+  registration (divergence may only arise later, by reassignment — never at birth).
+  *(2026-07-15: the match **validation** is deferred — too rigid without a recovery path;
+  legitimate payer≠file cases exist. The stamp + default-copy stand; see [[Deferred design]].)* Also pins
   the job's notification target ("External" side) against mid-job reassignment. A
   `VehicleOwnership` period-edge table was considered and rejected for v1 (over-engineering).
 

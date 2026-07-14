@@ -280,7 +280,9 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       token`; `belongs_to :workshop, :vehicle, :customer`; `has_secure_token :token`.
       *(2026-07-14: `customer_id` added — the triple-stamp, written once at registration with a
       creation-time must-equal-vehicle's-customer validation; [[Data model]] §Resolved, the
-      sold-vehicle decision.)* **Kickoff gate — both ruled 2026-07-15:**
+      sold-vehicle decision.)* *(2026-07-15: the match **validation** deferred at plan review —
+      too rigid without a recovery path (payer≠file cases are legitimate); stamp + default-copy
+      stand; circle back at the intake UI — [[Deferred design]].)* **Kickoff gate — both ruled 2026-07-15:**
       [[Risk ledger]] R5 → **refuse** (per-visit definition; partial unique index on
       `jobs(vehicle_id) WHERE stage IN (0,1,2)`); customer stamp **confirmed** on
       strengthened reasoning (persons query jobs through the frozen stamp, never through

@@ -43,8 +43,18 @@ beside the tables they read — sequencing hygiene, no design change.
 (`6c73972`), `main` pushed, Risk ledger footer fixed (`31079cc`), PWA files kept
 deliberately, launch.json cleanup explained and left to the builder.
 
+**Addendum — plan review refinements (pre-build).** Three builder calls on the drafted
+Phase 1 plan: (1) `plate` → **`registration_number`** (verbose JPJ term); (2) canonical
+storage collapses **all** whitespace + upcases ("WVK 3721"/"wvk3721" → `WVK3721` — makes the
+unique index actually catch dupes); (3) the **customer↔vehicle match validation is deferred**
+— "pretty rigid… give it a recovery path… push it back, circle back": legitimate payer≠file
+cases exist (borrowed car, informal sale, third-party payer) and a hard block at intake is
+workflow poison. The stamp + the door's default-copy stand untouched; only the law forbidding
+an explicit different choice is parked ([[Deferred design]], revisit at intake UI with a
+soft-override shape). [[Data model]] amended with a dated note.
+
 **Open (carried).** Company×RLS = v2 design pass; S0.8 deploy at Sprint 2 exit; R7 index
-decision (with R4's rescue); launch.json tidy-up (builder's call); next = Phase 1 plan.
+decision (with R4's rescue); launch.json tidy-up (builder's call); Phase 1 build next.
 
 ---
 
