@@ -383,8 +383,10 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       position`).
 - [ ] **S6.3** Migration + model **JobSheetFieldValue** (`job_id, job_sheet_field_id, value`).
 - [ ] **S6.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete** — [[Data model]]).
-- [ ] **S6.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by plate) → create Job →
-      fill jobsheet field values + complaints. One screen/flow.
+- [ ] **S6.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
+      registration number) → create Job → fill jobsheet field values + complaints. One
+      screen/flow. **Spec: [[Intake flow]]** (full SA decision tree, both lookup keys,
+      two-branch mismatch confirm — designed 2026-07-15).
 - [ ] **S6.6** *(Product-gap #1)* ETA: add `promised_ready_at` to Job; SA sets at intake; show on the job.
 - [ ] **S6.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
       prior jobs.

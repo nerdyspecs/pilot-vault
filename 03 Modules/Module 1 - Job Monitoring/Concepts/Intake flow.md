@@ -70,7 +70,9 @@ cousin).
 
 ## Principles this flow encodes
 1. **Phone is the person-key the way registration number is the vehicle-key** — both
-   canonicalized at storage, both looked up *before* any create.
+   canonicalized at storage, both looked up *before* any create. **And phone is mandatory**
+   (builder ruling 2026-07-15): no card without a phone — intake always collects one, which
+   is also what makes the 2a/2b lookups reliable.
 2. **File under the responsible contact, once, consistently** — not necessarily the legal
    owner.
 3. **Mismatches are decisions, not errors** — every payer≠file case reaches a human
