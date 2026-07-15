@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-04
+updated: 2026-07-16
 ---
 # Stage model
 The **progress axis** — how far a job has moved through its work. Exactly one stage at a time.
@@ -28,6 +28,8 @@ Registered → Assigned → In-Progress → Done → Delivered
 - Transitions are an **allow-list**, enforced in the service. Forward by default; backward/exit
   moves only where explicitly allowed (e.g. In-Progress → Assigned when new faults appear).
 - **Cancelled** is reachable from any active stage (service_advisor / workshop_manager / owner).
+- **Open blockers stop `→ done`** *(ruled 2026-07-16; ⚠ per-blocker guard nuance pending —
+  the Hold-For-Payment collision, see [[Blocker]]; enforcement lands with Sprint 3's door verbs)*.
 - Stage changes are **acknowledged** by the service advisor — see
   [[ADR-005 Acknowledged handoffs in V1]]. **Done freezes the job** — corrections open a new job
   ([[Design laws]] #8).

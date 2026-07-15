@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-15
+updated: 2026-07-16
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -305,8 +305,15 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       (the R5 index predicate references 0/1/2).)*
 - [ ] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.
-- [ ] **S2.6** Migration + model **JobMechanic**: `workshop_id, job_id, user_id, primary:boolean,
-      assigned_by_id, removed_at, acknowledged_at, acknowledged_by_id`.
+- [ ] **S2.6** Migrations + models for **crew — split into two tables** *(respecified
+      2026-07-16, builder ruling: entity + event log, replacing the settled single-table
+      shape — see [[Event log]] and worklog Session 17)*: **JobMechanic** (engagement):
+      `workshop_id, job_id, user_id` — no ack columns, **no `primary`/`lead` flag in v1**
+      (deferred entirely, [[Deferred design]]). **JobMechanicTransition** (events):
+      `workshop_id, job_mechanic_id, action:integer(joined/left), created_by_id,
+      acknowledged_at, acknowledged_by_id`. Old columns dissolve into events: `assigned_by`
+      → the joined row's `created_by`; `removed_at`/`removed_by` → the `left` row. Current
+      crew = engagements with no `left` event (a query).
 - [ ] **S2.7** **`JobActions`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
       role gate, and lock-on-Done (reject edits once `done/delivered/cancelled`); writes the transition.
       *(Settled 2026-07-12: job **creation** goes through the door too — multi-record motion, will
@@ -314,14 +321,25 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 - [ ] **S2.8** Allow-list transition map + role gate, per the [[M1-F1 Status flow and transitions]] matrix.
       *(Settled 2026-07-12: `in_progress → assigned` = service_advisor; no cancel from `done` —
       done's only exit is `delivered`. See M1-F1's "Settled" section.)*
-- [ ] **S2.9** `JobActions#assign_mechanic` — creates a primary `JobMechanic` **and** moves
-      `registered → assigned` in one motion. *(Settled 2026-07-12: assignee must hold an active
-      `technician` employment; primary-only in v1, helpers dormant.)*
+- [ ] **S2.9** `JobActions#assign_mechanic` — one transaction, **three rows**: `JobMechanic`
+      engagement + its `joined` transition + the `registered → assigned` stage transition.
+      *(Settled 2026-07-12: assignee must hold an active `technician` employment; single
+      mechanic per job in v1 — helpers deferred with the `lead` flag.)* *(2026-07-16 rulings:
+      one `ensure_counter!` guard — only SA/manager/owner assigns or removes, self-join
+      deferred; `remove_mechanic` writes the `left` event + the compensating
+      `assigned → registered` only when crew empties — and is **refused entirely** if it would
+      empty the crew of a job that has ever touched `in_progress` (the responsibility rule,
+      [[M1-F1 Status flow and transitions]]) — reassignment swap is the only crew motion there.
+      Implementation note: reload the crew scope after writing `left`, before the emptiness
+      check — a stale association cache would skip the stage move.)*
 - [ ] **S2.10** Log the `nil → registered` transition at job creation (clean entry timestamp).
 - [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
       buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
 - [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·
-      assignment one-motion · `nil→registered` logged.
+      assignment one-motion (three rows, one transaction) · `nil→registered` logged ·
+      join/leave receipts (ack pair on **events**, never the engagement) · removal legality
+      (responsibility rule: last-mechanic removal refused once `in_progress` was ever touched;
+      compensating rollback fires when legal).
 
 ---
 
@@ -332,6 +350,10 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       cleared_by_role`. **Seed "Hold For Payment"** (`raised_by/cleared_by: service_advisor`).
 - [ ] **S3.2** Migration + model **JobBlockerTransition**: `workshop_id, job_id, blocker_id,
       action:integer(raised/resolved), note, created_by_id, acknowledged_at, acknowledged_by_id`.
+      *(⚠ 2026-07-16: respecify at Sprint 3 kickoff — the tracker restructure makes blockers
+      **three records** (catalog + `JobBlocker` items + events, with a `noted` action);
+      also carry the ruled `→ done` guard + the unresolved Hold-For-Payment collision into
+      S3.3 — see [[Blocker]] and [[Event log]].)*
 - [ ] **S3.3** Extend `JobActions`: `raise_blocker` / `resolve_blocker` — check the actor's role against
       the catalog's `raised_by_role` / `cleared_by_role` (manager/owner always override).
 - [ ] **S3.4** `Job#active_blockers` scope: raises with no later matching resolve (a query, [[Design laws]] #3).
@@ -350,8 +372,13 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       `JobStageTransition` / `JobMechanic` / `JobBlockerTransition`.
 - [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · mechanic added →
       that mechanic · blocker raised → the `cleared_by_role` holder(s).
-- [ ] **S4.3** "Waiting on me" query across the three trackers where `acknowledged_at IS NULL` and
-      receiver = current user.
+- [ ] **S4.3** "Waiting on me" query across the event tables — via **the handoff predicate**
+      (`.pending_ack`, design-pass item named 2026-07-16): unacked AND not-self-caused AND
+      role-resolved to me, in ONE shared scope used by inbox, manager board, and limbo flag
+      alike (a bare `acknowledged_at IS NULL` overcounts — NULL also means "never was a
+      handoff"; [[Event log]]). Orphaned debts (role resolves to nobody) render as "pending,
+      unheld role" — never vanish. Manager's chase board = the union view grouped by debtor,
+      distinct from each person's own inbox.
 - [ ] **S4.4** Inbox controller + view: my pending acks + an "acknowledge" button each. **Mobile-friendly
       — techs live here.**
 - [ ] **S4.5** Limbo surfacing: flag handoffs unacked beyond a threshold.

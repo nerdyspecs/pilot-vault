@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-15
+updated: 2026-07-16
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -67,6 +67,21 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   log (accepted — the frozen stamps form a de facto timeline); (3) v2 nuance: a borrowed-car
   job is visible to the payer, not the vehicle's owner — person-inward being consistent;
   note it in the v2 design pass. See [[Job visibility]].
+- **Crew: helpers + the `lead` flag (2026-07-16, builder ruling).** v1 crews are a single
+  responsible mechanic; S2.6 ships `job_mechanics` **without** any lead/primary flag — all
+  v1 technicians on a job are treated the same. When helpers arrive, the flag lands as
+  **`lead`** (boolean, `default: true` — which honestly backfills v1 engagements, since every
+  v1 mechanic *was* the lead). Named `lead`, not `primary`: PRIMARY is a reserved SQL keyword
+  (quoting tax on the raw-psql audit sweeps run every session) and reads ambiguously next to
+  "primary key". **Naming settled now so it isn't re-litigated.** See
+  [[M1-F1 Status flow and transitions]] Settled 2026-07-16.
+- **Crew self-join / self-leave (2026-07-16).** The event shape supports it (`joined`/`left`
+  events don't care who `created_by` is — the receiver derivation already handles "the party
+  who didn't act"), but v1 capability is counter-only: one `ensure_counter!` guard in the
+  door (SA + manager/owner). Waking self-service crew motion **supersedes M1-F1's permission
+  matrix** — dated note there when it lands. Free-standing "remove" as a motion is
+  conceptually for helpers (v2); v1's single-mechanic crews make the reassignment swap the
+  only in-progress crew change (the responsibility rule, M1-F1).
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either

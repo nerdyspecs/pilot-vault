@@ -52,5 +52,20 @@ Ack columns `acknowledged_at`, `acknowledged_by` on all three trackers:
 - Reporting gains time-to-acknowledge / dropped-handoff metrics for free.
 - Removes the "handshake backlogged" note from [[Deferred design]].
 
+---
+**Footnote 2026-07-16 (structure refined, decision unchanged).** The trackers were
+restructured into **entity + event log** ([[Event log]], worklog Session 17): crew became
+`JobMechanic` (engagement) + `JobMechanicTransition` (`joined`/`left` events), and Sprint 3's
+blockers become catalog + `JobBlocker` items + events. The ack pair now rides the **event
+rows** — so the Model table's "Mechanic added | `JobMechanic` | that mechanic" reads as
+"mechanic joined/left | `JobMechanicTransition` | the party who didn't act". This
+*strengthens* the decision: a leave now gets its own receipt (one ack pair can't shake hands
+twice), and "the ack belongs **on** the event" holds more literally than before. Two
+clarifications from the same sessions: acknowledgement is a **receipt, never consent** (the
+change stands regardless — "accepts the job" in the table is loose wording); and the inbox
+sketch `to_user = me AND acknowledged_at IS NULL` is **illustrative** — no `to_user` column
+exists, receivers are derived at read time, and the real query is Sprint 4's `.pending_ack`
+handoff predicate (a bare NULL check overcounts; NULL also means "never was a handoff").
+
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[M1-F1 Status flow and transitions]] · [[Event log]] · [[Blocker]] · [[Data model]] · [[Design laws]]

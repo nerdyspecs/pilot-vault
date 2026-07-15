@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-15
+updated: 2026-07-16
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -21,10 +21,12 @@ Vehicle  ─*─ Job     ── triple-stamped: workshop_id + vehicle_id + custo
 Job      ─*─ JobSheetFieldValue
 Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
 
-Job      ─*─ JobStageTransition       (stage history + ack)
-Job      ─*─ JobBlockerTransition ── belongs_to Blocker   (blocker events + ack)
-Job      ─*─ JobMechanic ── belongs_to User               (crew, plural + ack)
-Workshop ─*─ Blocker                  (workshop's blocker catalog)
+Job      ─*─ JobStageTransition                     (stage events + ack)
+Job      ─*─ JobMechanic ─*─ JobMechanicTransition  (crew engagement + joined/left events)
+              └ belongs_to User
+Job      ─*─ JobBlocker ─*─ JobBlockerTransition    (blocker items + events — Sprint 3)
+              └ belongs_to Blocker
+Workshop ─*─ Blocker                                (workshop's blocker catalog)
 ```
 
 - **User** — global, thin Devise login. No role, no org. Roles live on **Employment** ([[Design laws]] #1).
@@ -40,7 +42,10 @@ Workshop ─*─ Blocker                  (workshop's blocker catalog)
 - **Job** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
   registration — see Resolved below). The tracked unit ([[Job]]). Per-visit.
 - **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).
-- **JobStageTransition / JobBlockerTransition / JobMechanic** — the three job event trackers, each with ack columns ([[Event log]], [[ADR-005 Acknowledged handoffs in V1]]).
+- **Trackers — entity + event log** *(restructured 2026-07-16)*: `JobMechanic` (engagement)
+  + `JobMechanicTransition` (joined/left); `JobBlocker` (item) + `JobBlockerTransition`
+  (Sprint 3); stage events ride `Job` itself via `JobStageTransition`. Ack columns live on
+  **event rows only**, never entities ([[Event log]], [[ADR-005 Acknowledged handoffs in V1]]).
 - **Blocker** — the workshop's catalog of blocker types, each with `raised_by_role`/`cleared_by_role` (seed "Hold For Payment"); all state lives in `JobBlockerTransition` ([[Blocker]]).
 
 ## The jobsheet — a configurable inspection form
