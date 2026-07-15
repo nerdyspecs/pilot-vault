@@ -1,11 +1,96 @@
 ---
 type: log
-updated: 2026-07-15 (Session 16)
+updated: 2026-07-16 (Session 17)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-16 · Session 17 — Tracker restructure: entity + event log; crew split
+
+**Summary.** Pre-Phase-2 reasoning session, run partly across side discussions (RLS-style
+"chip out" sessions kept the main thread from bloating). Reasoned through what a job
+transition actually is in real life (Siti assigns Ah Boy, the handshake, the limbo case),
+which surfaced that a single-table `JobMechanic` can't give a *leave* its own ack receipt —
+one ack pair can only shake hands once. That reasoning generalized into a restructure of
+every tracker: **entity + event log**, the same idiom `Job` + `JobStageTransition` already
+used. Vault updated and committed (`f3c253f`) before any Phase 2 code is written (house
+discipline). Next: draft the Phase 2 build plan against the new shape, on the builder's call.
+
+**The restructure.** Trackers split into an entity (written once, never carries ack columns)
+and its event table (append-only, each row: one author, one derived receiver, one dormant
+ack pair). Crew becomes `JobMechanic` (the engagement — "Ah Boy on WVK 3721") +
+`JobMechanicTransition` (`joined`/`left` events); old `assigned_by`/`removed_at` dissolve
+into the joined/left rows. Blockers (Sprint 3) will mirror it: catalog + `JobBlocker` items +
+`JobBlockerTransition` events, with a `noted` action for state-neutral annotation and item
+identity replacing the never-quite-stated "no double raise" rule. Post-split, the ack pair is
+the *only* designed mutation on any tracker row anywhere — append-only becomes easier to hold,
+not harder. [[Event log]] rewritten to state the pattern generally; [[Job]]'s tracker
+associations and [[Data model]]'s entity diagram follow it. [[Job]] also had a stale
+"double-stamped" line fixed to triple-stamped (workshop + vehicle + customer) — drifted since
+Phase 1 shipped `2c5ca91`, caught in this sweep.
+
+**Ack theory closed out (the four framings, now canonical in [[Event log]]).** The ack pair
+belongs to a *direction*, not a table — a row's NULL means either "dropped handoff" or
+"never was a handoff," and only a derived receiver tells them apart (the trap the builder hit
+twice mid-discussion). Receivers are always derived by query, never stored — stage
+transitions target the `service_advisor` role, crew events target whichever party didn't
+act, blocker raises/resolves target the catalog's role or the raiser. Ack-owed is therefore a
+*role-level* test: a creator holding the receiving role owes nothing (Siti's own
+`registered → assigned` is silent by design). The assignment handshake rides the `joined`
+crew event, not the stage transition — freeing the stage tracker's pair for its real job:
+catching an unacked `in_progress → done`, a finished car nobody at the counter has noticed,
+named as the product's founding pain expressed as a single NULL. Sprint 4 gains two named
+design-pass items: **the handoff predicate** (`.pending_ack`, one shared scope encoding
+not-self-caused + role-resolution + aging, so every inbox/board/limbo view agrees) and
+**orphaned debts** (a role that resolves to nobody renders "pending, unheld role," never
+vanishes). [[ADR-005 Acknowledged handoffs in V1]] gets a dated footnote only — the decision
+(ack lives on the event record, no handoff table) is unchanged, arguably strengthened; its
+"accepts the job" wording is corrected to "acknowledges" (ack is a receipt, not a consent
+gate — a proposal to make assignment consent-based was raised and set aside: unilateral
+assignment matches how a workshop floor actually runs, and ADR-008's crew-joining consent is
+a different species — it crosses an org boundary, this doesn't).
+
+**Three rulings, reached via a dedicated clarity side-session.**
+1. **Crew split: yes**, deliberately (it rewrites settled S2.6/S2.9 spec, so it got a real
+   look rather than a nod). Reasoning above.
+2. **Removal legality — ruled, not parked: the "responsibility, not presence" principle.**
+   An engagement asserts who's *responsible*, not who's physically present right now — same
+   shape as `in_progress` meaning "this is the active stage," not "work is happening this
+   exact second." At `assigned`, before `in_progress` is ever touched, removing the last
+   mechanic is legal (compensating `assigned → registered` rollback). Once a job has ever
+   touched `in_progress`, the last mechanic is **never removable** — the only crew motion is
+   the reassignment swap (old `left` + new engagement/`joined`, one door call). A sick tech
+   with no replacement keeps showing on the job, truthfully, until someone swaps in — the
+   board isn't lying, it's naming who's accountable. v1's primary-only crews make the swap
+   the only `in_progress` crew motion; true standalone removability is conceptually a
+   helpers-era (v2) capability. Non-binding soft note: if the floor wants to distinguish
+   "working slowly" from "responsible tech absent," a `Blocker` catalog entry ("no
+   manpower") is the natural v1-compatible escape hatch, not a schema change. Lands in
+   Phase 3 with the `JobActions` allow-list; the "touched `in_progress`" edge (a job moved
+   backward to `assigned` via the reassignment move) needs a sanity check when the matrix is
+   written. [[M1-F1 Status flow and transitions]] gains a Settled 2026-07-16 section
+   recording this plus the SA/manager/owner-only `ensure_counter!` guard and the new
+   **open blockers stop `→ done`** rule (with the Hold-For-Payment collision flagged
+   unresolved for the Sprint 3 deep-dive: HFP as written would block Done forever if used as
+   "don't release until paid" — needs redefining as pre-work, or a per-blocker
+   stage-it-guards field).
+3. **`primary`/`lead` flag: deferred entirely, not renamed.** S2.6 ships with no flag — v1
+   crews are single-mechanic, so "primary" has nothing to distinguish yet. Recorded in
+   [[Deferred design]]: when helpers arrive, the flag lands as `lead` (unreserved SQL,
+   genuine workshop vocabulary, no quoting tax on the project's habitual raw-`psql` audit
+   sweeps) with `default: true` honestly backfilling every v1 engagement as having been the
+   lead. Naming settled now so it isn't re-litigated when it actually ships.
+
+**Open, carried forward.** Phase 2 build plan — not yet drafted, next on the builder's call.
+Sprint 3 kickoff needs: full [[Blocker]] respec (already noted inline), the HFP/`→done`
+collision, and the `noted`-action detail. Phase 3's allow-list write-up needs: the
+"touched `in_progress`" sanity check for removal legality. Standing parked items unchanged
+(launch.json cleanup, R3 GUC hardening, R7 invitation index, vehicle-normalizer punctuation,
+match-validation circle-back at the intake UI, Company×RLS v2 pass, PDPA trigger).
 
 ---
 
