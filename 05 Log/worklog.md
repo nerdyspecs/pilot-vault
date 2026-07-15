@@ -75,6 +75,18 @@ refuse + law-#8 follow-up, RLS backstops ×2, cross-workshop same-registration l
 Seeds idempotent (Lim + Speedy, 3 vehicles, 3 jobs across stages); no-GUC runner reads 0
 rows on all three tables. [[Risk ledger]] R5 → fixed. Next: Phase 2 (trackers + timeline).
 
+**Addendum 4 — post-build full sweep + the phone ruling (`0e4204d`, pushed).** Sweep
+all-clean: 43 tests green, live `pg_policies` = docs exactly, R5 index predicate verified,
+fail-closed proven live (no GUC → 0 rows ×3), seeds idempotent, all 36 cited hashes real,
+links clean, shipped models = plan verbatim. **One genuine code find:** the Customer
+normalizers stored `""` for blank phone/email — at Sprint 6, `find_or_create_by(phone: "")`
+would have glued every phone-less walk-in onto one card. Fixed with `.presence` (blank →
+nil). On the back of it the builder ruled: **no customer exists without a phone** — it's
+the person-key AND the notification channel; presence validation + NOT NULL migration
+(tests 43 green). Also synced S6.5 (registration number; [[Intake flow]] named as its spec)
+and pushed `main` (was one commit behind). Parked observation: vehicle normalizer keeps
+punctuation ("WVK-3721" ≠ "WVK3721") — candidate for the intake pass.
+
 **Open (carried).** Company×RLS = v2 design pass; S0.8 deploy at Sprint 2 exit; R7 index
 decision (with R4's rescue); launch.json tidy-up (builder's call); Phase 2 next.
 
