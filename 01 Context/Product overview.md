@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-07-06
+updated: 2026-07-17
 ---
 # Product Overview
 Use alongside [[Builder identity]] at the start of every Claude session.
@@ -32,5 +32,5 @@ Owners are kept completely in the dark. They don't know what stage their car is 
 - Not a complex enterprise product — must stay simple enough for a small workshop to adopt without training
 
 ## Stage
-- Early — design mostly complete; Rails app scaffolded (slice 0), build starting
+- Early — mid-Sprint 2: tenancy spine live (Sprint 1), job engine door (`JobActions`) built; job UI + remaining slices ahead *(status refreshed 2026-07-17)*
 - Stack: Ruby on Rails

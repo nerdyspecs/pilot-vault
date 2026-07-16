@@ -1,11 +1,46 @@
 ---
 type: log
-updated: 2026-07-16 (Session 19)
+updated: 2026-07-17 (Session 20)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-17 · Session 20 — Vault coherence sweep: stale docs re-aligned with existing rulings
+
+**Summary.** A full coherence sweep found documents lagging behind decisions already made —
+**no new decisions**, every fix just makes a doc agree with a ruling recorded elsewhere.
+Fixes applied, worst first:
+- **[[Open questions]] · one-active-job-per-vehicle** (HIGH — stated the *opposite* of shipped
+  reality): the old "leaning yes, `WHERE stage NOT IN (delivered, cancelled)`" text replaced with
+  the actual 2026-07-15 ruling ([[Risk ledger]] R5, commit `2c5ca91`): index is
+  `jobs(vehicle_id) WHERE stage IN (0,1,2)` — a Done job does **not** block a new job;
+  follow-up-after-done is legal and [[Intake flow]] 1c depends on it.
+- **[[Open questions]] · single-vs-multiple assignees**: "✅ resolved: multiple, one `primary`"
+  rewritten to the superseding 2026-07-16 ruling — v1 single mechanic, no flag; future flag is
+  `lead`, not `primary` ([[Deferred design]] + M1-F1 Settled 2026-07-16).
+- **[[Sprint plan]] S4.1**: ack columns corrected to event rows only —
+  `JobStageTransition` / `JobMechanicTransition` / `JobBlockerTransition`; engagements
+  (`JobMechanic`) carry no ack columns post-restructure. S4.2–S4.7 checked — S4.3 already
+  carried the `.pending_ack` correction; nothing else stale.
+- **[[Roadmap]]** (untouched since 07-06): slice 4 status honest-ed to "⚠ needs respec at
+  Sprint 3 kickoff" (per [[Blocker]]'s restructure-pending warning — three records); slice 5
+  inbox note corrected from bare `acknowledged_at IS NULL` (overcounts) to the `.pending_ack`
+  handoff predicate ([[Event log]]).
+- **[[Rejected alternatives]] · RLS-first tenancy**: rejection stands; the *why* updated to
+  cite ADR-007 (RLS live as the Sprint-1 backstop) instead of ADR-004's superseded
+  "additive hardening" clause.
+- **[[M1-F1 Status flow and transitions]]**: acceptance draft drops "primary"; the matrix's
+  technician cell gains the crew-gate qualifier (current engagement on that job) so the table
+  can't mislead when quoted alone.
+- Cosmetic: [[Product overview]] Stage line refreshed to mid-Sprint-2; [[Stage model]] ASCII
+  diagram redrawn so Cancelled branches from the active stages, never Done.
+
+Explicitly **not** touched (recorded elsewhere, need builder decisions, not doc fixes):
+Product-gaps #3/#4/#7/#8 and the S2.11 JSON-endpoint reminder.
 
 ---
 

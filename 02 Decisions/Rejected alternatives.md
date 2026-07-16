@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-04
+updated: 2026-07-17
 ---
 # Rejected alternatives
 Dead ends already walked. **Do not re-propose** — resurfacing needs new evidence, not a re-run.
@@ -15,7 +15,7 @@ Dead ends already walked. **Do not re-propose** — resurfacing needs new eviden
 | EmploymentRole join table | Parked to v3 — only if per-workshop custom roles become real demand |
 | Dual-writing job copies to the owner side | Owner visibility is a query, not a second copy ([[Design laws]] #3) |
 | Schema-per-tenant | Operational complexity a solo builder can't afford |
-| RLS-first tenancy | App-level scoping first; RLS is additive hardening ([[ADR-004 Multi-tenant foundation]]) |
+| RLS-first tenancy | App-level scoping remains primary; RLS shipped in Sprint 1 as the enforced backstop ([[ADR-007 Row-Level Security pulled into Sprint 1]]) — RLS-as-the-*only*-scoping stays rejected *(reason updated 2026-07-17; the old wording cited ADR-004's "additive hardening" clause, superseded by ADR-007)* |
 
 ## Related
 - [[Decisions]] · [[Design laws]]

@@ -3,7 +3,7 @@ id: M1-F1
 type: feature
 module: M1
 status: settled
-updated: 2026-07-16
+updated: 2026-07-17
 ---
 # M1-F1 — Status flow & role-gated transitions
 
@@ -105,7 +105,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 ## Permission matrix (v1)
 | Role | Stage transitions (via ONE DOOR) | Blockers | Crew |
 |---|---|---|---|
-| technician | Assigned → In-Progress → Done | raises/clears per its `Blocker.raised_by_role`/`cleared_by_role` | — |
+| technician | Assigned → In-Progress → Done — **only on jobs where they hold a current engagement** (crew gate, Settled 2026-07-16 Phase 3) | raises/clears per its `Blocker.raised_by_role`/`cleared_by_role` | — |
 | service_advisor | create Registered; Registered → Assigned; Done → Delivered; Cancel | raises/clears per role fields | assigns/removes mechanic (responsibility rule below) |
 | parts_advisor | — | raises/clears per role fields | — |
 | workshop_manager | all | all (overrides any blocker's role fields) | all |
@@ -145,7 +145,7 @@ Inbox ("waiting on me") = a query across the event tables via the **handoff pred
 
 ## Acceptance (draft)
 - [ ] A job moves through the stages; each transition permitted only for the right role.
-- [ ] Assignment creates a primary `JobMechanic` + moves stage in one motion; the mechanic acknowledges.
+- [ ] Assignment creates a `JobMechanic` + moves stage in one motion; the mechanic acknowledges.
 - [ ] A raised blocker checks the catalog's `raised_by_role`; resolving checks `cleared_by_role`.
 - [ ] Illegal transitions rejected; a Done job rejects all edits.
 - [ ] Every transition writes a `JobStageTransition`.

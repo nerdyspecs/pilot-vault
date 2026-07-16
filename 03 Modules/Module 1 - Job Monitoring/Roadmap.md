@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-07-06
+updated: 2026-07-17
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -16,7 +16,7 @@ exists; **needs design** = real thinking still required before/while building.
 | 1   | Engine — Job + stages + transitions + JobStageTransition      | ✅ designed               |
 | 2   | Tenancy + Employment edges + role-gated transitions (ONE DOOR) | ✅ designed               |
 | 3   | Live job list & filtering                                     | mostly mechanical        |
-| 4   | Blockers (v1: single-step lifecycle)                          | ✅ designed               |
+| 4   | Blockers                                                      | ⚠ needs respec at Sprint 3 kickoff |
 | 5   | Acknowledged handoffs + in-app inbox                          | ✅ designed              |
 | 6   | Job intake + digitized jobsheet                               | ✅ designed              |
 | 7   | Owner status page (token link)                                | ⚠️ needs design          |
@@ -39,7 +39,9 @@ Left to build (not design): the actual intake/jobsheet forms + the field-admin s
 ### 5 — Acknowledged handoffs + in-app inbox
 - **Acknowledgement is in v1** — see [[ADR-005 Acknowledged handoffs in V1]]. Every handoff
   (stage change, blocker raised, mechanic added) is acked by its receiver; the in-app "waiting
-  on me" inbox is a query over `acknowledged_at IS NULL`, not a new table.
+  on me" inbox is a query over the event tables, not a new table — via the **`.pending_ack`
+  handoff predicate** (S4.3), *not* a bare `acknowledged_at IS NULL` check, which overcounts
+  (NULL also means "never was a handoff" — [[Event log]]). *(Query wording corrected 2026-07-17.)*
 - **Owner-facing delivery:** v1 = a copy-paste message the service advisor sends manually.
   WhatsApp / email automation is parked in [[Open questions]] — decide during the intake feature.
 

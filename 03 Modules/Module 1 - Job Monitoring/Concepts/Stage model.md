@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-16
+updated: 2026-07-17
 ---
 # Stage model
 The **progress axis** — how far a job has moved through its work. Exactly one stage at a time.
@@ -10,7 +10,7 @@ Tenant-scoped (`workshop_id`) — see [[ADR-004 Multi-tenant foundation]].
 ## Stages
 ```
 Registered → Assigned → In-Progress → Done → Delivered
-                                        └─ Cancelled (terminal)
+     └──────────┴──────────┴─→ Cancelled (terminal — from active stages only, never Done)
 ```
 
 | Stage | What happens | Owner (role) |

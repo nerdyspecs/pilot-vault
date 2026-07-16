@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-16 (Session 19)
+updated: 2026-07-17 (Session 20)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -439,8 +439,10 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 **Goal:** the differentiator — see [[ADR-005 Acknowledged handoffs in V1]]. ⚠️ **Decide Product-gap #5
 (partial-adoption) before building** ([[Product gaps]]). **Exit:** handoffs land in the receiver's inbox; ack clears them; stale ones flag.
 
-- [ ] **S4.1** `JobActions#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on a
-      `JobStageTransition` / `JobMechanic` / `JobBlockerTransition`.
+- [ ] **S4.1** `JobActions#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on an
+      **event row**: `JobStageTransition` / `JobMechanicTransition` / `JobBlockerTransition`.
+      *(2026-07-17 correction: pre-restructure wording said `JobMechanic` — engagements carry
+      **no ack columns** after the 2026-07-16 tracker split; acks live only on events — [[Event log]].)*
 - [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · mechanic added →
       that mechanic · blocker raised → the `cleared_by_role` holder(s).
 - [ ] **S4.3** "Waiting on me" query across the event tables — via **the handoff predicate**
