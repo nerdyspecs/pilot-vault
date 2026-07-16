@@ -19,6 +19,11 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   which can't collide. The fix is one line (`job.with_lock` around read-check-write) in the one
   door, so the cost of waiting doesn't compound. **Trigger to revisit:** a workshop reports a job
   that "changed twice at once", or the log shows two transitions out of the same stage.
+  **⚠ WOKEN 2026-07-16 (Phase 3 rulings, builder):** superseded before it ever bit — the
+  Phase 3 design session ruled every `JobActions` verb wraps its read-check-write in
+  `job.with_lock`, from day one. The cost turned out to be one shared line in the door, so
+  the original "wait until it hurts" trade lost its upside. No longer deferred; kept here
+  as the record of the original reasoning.
 - **Trapped last owner — the escape routes from account deletion (2026-07-14).** Since a
   workshop cannot exist without an Ownership (lifetime invariant, ADR-009), the **last owner
   of a workshop can never delete their account** while the workshop stands — that refusal is
@@ -81,7 +86,20 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   door (SA + manager/owner). Waking self-service crew motion **supersedes M1-F1's permission
   matrix** — dated note there when it lands. Free-standing "remove" as a motion is
   conceptually for helpers (v2); v1's single-mechanic crews make the reassignment swap the
-  only in-progress crew change (the responsibility rule, M1-F1).
+  only in-progress crew change (the responsibility rule, M1-F1). *(2026-07-16 later that
+  day: the swap itself was then dropped for v1 — see the `swap_mechanic!` entry below;
+  v1 has **no** in-progress crew motion at all.)*
+- **`swap_mechanic!` — mid-job crew handover (2026-07-16, Phase 3 rulings, builder).**
+  Dropped from v1 entirely (amends Session 17's wording that made the swap "the only
+  in-progress crew motion" — v1 now has none). Consequence accepted: once a job has started
+  work, its crew is fixed — a sick tech shows on the board, truthfully, as the responsible
+  party until the job reaches done/cancelled. **The escape hatch that makes this safe:** the
+  manager/owner exemption in the crew gate means a manager can still drive a stuck job to
+  `done` themselves — the workshop is never trapped, the job just keeps naming the sick tech
+  as responsible. **Trigger to revisit:** the first real mid-job handover need from the
+  floor. When it lands it's one door verb (old `left` + new engagement/`joined`, one
+  transaction) — purely additive. See [[M1-F1 Status flow and transitions]] Settled
+  2026-07-16 (Phase 3).
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either

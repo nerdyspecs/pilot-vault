@@ -27,7 +27,9 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   The two terminals are `delivered` (success) and `cancelled` (died before done).
 - **Concurrency guards deferred** (stage-change race + `lock_version`) — see
   [[Deferred design]]; failure mode is loud (double transitions visible in the log),
-  fix is one line in the one door.
+  fix is one line in the one door. *(2026-07-16: the stage-change row lock was **woken**
+  before Phase 3 was built — every verb wraps read-check-write in `job.with_lock`.
+  `lock_version` stays deferred. See Settled 2026-07-16 (Phase 3) below.)*
 
 ## Settled 2026-07-16 (tracker-restructure sessions, builder rulings)
 - **Crew tracker split — entity + event log** ([[Event log]]): `JobMechanic` (engagement) +
@@ -44,13 +46,21 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   `in_progress`**: removing the last mechanic is legal and writes the compensating
   `assigned → registered` rollback. Once a job has **ever** touched `in_progress`: the last
   mechanic is never removable — the only crew change is the reassignment swap (old `left` +
-  new engagement/`joined`, one door call). **Invariant: a job that has started work always
+  new engagement/`joined`, one door call). *(2026-07-16 Phase 3 rulings: the swap itself was
+  then **dropped for v1** — no crew motion at all on a started job; see Settled 2026-07-16
+  (Phase 3) below + [[Deferred design]].)* **Invariant: a job that has started work always
   names ≥1 responsible mechanic.** Sick tech with no replacement → the board keeps showing
   them, truthfully, as the responsible party until a swap. Time-in-stage deliberately does
   not split "worked slowly" from "responsible tech absent" in v1 *(soft note, non-binding:
   a "no-manpower" blocker type is a possible Sprint-3 catalog candidate if the floor demands
   the distinction)*. ⚠ Sanity-check the "touched in_progress" edge (a job moved back to
-  `assigned` via the backward move) when the Phase 3 allow-list is written.
+  `assigned` via the backward move) when the Phase 3 allow-list is written. *(2026-07-16:
+  checked at the Phase 3 design session — consistent. After the backward move the job is
+  `assigned` + crew + touched-`in_progress`, so **both** remove and assign refuse; with the
+  swap dropped, that job's crew is simply fixed, uniformly with every other started job.
+  "Touched `in_progress`" is a **history query** — `Job#started_work?`,
+  `job_stage_transitions.where(to_stage: :in_progress).exists?` — never derived from the
+  current stage, which the backward move would falsify.)*
 - **Open blockers stop `→ done`.** ⚠ Unresolved collision, decide at the Sprint 3 blocker
   deep-dive: seed blocker Hold For Payment, if used as "don't release until paid," would
   block `done` forever — redefine HFP as pre-work, or give the catalog per-blocker stage
@@ -60,6 +70,37 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   **`lead`** (`default: true` honestly backfills v1 engagements — every v1 mechanic was the
   lead); named `lead` not `primary` (reserved SQL keyword — quoting tax on raw-psql audit
   sweeps). Naming settled now so it isn't re-litigated ([[Deferred design]]).
+
+## Settled 2026-07-16 (Phase 3 design session, builder rulings)
+- **Named verbs, no generic `change_stage!`.** The door's public surface is **eight** bang
+  methods — `register_job!`, `assign_mechanic!`, `remove_mechanic!`, `start_work!`,
+  `mark_done!`, `deliver!`, `send_back!`, `cancel!` — each its own `def`/`end` block with a
+  first-line stage guard. The allow-list **is** the verb set: no verb accepts `done` except
+  `deliver!`, none accepts `delivered`/`cancelled` — the Done-freeze is structural, not a
+  checked rule. Refusals raise `JobActions::Refused` (human message); every verb wraps
+  read-check-write in `job.with_lock` (the row-lock deferral **woken** — [[Deferred design]]).
+- **`swap_mechanic!` dropped for v1** (amends Session 17's "the swap is the only in-progress
+  crew motion" — v1 has none). A started job's crew is fixed until done/cancelled; a sick
+  tech shows truthfully as responsible. **Escape hatch:** the manager/owner exemption in the
+  crew gate means a manager can still drive a stuck job to `done` — the workshop is never
+  trapped. Revisit at the first real mid-job handover need ([[Deferred design]]).
+- **Tech moves are crew-gated.** `start_work!`/`mark_done!` require active `technician`
+  employment **and** a current engagement on that job (manager/owner exempt) — being a
+  technician somewhere isn't enough; you must be *this job's* mechanic.
+- **`registered ↔ assigned` is crew-method-private.** Those stage rows are written only
+  inside `assign_mechanic!`/`remove_mechanic!` transactions — "`assigned` ⟺ crew exists"
+  is unbreakable because no other path can write either move.
+- **`send_back!`** is the verb for the 2026-07-12 backward move (`in_progress → assigned`,
+  counter-only). Reframed: a rare **compensating correction**, not a workflow step — never
+  surfaced on technician screens (S2.11 note). Internal name only.
+- **Crew freezes on terminal stages.** `cancel!`/`deliver!` write no synthetic `left`
+  events — the engagement record keeps naming who was responsible.
+- **Accepted edge: `mark_done!` has no compensating path** (done's only exit is
+  `delivered`). Softened with a confirm dialog in S2.11.
+- **Positioning invariant (pinned):** Knot tracks **job statuses**, never real-time tech
+  activity. Many `in_progress` jobs per tech is normal; no pause/resume ever joins the stage
+  axis. Per-tech workload is a query (`joins job_mechanics` merged with
+  `JobMechanic.current`) feeding S5.2 — zero Phase 3 work.
 
 ## Permission matrix (v1)
 | Role | Stage transitions (via ONE DOOR) | Blockers | Crew |

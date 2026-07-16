@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-16 (Session 18)
+updated: 2026-07-16 (Session 19)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -326,25 +326,57 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       off N+1 before Sprint 4's views exist. 8 new tests + 51/51 suite green; RLS fail-closed
       spot-checked live (visible under the tenant note, invisible after reset); seeds still
       idempotent, untouched by these tables.)*
-- [ ] **S2.7** **`JobActions`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
-      role gate, and lock-on-Done (reject edits once `done/delivered/cancelled`); writes the transition.
-      *(Settled 2026-07-12: job **creation** goes through the door too — multi-record motion, will
-      grow. Concurrency row lock consciously deferred — see [[Deferred design]].)*
-- [ ] **S2.8** Allow-list transition map + role gate, per the [[M1-F1 Status flow and transitions]] matrix.
-      *(Settled 2026-07-12: `in_progress → assigned` = service_advisor; no cancel from `done` —
-      done's only exit is `delivered`. See M1-F1's "Settled" section.)*
-- [ ] **S2.9** `JobActions#assign_mechanic` — one transaction, **three rows**: `JobMechanic`
-      engagement + its `joined` transition + the `registered → assigned` stage transition.
-      *(Settled 2026-07-12: assignee must hold an active `technician` employment; single
-      mechanic per job in v1 — helpers deferred with the `lead` flag.)* *(2026-07-16 rulings:
-      one `ensure_counter!` guard — only SA/manager/owner assigns or removes, self-join
-      deferred; `remove_mechanic` writes the `left` event + the compensating
-      `assigned → registered` only when crew empties — and is **refused entirely** if it would
-      empty the crew of a job that has ever touched `in_progress` (the responsibility rule,
-      [[M1-F1 Status flow and transitions]]) — reassignment swap is the only crew motion there.
-      Implementation note: reload the crew scope after writing `left`, before the emptiness
-      check — a stale association cache would skip the stage move.)*
-- [ ] **S2.10** Log the `nil → registered` transition at job creation (clean entry timestamp).
+- [ ] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
+      2026-07-16, Phase 3 rulings: **named verbs, no generic `change_stage!`** — each move is
+      its own `def`/`end` block with a first-line stage guard, so the allow-list IS the verb
+      set and the Done-freeze is structural: no verb accepts `done` except `deliver!`, none
+      accepts `delivered`/`cancelled`)*. Plain PORO, **class methods**, one file
+      (`app/services/job_actions.rb`): `start_work!(job, acting_user:)` ·
+      `mark_done!` · `deliver!` · `send_back!` · `cancel!` (the crew verbs are S2.9, creation
+      S2.10 — **eight** public methods total). Refusals raise `JobActions::Refused <
+      StandardError` with a human message; bang methods commit or raise (controllers rescue
+      into flash). Every verb uniformly: stage-legality first → role gate →
+      **`job.with_lock`** transaction *(the row-lock deferral **woken** 2026-07-16 —
+      [[Deferred design]])* → state write + event row together → `created_by = acting_user`,
+      `workshop_id` from the job. *(Settled 2026-07-12, stands: job **creation** goes through
+      the door too.)*
+- [ ] **S2.8** Role gates + the guard set, per the [[M1-F1 Status flow and transitions]]
+      matrix + Settled 2026-07-16 (Phase 3). Private class methods: `ensure_counter!(user)`
+      (Ownership OR active SA/workshop_manager employment) ·
+      `ensure_crew_technician!(job, user)` (manager/owner pass; else technician role + a
+      **current engagement on that job** — gates `start_work!`/`mark_done!`) ·
+      `ensure_technician!(user)` (the assignee check inside `assign_mechanic!`) · per-verb
+      one-line stage checks. **"Touched `in_progress`" = `Job#started_work?`** on the model —
+      a history query (`job_stage_transitions.where(to_stage: :in_progress).exists?`), never
+      stage-based (`send_back!` keeps it true). *(Settled 2026-07-12, stands:
+      `in_progress → assigned` = counter — its verb is now `send_back!`, a rare compensating
+      correction, never on technician screens (S2.11); no cancel from `done` — done's only
+      exit is `delivered`.)*
+- [ ] **S2.9** The crew verbs — `JobActions.assign_mechanic!(job, mechanic:, acting_user:)`
+      + `remove_mechanic!(job, mechanic:, acting_user:)`. Assignment = one transaction,
+      **three rows**: `JobMechanic` engagement + its `joined` transition + the
+      `registered → assigned` stage transition. *(Settled 2026-07-12: assignee must hold an
+      active `technician` employment (`ensure_technician!`); single mechanic per job in v1 —
+      `assign_mechanic!` refuses a non-empty crew.)* *(2026-07-16 rulings: one
+      `ensure_counter!` guard — only SA/manager/owner assigns or removes, self-join deferred;
+      `remove_mechanic!` writes the `left` event + the compensating `assigned → registered`
+      in the same transaction — legal only at untouched-`assigned`, **refused** if
+      `started_work?` (the responsibility rule, [[M1-F1 Status flow and transitions]]).
+      Implementation gotcha: re-check crew emptiness **fresh via `JobMechanic.current`**
+      after writing `left`, never a cached association — a stale cache would skip the stage
+      move.)* *(2026-07-16 Phase 3: the **`registered ↔ assigned` moves are
+      crew-method-private** — written only inside these two verbs' transactions, so
+      "`assigned` ⟺ crew exists" is unbreakable. `swap_mechanic!` **dropped** for v1 —
+      no crew motion on a started job; escape hatch + trigger in [[Deferred design]].
+      Crew freezes on terminal stages: `cancel!`/`deliver!` write no synthetic `left`
+      events.)*
+- [ ] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
+      the Job **and** logs the `nil → registered` birth transition, one transaction (clean
+      entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to
+      `vehicle.customer` (the door's default-copy — [[Deferred design]] match-validation
+      entry; an explicit different customer is legal, the two-branch confirm is Sprint 6 UI).
+      *(respecified 2026-07-16 — creation was always through the door (Settled 2026-07-12);
+      this names the verb.)*
 - [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
       buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
 - [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·

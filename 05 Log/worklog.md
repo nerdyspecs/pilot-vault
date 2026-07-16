@@ -1,11 +1,68 @@
 ---
 type: log
-updated: 2026-07-16 (Session 18)
+updated: 2026-07-16 (Session 19)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-16 · Session 19 — Phase 3 designed: the `JobActions` verb surface (rulings swept)
+
+**Summary.** The Phase 3 design discussion ran in a chip session and closed with builder
+verdicts on every open question; this session sweeps them into the vault before any code.
+Headline rulings: **named verbs, no generic `change_stage!`** — the door's public surface is
+**eight** bang class methods (`register_job!`, `assign_mechanic!`, `remove_mechanic!`,
+`start_work!`, `mark_done!`, `deliver!`, `send_back!`, `cancel!`; a chip-session doc said
+"seven," miscount), each its own `def`/`end` block with a first-line stage guard, so the
+allow-list IS the verb set and the Done-freeze is structural (nothing accepts `done` but
+`deliver!`; nothing accepts the terminals). Refusals raise `JobActions::Refused` with a human
+message; every verb wraps read-check-write in `job.with_lock` — the **row-lock deferral
+woken** (one shared line, the "wait until it hurts" trade lost its upside) — [[Deferred
+design]] superseded with a dated note. Next: build S2.7–S2.10 against this spec, on the
+builder's go.
+
+**The rulings, in brief** (full detail: [[M1-F1 Status flow and transitions]] Settled
+2026-07-16 (Phase 3) + the respec'd S2.7–S2.10).
+- **`swap_mechanic!` dropped for v1** (amends Session 17's "the swap is the only in-progress
+  crew motion" — v1 now has none). Sick tech shows truthfully until done/cancelled.
+  **Escape hatch, recorded explicitly:** the manager/owner exemption in the crew gate means
+  a manager can still drive a stuck job to `done` — the workshop is never trapped, the job
+  just keeps naming the sick tech. New [[Deferred design]] entry; trigger = first real
+  mid-job handover need.
+- **Tech moves crew-gated:** `start_work!`/`mark_done!` need active technician employment
+  AND a current engagement on that job (manager/owner exempt).
+- **"Touched `in_progress`" = `Job#started_work?`**, a history query on
+  `job_stage_transitions` (`to_stage: :in_progress`), never stage-based — `send_back!`
+  keeps it true. Session 17's ⚠ sanity-check on that edge: **checked, consistent** — after
+  `send_back!` the job is assigned + crew + started, both remove and assign refuse, ruling
+  applied uniformly.
+- **`registered ↔ assigned` crew-method-private:** those stage rows are written only inside
+  `assign_mechanic!`/`remove_mechanic!` transactions — "assigned ⟺ crew exists" unbreakable.
+- **`send_back!` kept** (counter-only) but reframed: rare compensating correction, never on
+  technician screens (S2.11 note). Internal name only.
+- **Crew freezes on terminals** — `cancel!`/`deliver!` write no synthetic `left` events.
+- **Accepted edge:** `mark_done!` has no compensating path (done's only exit is `delivered`);
+  soften with an S2.11 confirm dialog.
+- **Positioning pin:** Knot tracks job statuses, never real-time tech activity — many
+  `in_progress` jobs per tech is normal, no pause/resume ever joins the stage axis; per-tech
+  workload is a query feeding S5.2, zero Phase 3 work.
+
+**Sweep.** [[Deferred design]]: row-lock entry superseded (woken), new `swap_mechanic!`
+entry, self-join entry's swap sentence dated-corrected. [[M1-F1 Status flow and
+transitions]]: new Settled 2026-07-16 (Phase 3) section + dated corrections on the
+responsibility rule's swap wording, the resolved ⚠ edge, and the concurrency-deferral line.
+Sprint plan S2.7–S2.10 respecified to the verb surface (guards: `ensure_counter!` ·
+`ensure_crew_technician!` · `ensure_technician!` + per-verb stage checks; S2.10 =
+`register_job!`, customer defaults to `vehicle.customer`). Correction on record: `JobActions`
+does **not** exist yet — no `app/services/` — Phase 3 creates it from scratch;
+`register_job` was spec'd but never coded.
+
+**Open, carried forward.** Sprint 3 blocker respec + the Hold-For-Payment/`→done` collision
+(unchanged); S2.11 controllers/views (confirm dialog, `send_back!` counter-only); S0.8
+deploy at sprint exit. Standing parked items unchanged.
 
 ---
 
