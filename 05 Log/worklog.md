@@ -60,9 +60,34 @@ Sprint plan S2.7–S2.10 respecified to the verb surface (guards: `ensure_counte
 does **not** exist yet — no `app/services/` — Phase 3 creates it from scratch;
 `register_job` was spec'd but never coded.
 
+**Build addendum (same day) — Phase 3 built: S2.7–S2.10 ticked.** The door exists:
+`app/services/job_actions.rb`, eight verbs + three guards + two helpers in one
+`class << self` block, `Job#started_work?` on the model. Three app commits: `045f5c1`
+(stage verbs, guards, `Refused`), `36bb90e` (crew verbs), `5592291` (`register_job!`).
+Two decisions taken at plan review with the builder:
+- **Checks inside `with_lock`** — the ruling's "stage check → role gate → lock" order
+  would check stale state (the lock reloads the row; a pre-lock check is decorative).
+  One check per verb, inside the lock, same reading order, actually race-safe. Explained
+  via the Siti-cancels-while-Ah-Boy-marks-done race; builder chose it over a duplicate
+  pre-check + re-check shape.
+- **Guards renamed for plainer vocabulary**: `ensure_counter_staff!` / `ensure_job_crew!` /
+  `ensure_active_technician!` (from the chip session's `ensure_counter!` /
+  `ensure_crew_technician!` / `ensure_technician!`). Kept `ensure_` over the controllers'
+  `require_` — those redirect, these raise. **CanCanCan raised and rejected**: door
+  permissions are verb+stage+crew-membership business rules, not resource permissions;
+  an Ability class would split ONE DOOR across two files. Revisit only if v2 grows
+  truly dynamic per-workshop permissions (the Blocker catalog's role fields already
+  handle the data-driven case).
+Also ruled: **S2.12 tests wait for the sprint-close batch** — verification this session was
+a 22-check console script (happy path end-to-end, every refusal, the post-`send_back!`
+edge live-checked, untouched-assigned removal with compensating rollback, refused-assign
+atomicity), all green, plus the suite (51/51) after each commit. One observation recorded
+on S2.9: v1's "crew already full" refusal is shadowed by the stage guard (`assigned`
+implies crew) — kept as belt-and-suspenders.
+
 **Open, carried forward.** Sprint 3 blocker respec + the Hold-For-Payment/`→done` collision
-(unchanged); S2.11 controllers/views (confirm dialog, `send_back!` counter-only); S0.8
-deploy at sprint exit. Standing parked items unchanged.
+(unchanged); S2.11 controllers/views (confirm dialog, `send_back!` counter-only); S2.12
+test batch at sprint close; S0.8 deploy at sprint exit. Standing parked items unchanged.
 
 ---
 

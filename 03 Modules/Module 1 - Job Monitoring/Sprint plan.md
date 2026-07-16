@@ -326,7 +326,7 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       off N+1 before Sprint 4's views exist. 8 new tests + 51/51 suite green; RLS fail-closed
       spot-checked live (visible under the tenant note, invisible after reset); seeds still
       idempotent, untouched by these tables.)*
-- [ ] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
+- [x] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
       2026-07-16, Phase 3 rulings: **named verbs, no generic `change_stage!`** — each move is
       its own `def`/`end` block with a first-line stage guard, so the allow-list IS the verb
       set and the Done-freeze is structural: no verb accepts `done` except `deliver!`, none
@@ -339,8 +339,12 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       **`job.with_lock`** transaction *(the row-lock deferral **woken** 2026-07-16 —
       [[Deferred design]])* → state write + event row together → `created_by = acting_user`,
       `workshop_id` from the job. *(Settled 2026-07-12, stands: job **creation** goes through
-      the door too.)*
-- [ ] **S2.8** Role gates + the guard set, per the [[M1-F1 Status flow and transitions]]
+      the door too.)* *(2026-07-16: built, commit `045f5c1`. One plan-review refinement: the
+      stage/role checks run **inside** `job.with_lock` — the lock reloads the row, so a check
+      outside it reads stale state, the exact race the woken lock kills; checking once inside
+      keeps the ruled reading order without a duplicate pre-check. Console-verified: full
+      happy path, every refusal readable, both terminals verb-less.)*
+- [x] **S2.8** Role gates + the guard set, per the [[M1-F1 Status flow and transitions]]
       matrix + Settled 2026-07-16 (Phase 3). Private class methods: `ensure_counter!(user)`
       (Ownership OR active SA/workshop_manager employment) ·
       `ensure_crew_technician!(job, user)` (manager/owner pass; else technician role + a
@@ -351,8 +355,15 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       stage-based (`send_back!` keeps it true). *(Settled 2026-07-12, stands:
       `in_progress → assigned` = counter — its verb is now `send_back!`, a rare compensating
       correction, never on technician screens (S2.11); no cancel from `done` — done's only
-      exit is `delivered`.)*
-- [ ] **S2.9** The crew verbs — `JobActions.assign_mechanic!(job, mechanic:, acting_user:)`
+      exit is `delivered`.)* *(2026-07-16: built, commit `045f5c1`. Guards **renamed at plan
+      review** — builder wanted plainer vocabulary: `ensure_counter_staff!` ·
+      `ensure_job_crew!` · `ensure_active_technician!`. Kept the `ensure_` prefix, not the
+      controllers' `require_`: those redirect, these raise — a shared prefix would suggest
+      shared behavior. CanCanCan raised by the builder and rejected: these are
+      verb+stage+crew-membership business rules, not resource permissions — an Ability class
+      would split the door across two files; the M1-F1 matrix already compiles to
+      three guards on eight verbs, readable in one screen.)*
+- [x] **S2.9** The crew verbs — `JobActions.assign_mechanic!(job, mechanic:, acting_user:)`
       + `remove_mechanic!(job, mechanic:, acting_user:)`. Assignment = one transaction,
       **three rows**: `JobMechanic` engagement + its `joined` transition + the
       `registered → assigned` stage transition. *(Settled 2026-07-12: assignee must hold an
@@ -369,14 +380,22 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       "`assigned` ⟺ crew exists" is unbreakable. `swap_mechanic!` **dropped** for v1 —
       no crew motion on a started job; escape hatch + trigger in [[Deferred design]].
       Crew freezes on terminal stages: `cancel!`/`deliver!` write no synthetic `left`
-      events.)*
-- [ ] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
+      events.)* *(2026-07-16: built, commit `36bb90e`. Console-verified: 3 rows one txn;
+      removal at untouched-assigned writes `left` + compensating rollback; refused after
+      `send_back!` (the ruled edge — checked live, both remove and assign refuse); a refused
+      assign writes zero rows. Note from verification: in v1 the "crew already full" refusal
+      is shadowed by the stage guard — `assigned` implies crew, so a second assign refuses as
+      "not registered" first; the crew check stays as belt-and-suspenders.)*
+- [x] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
       the Job **and** logs the `nil → registered` birth transition, one transaction (clean
       entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to
       `vehicle.customer` (the door's default-copy — [[Deferred design]] match-validation
       entry; an explicit different customer is legal, the two-branch confirm is Sprint 6 UI).
       *(respecified 2026-07-16 — creation was always through the door (Settled 2026-07-12);
-      this names the verb.)*
+      this names the verb.)* *(2026-07-16: built, commit `5592291`. Plain
+      `ActiveRecord::Base.transaction` — no job row exists yet to lock. Console-verified:
+      birth row `from_stage` nil, `customer` defaults from the vehicle. Suite 51/51 green
+      after each of the three commits; S2.12 tests deferred to sprint close, builder ruling.)*
 - [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
       buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
 - [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·
