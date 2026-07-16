@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-16
+updated: 2026-07-16 (Session 18)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -303,9 +303,14 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 - [x] **S2.4** `stage` enum: `registered / assigned / in_progress / done / delivered / cancelled`.
       *(2026-07-15: built with S2.3, commit `2c5ca91` — integers now frozen **by schema**
       (the R5 index predicate references 0/1/2).)*
-- [ ] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
+- [x] **S2.5** Migration + model **JobStageTransition**: `workshop_id, job_id, from_stage, to_stage,
       created_by_id, acknowledged_at, acknowledged_by_id`; `belongs_to :job`.
-- [ ] **S2.6** Migrations + models for **crew — split into two tables** *(respecified
+      *(2026-07-16: built, commit `30f3a10`. `from_stage`/`to_stage` are enums that **reuse
+      `Job.stages`** rather than redeclaring the mapping — one source of truth for the frozen
+      integers; `prefix: true` on both keeps `from_stage_registered?`/`to_stage_registered?`
+      from colliding. `to_stage` presence-validated; `from_stage` nullable for the future
+      birth row (S2.10, Phase 3). No writer yet — `JobActions` is Phase 3.)*
+- [x] **S2.6** Migrations + models for **crew — split into two tables** *(respecified
       2026-07-16, builder ruling: entity + event log, replacing the settled single-table
       shape — see [[Event log]] and worklog Session 17)*: **JobMechanic** (engagement):
       `workshop_id, job_id, user_id` — no ack columns, **no `primary`/`lead` flag in v1**
@@ -314,6 +319,13 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       acknowledged_at, acknowledged_by_id`. Old columns dissolve into events: `assigned_by`
       → the joined row's `created_by`; `removed_at`/`removed_by` → the `left` row. Current
       crew = engagements with no `left` event (a query).
+      *(2026-07-16: built, commit `30f3a10`. `JobMechanic.current` scope implements the
+      no-left-event query as a `where.not(id: ... select(:job_mechanic_id))` subquery.
+      `Job#timeline` merges `job_stage_transitions` + `job_mechanic_transitions` (via
+      `has_many :through`) by `created_at`, `includes` on the author/acknowledger to head
+      off N+1 before Sprint 4's views exist. 8 new tests + 51/51 suite green; RLS fail-closed
+      spot-checked live (visible under the tenant note, invisible after reset); seeds still
+      idempotent, untouched by these tables.)*
 - [ ] **S2.7** **`JobActions`** (ONE DOOR) — `change_stage(job, to:, by:)`: enforces the allow-list,
       role gate, and lock-on-Done (reject edits once `done/delivered/cancelled`); writes the transition.
       *(Settled 2026-07-12: job **creation** goes through the door too — multi-record motion, will

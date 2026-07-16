@@ -1,11 +1,52 @@
 ---
 type: log
-updated: 2026-07-16 (Session 17)
+updated: 2026-07-16 (Session 18)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-16 · Session 18 — Phase 2 built: JobStageTransition + crew split (S2.5/S2.6)
+
+**Summary.** Straight implementation of Session 17's design — schema, models, associations,
+`Job#timeline`, tests. Nothing writes these tables yet (`JobActions` is Phase 3); this was
+deliberately a contained, demo-free chunk so any schema surprise surfaced in isolation.
+None did: the build matched the vault spec exactly, no design changes mid-build. Commit
+`30f3a10`. Sprint plan S2.5/S2.6 ticked. Next: Phase 3 (S2.7–S2.10, the `JobActions` door)
+— on the builder's call, per standing discipline.
+
+**What landed.** Three migrations (`20260716090000/090100/090200`), each bundling its RLS
+`tenant_isolation` policy in the same file (ADR-007 gotcha 1), same shape as every prior
+tenant table. `JobStageTransition`'s `from_stage`/`to_stage` enums **reuse `Job.stages`**
+rather than redeclaring the integer mapping — one source of truth, so Risk ledger R5's index
+predicate (`stage IN (0,1,2)`) and the transition table can never drift apart; `prefix: true`
+on both keeps `from_stage_registered?` and `to_stage_registered?` from colliding on the same
+method name. `JobMechanic.current` implements Event log.md's promised query ("engagements
+with no left event") as a `where.not(id: ...)` subquery — deliberately the plain/readable
+form over anything cleverer. `Job#timeline` merges `job_stage_transitions` +
+`job_mechanic_transitions` (reached via `has_many :through`) by `created_at`, `includes`-ing
+the author/acknowledger associations now even though nothing renders them until Sprint 4 —
+cheap to add while touching the method, expensive to retrofit later.
+
+**Verification.** 8 new unit tests (birth-row shape, enum-prefix independence, current-scope
+behavior across joined/left, `#timeline` ordering) + the existing 43 = **51/51 green**.
+Migrated clean in dev; `db/structure.sql` regenerated with the three new
+`CREATE POLICY tenant_isolation` blocks. Live spot-check in `bin/rails console`: a row
+created under `SET app.workshop_id` was visible, then invisible after `RESET` — the
+fail-closed backstop re-verified on new tables, as every prior tenant table got. `db:seed`
+re-run clean and idempotent (these tables aren't seeded yet, by design — nothing to seed
+until Phase 3 gives them a writer).
+
+**Open, carried forward.** Phase 3 (`JobActions`, S2.7–S2.10) is next but unplanned — needs
+its own discussion before a plan, per standing discipline. It inherits two named questions
+from Session 17: the "touched `in_progress`" edge in the removal-legality rule (sanity-check
+when the allow-list matrix is written) and the Sprint 3 blocker respec (full [[Blocker]]
+rewrite + the Hold-For-Payment/`→done` collision). Standing parked items unchanged
+(launch.json cleanup, R3 GUC hardening, R7 invitation index, vehicle-normalizer punctuation,
+match-validation circle-back, Company×RLS v2 pass, PDPA trigger).
 
 ---
 
