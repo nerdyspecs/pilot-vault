@@ -106,6 +106,19 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   a token-keyed `FOR SELECT` policy (`USING (token = current_setting('app.job_token', true))`,
   set before the lookup) or a `SECURITY DEFINER` lookup function. Purely additive — `token`
   is stamped at birth (S2.3). Decide at Sprint 7 kickoff. See [[Job visibility]].
+- **CanCanCan — gem for permission checks (2026-07-16, builder: park, might need it).**
+  Rejected for the door itself (Session 19): `JobActions` permissions are
+  verb+stage+crew-membership *business rules* — an Ability class would split ONE DOOR
+  across two files, and the M1-F1 matrix already compiles to three guards on eight verbs,
+  readable in one screen. Where it *could* earn its keep later: **controller/view-level
+  checks** — "which buttons does this user see" (S2.11+), authorizing RESTful resources
+  outside the door (crew admin, blocker catalog, jobsheet fields), or v2's truly dynamic
+  per-workshop permissions (the Blocker catalog's `raised_by_role`/`cleared_by_role` is
+  already the data-driven case). Rails-built-in rule applies at revisit: show first why
+  plain guard methods + shared predicates aren't enough. **Trigger:** permission checks
+  spreading across controllers/views faster than the guard-method pattern keeps tidy —
+  likely visible at S2.11 or Sprint 5's role-shaped screens. Adds a dependency — builder
+  decides at trigger time.
 - **Dark mode = steel-blue chrome (2026-07-05).** v1 ships light mode only (high-contrast, per
   device-posture decision). When dark mode comes, the dark theme's surfaces derive from the brand
   steel blue (~`#22456B` family) — chosen because the navy app-bar sample read as "dark mode" and
