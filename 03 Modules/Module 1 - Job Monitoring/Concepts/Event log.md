@@ -73,9 +73,12 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
 ## In Rails
 - `JobStageTransition`: `workshop_id, job_id, from_stage` (null only on the birth row),
   `to_stage, created_by, created_at, acknowledged_at, acknowledged_by`.
-- `JobMechanic` (engagement): `workshop_id, job_id, user_id, created_at` — **no ack columns;
-  no `lead` flag in v1** (deferred with helpers, [[Deferred design]]). Current crew =
-  engagements with no `left` event — a query, not a column.
+- `JobMechanic` (engagement): `workshop_id, job_id, employment_id, created_at` — **no ack
+  columns; no `lead` flag in v1** (deferred with helpers, [[Deferred design]]). Current crew =
+  engagements with no `left` event — a query, not a column. *(2026-07-16, Session 19:
+  `user_id` → `employment_id` — an engagement is held by a stint; actor columns
+  (`created_by`/`acknowledged_by`) stay User, owners act but hold no employment. The
+  actor/holder split — [[Data model]] §Resolved.)*
 - `JobMechanicTransition`: `workshop_id, job_mechanic_id, action (joined | left), created_by,
   created_at, acknowledged_at, acknowledged_by`.
 - `JobBlocker` + `JobBlockerTransition` — Sprint 3; column detail in [[Blocker]].

@@ -23,7 +23,7 @@ Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
 
 Job      ─*─ JobStageTransition                     (stage events + ack)
 Job      ─*─ JobMechanic ─*─ JobMechanicTransition  (crew engagement + joined/left events)
-              └ belongs_to User
+              └ belongs_to Employment   (the stint, not the login — 2026-07-16, see Resolved)
 Job      ─*─ JobBlocker ─*─ JobBlockerTransition    (blocker items + events — Sprint 3)
               └ belongs_to Blocker
 Workshop ─*─ Blocker                                (workshop's blocker catalog)
@@ -86,6 +86,28 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
   legitimate payer≠file cases exist. The stamp + default-copy stand; see [[Deferred design]].)* Also pins
   the job's notification target ("External" side) against mid-job reassignment. A
   `VehicleOwnership` period-edge table was considered and rejected for v1 (over-engineering).
+- **Who tracker rows point at — the actor/holder split** *(2026-07-16, builder ruling,
+  Session 19; app commit `6799438`)*. Two different questions, two different FK targets:
+  - **Engagements point at `Employment`** (`job_mechanics.employment_id`, not `user_id`).
+    A crew engagement is a *responsibility held by a stint* — "Ah Boy-as-technician-here",
+    not "login #42". No owner gap: every legal assignee holds an active technician
+    employment by the door's own guard. Payoff is direct stint attribution —
+    `employment.jobs` answers "what did he do while employed here"; a re-employed mechanic's
+    two stints each own their jobs; an engagement pointing at an ended employment reads
+    truthfully as history.
+  - **Actor/audit columns stay `User`** (`created_by`/`acknowledged_by` on all event
+    tables). Actions are taken by *people*, and owners act through the door constantly but
+    hold no Employment (ADR-006) — an employment FK there is unrecordable for them. The
+    considered fixes were all rejected: polymorphic actor (loses FK integrity), auto-created
+    owner employments (fictional records — would reintroduce the `owner` role as data and
+    quietly rewrite the Employment-OR-Ownership access rule). Role-at-action-time stays
+    derivable: `(user_id, workshop_id, created_at)` finds the exact employment — **because
+    employments are append-only**, the invariant this ruling makes load-bearing (below).
+- **Employments are append-only** *(pinned 2026-07-16, now load-bearing)*: terminate =
+  `end!` (sets `ended_at`), role change = end + new row, **delete = never** once referenced
+  — engagements FK to employments, so deletion would orphan job history. Enforced twice:
+  `dependent: :restrict_with_error` + the DB FK. If in-place role edits ever appear, the
+  audit story above collapses — don't.
 
 ## v2 — additive, do not build
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.

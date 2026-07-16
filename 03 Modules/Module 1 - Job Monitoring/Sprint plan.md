@@ -326,6 +326,10 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       off N+1 before Sprint 4's views exist. 8 new tests + 51/51 suite green; RLS fail-closed
       spot-checked live (visible under the tenant note, invisible after reset); seeds still
       idempotent, untouched by these tables.)*
+      *(**Amended 2026-07-16 later, Session 19, commit `6799438`:** `job_mechanics.user_id`
+      → **`employment_id`** — an engagement is held by a *stint*, not a login; actor/audit
+      columns stay User. The actor/holder split + the append-only-employments pin:
+      [[Data model]] §Resolved.)*
 - [x] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
       2026-07-16, Phase 3 rulings: **named verbs, no generic `change_stage!`** — each move is
       its own `def`/`end` block with a first-line stage guard, so the allow-list IS the verb
@@ -386,6 +390,10 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       assign writes zero rows. Note from verification: in v1 the "crew already full" refusal
       is shadowed by the stage guard — `assigned` implies crew, so a second assign refuses as
       "not registered" first; the crew check stays as belt-and-suspenders.)*
+      *(**Amended 2026-07-16 later, Session 19, commit `6799438`:** engagements now point at
+      the assignee's **Employment** — `ensure_active_technician!` returns the stint the
+      engagement belongs to; crew lookups join through `employments`. `employment.jobs`
+      now answers "work done this stint" directly. See [[Data model]] §Resolved.)*
 - [x] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
       the Job **and** logs the `nil → registered` birth transition, one transaction (clean
       entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to

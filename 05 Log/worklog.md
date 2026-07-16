@@ -85,6 +85,32 @@ atomicity), all green, plus the suite (51/51) after each commit. One observation
 on S2.9: v1's "crew already full" refusal is shadowed by the stage guard (`assigned`
 implies crew) — kept as belt-and-suspenders.
 
+**Addendum 2 (same day) — the actor/holder split: engagements point at Employment
+(`6799438`).** Post-build, the builder asked the honest question: shouldn't the schema
+reference Employment instead of `user_id` — more accurate, keeps User bare? The discussion
+ran the full arc. First position (defended): keep `user_id` everywhere — the **owner gap**
+(owners act through the door but hold no Employment, ADR-006) makes an employment FK
+unrecordable for actor columns; polymorphic actors and auto-created owner-employments were
+both examined and rejected (the latter would reintroduce the `owner` role as data and
+quietly rewrite the Employment-OR-Ownership access rule); role-at-action-time stays
+derivable from `(user_id, workshop_id, created_at)` because employments are append-only.
+Then the builder's real motivation surfaced — **"what did this guy do while employed at
+X"**, jobs grouped per stint — and that flipped the answer *for one FK family*: on
+`job_mechanics`, the owner gap doesn't exist (every legal assignee holds an active
+technician employment, by the door's own guard), and an engagement genuinely is a
+responsibility held by a *stint*. **Ruled: the split** — `job_mechanics.employment_id`
+(holder = stint; `employment.jobs` direct; re-employment attributes per stint; sick-tech
+engagement pointing at an ended employment reads truthfully), while `created_by`/
+`acknowledged_by` on all event tables stay User (actions are taken by people; owners act).
+Rider ruling: **employments are append-only** — `end!` never delete, role change = end +
+new row — now load-bearing (engagements FK to stints; `restrict_with_error` + DB FK
+enforce it). Built same session: migration on the empty table, `ensure_active_technician!`
+returns the stint, crew lookups join through `employments` (`ensure_job_crew!` simplified —
+the engagement's employment is technician by construction), 3 test files updated, 51/51
+green, 12-check console verification (stint attribution, re-employment onto the new stint,
+destroy refused, off-crew refusal through the join) all pass. Full reasoning:
+[[Data model]] §Resolved.
+
 **Open, carried forward.** Sprint 3 blocker respec + the Hold-For-Payment/`→done` collision
 (unchanged); S2.11 controllers/views (confirm dialog, `send_back!` counter-only); S2.12
 test batch at sprint close; S0.8 deploy at sprint exit. Standing parked items unchanged.
