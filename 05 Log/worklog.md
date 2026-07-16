@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-07-17 (Session 20)
+updated: 2026-07-17 (Session 20, audit addendum)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -41,6 +41,27 @@ Fixes applied, worst first:
 
 Explicitly **not** touched (recorded elsewhere, need builder decisions, not doc fixes):
 Product-gaps #3/#4/#7/#8 and the S2.11 JSON-endpoint reminder.
+
+**Addendum — code audit (read-only) of the Sessions 18–19 build against the vault.**
+The door, models, and schema all match the rulings: eight verbs exactly, allow-list
+structural, `with_lock` on every job-taking verb, `registered↔assigned` crew-method-private,
+engagement→employment stint, `started_work?` a history query, `Employment` append-only
+(restrict + FK backstop), RLS `tenant_isolation` on all three new event/crew tables (policy
+born with each table), R5 partial index `WHERE stage IN (0,1,2)`, no endless methods, no bare
+tenant queries. **Proof:** `bin/rails test` 51/51 green; dev-console lifecycle
+register→assign→start→(send_back→restart)→done→deliver on BMT8056 wrote 8 timeline rows,
+three refusals fired correctly (remove at in_progress, responsibility rule after `send_back!`,
+cancel-from-done), rows visible under the workshop GUC and invisible after `RESET`. Two
+findings, neither in committed Sprint-2 code: (1) the builder's **uncommitted**
+`workshops_controller.rb` diff calls `Workshop.create_with_founder!(founder:)` but the model
+still defines `create_with_owner!(owner:)` — create-workshop 500s while the diff is applied,
+and tests stay green (they call the model directly), so the half-rename is invisible to the
+suite; finish the rename (model + 12 test files + invitation comment) or revert. (2)
+`db/seeds.rb` still writes jobs with bare `Job.create!` + a now-stale "door arrives Phase 3"
+comment — seeded jobs carry no birth rows, so the in_progress seed job has an empty timeline
+and `started_work?` = false; cheap to reroute through `JobActions` before S2.11 views render
+dev data. Low note: `ensure_job_crew!` inlines `ended_at: nil` instead of merging
+`Employment.active` — fine today, drifts if "active" ever grows a second condition.
 
 ---
 
