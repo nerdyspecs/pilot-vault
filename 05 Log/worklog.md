@@ -1,11 +1,78 @@
 ---
 type: log
-updated: 2026-07-17 (Session 21, addendum 3 — vault half of the close-out plan landed)
+updated: 2026-07-17 (Session 22 — Sprint 2 closed)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-17 · Session 22 — Sprint 2 closed: Design B + edge rename built, S2.12 shipped, S0.8 re-parked
+
+**Summary.** The close-out plan from Session 21's addenda was built in three commits, each
+verified live before the next: `c692451` (Design B crew restructure + technician
+vocabulary), `7a7881d` (edge rename, full sweep), `bee2c2a` (the ten-case S2.12 test
+batch). 64/64 tests green (61 model/service + 3 system). Builder then held off Item 4 —
+deploying to Heroku — a third time: nothing demoable enough yet to justify a live URL, and
+local dev already proves what the deploy would (RLS enforcement, the full lifecycle).
+**Sprint 2 is closed** on its own exit criterion, decoupled from deploy. Next: Sprint 3
+kickoff (the blocker design pass), whenever the builder calls it.
+
+**Design B, built.** One migration (`rename_job_mechanics_to_design_b`): `rename_table` ×2
+(RLS policies and FKs ride the rename — ADR-007's footnote proved out in practice, not just
+theory); transitions gained `job_id`/`workshop_employment_id`, backfilled via one UPDATE
+join through the old `job_mechanic_id` FK before it was dropped; membership rows whose
+engagement had already `left` were deleted, so present-tense semantics started true on a
+seeded dev DB, not just an empty one. **Gotcha found mid-migration:** both crew tables carry
+`FORCE ROW LEVEL SECURITY` (every tenant table does, ADR-007) — which polices even the
+table owner, so the backfill UPDATE silently touched zero rows under the migration's own
+connection until `NO FORCE`/`FORCE` bracketed the data steps. A second, smaller gotcha:
+Rails' `rename_table`/`rename_column` already auto-rename dependent indexes — the plan's
+explicit `rename_index` calls were redundant and had to be dropped when they errored on
+already-renamed index names. Console-verified after: assign → remove leaves membership at
+zero while `job.timeline` still shows both `joined`/`left` events plus the compensating
+`assigned → registered` rollback — the whole point of the split, proven, not just asserted.
+
+**Edge rename, built.** Two `rename_table` calls; the real work was the Ruby sweep —
+models, `Current`, the access door, both crew models' `belongs_to :workshop_employment`
+(class name now matches, no override needed), `WorkshopEmploymentsController` (URL kept
+`/employments` — this session's ruling), seeds, and every test file. **Tooling gotcha,
+twice:** macOS `sed` doesn't support `\b` word-boundary regex — patterns like
+`s/\bEmployment\b/WorkshopEmployment/` silently matched nothing, so an early pass looked
+complete (no errors) but left ~15 bare `Employment`/`Ownership` references across five test
+files, surfaced only when the suite ran. Switched to Python's `re` for the real thing.
+Second-order lesson: compound identifiers (`EmploymentTest`) have no boundary between the
+words for regex purposes either way — those two class names needed a direct string
+replace. Full suite + a live browser walk (dashboard, crew page, full job lifecycle) both
+confirmed clean before commit.
+
+**S2.12, built — ten cases, two real test-writing lessons worth keeping.** (1) System
+tests must use `assert_text`, never a raw `page.text` read, to check state after a
+navigation — `page.text` doesn't wait for Turbo/redirects, so an early debugging pass
+misdiagnosed two real app-flow issues (tech and SA both need to navigate to a job page
+after sign-in; the dashboard only lists `Job.active` jobs, so a job that's reached `done`
+correctly disappears from it) as sign-in failures, because the raw read was racing the
+page. This is the sign-in-side twin of the S1.14 async-sign-out race — same family of bug,
+opposite direction. (2) **Flash is read-once**, and a forged same-origin XHR that follows
+its own redirect consumes it: a synchronous XHR to an illegal verb redirects to the
+dashboard with a flash, and if the test then does a *second* `visit`, Rails has already
+popped and cleared that flash during the XHR's own response cycle — the assertion has to
+read the XHR's own `responseText` instead, which **is** the rendered, redirected page.
+Once both were understood, all ten cases passed cleanly; case 2's stage×verb loop is now
+the allow-list's executable spec, and case 5's `assert_no_difference` proves the
+three-rows-one-transaction claim rather than just asserting the happy path.
+
+**S0.8 — re-parked a third time, on the record.** Builder: hold off Heroku until a
+stable/semi-full v1 exists — nothing to demo yet, and local dev already proves the RLS
+guarantee and the full lifecycle a deploy would. New trigger: Sprint 3 or Sprint 4 landing.
+The Heroku choice and shape (Procfile, release-phase migrate, the deploy-day RLS proof)
+stand unchanged from Session 21 — nothing to redo when the day comes.
+
+**Open, carried forward.** Sprint 3 kickoff (blocker design pass: full respec, the
+Hold-For-Payment/`→done` collision, Roadmap slice 4's descriptor) is next, unbuilt, on the
+builder's call per standing discipline.
 
 ---
 

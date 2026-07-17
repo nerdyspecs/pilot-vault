@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-17 (Session 21 — Design B/rename supersessions, S2.12 respec, S0.8 Heroku)
+updated: 2026-07-17 (Session 22 — Sprint 2 closed: Design B + rename built, S2.12 shipped, S0.8 re-parked)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -82,6 +82,12 @@ that ends in something demoable.
       Deploy-day proof: `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname =
       current_user` + an unset-GUC zero-rows smoke test. Re-verify current Heroku
       pricing/docs live before deploy day.)*
+      *(2026-07-17, Session 22 — **re-parked a third time**: builder held off past Sprint
+      2's close after all — nothing demoable enough to show anyone yet; local dev already
+      proves what Heroku would (RLS enforcement, the full job lifecycle). New trigger: a
+      **stable/semi-full v1** — Sprint 3 (blockers) or Sprint 4 (acknowledged handoffs, the
+      differentiator) landing is the likely moment. Heroku choice + shape stand unchanged
+      from the ruling above; nothing to redo when the day comes.)*
 - [x] **S0.9** First commit(s), tagged `S0`. *(2026-07-08: branches unified — `v1-db-setup`
       fast-forwarded into `main` and deleted; `main` = `fc821b7` pushed to private GitHub +
       annotated tag `S0`. Note: GitHub immediately opened 3 dependabot PRs (Rails 8.1.3 +
@@ -263,10 +269,14 @@ atomically; a 2nd user joins via employment; ending an employment kills access n
 
 ---
 
-## Sprint 2 · Job engine (ONE DOOR)
+## Sprint 2 · Job engine (ONE DOOR) — ✅ **closed 2026-07-17 (Session 22)**
 **Goal:** the job spine + state machine — see [[Job]], [[Stage model]], [[M1-F1 Status flow and transitions]].
 Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake is Sprint 6).
 **Exit:** move a job through stages via `JobActions` (illegal moves rejected); assign a mechanic; Done freezes the job.
+**Exit met** — S2.0b–S2.12 all built and tested (S2.6/S2.9 in their final Design B +
+technician-vocabulary shape); S0.8 deploy **decoupled from sprint exit** and re-parked a
+third time (see its own annotation) — the code exit criterion above doesn't need a live
+URL to be true.
 
 - [x] **S2.0b** ADR-009 destroy guard — replace Devise's stock `DELETE /users` path: bare
       account (no edges, no history) → delete; anything else → refuse with the derived reason
@@ -343,6 +353,17 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       `job_technician_transitions` (direct `job_id` + `workshop_employment_id`, no FK to
       membership; `.current` scope deleted). This tick's annotation stands as the record of
       what S2.6 built; the current shape is [[Event log]]'s supersession note.)*
+      *(**Built 2026-07-17, Session 22, commit `c692451`:** one migration
+      (`rename_job_mechanics_to_design_b`) — `rename_table` ×2 (RLS + FKs ride the rename);
+      transitions gain `job_id`/`workshop_employment_id`, backfilled via one UPDATE join
+      through the old `job_mechanic_id` FK, then that FK dropped; membership rows whose
+      engagement had already `left` are deleted (present-tense semantics start true).
+      Backfill gotcha: both crew tables carry `FORCE ROW LEVEL SECURITY` — even the table
+      owner is policed, so the backfill UPDATE saw zero rows until `NO FORCE`/`FORCE`
+      bracketed the data steps. Models: `.current` scope deleted (the table IS current);
+      `JobTechnicianTransition` has no membership association (self-contained by design).
+      Console-verified: assign→remove shows membership at 0 while `job.timeline` still
+      carries both `joined`/`left` events + the compensating rollback. 51/51 green.)*
 - [x] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
       2026-07-16, Phase 3 rulings: **named verbs, no generic `change_stage!`** — each move is
       its own `def`/`end` block with a first-line stage guard, so the allow-list IS the verb
@@ -412,6 +433,9 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       **deletes** the membership row; the fullness check becomes a bare `exists?` and the
       fresh-`.current`-re-check gotcha dissolves with the scope. Responsibility rule,
       three-rows-one-transaction, and crew-method-private `registered↔assigned` all stand.)*
+      *(**Built 2026-07-17, Session 22, commit `c692451`:** `assign_technician!`/
+      `remove_technician!` shipped in the renamed shape; `job_crew?` predicate simplified
+      to a direct membership join (no `.current`).)*
 - [x] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
       the Job **and** logs the `nil → registered` birth transition, one transaction (clean
       entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to
@@ -443,7 +467,7 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       `turbo_confirm` on mark-done, full register→assign→start→done→deliver lifecycle,
       375px mobile check. JSON responses for door mutations consciously deferred —
       [[Deferred design]].)*
-- [ ] **S2.12** Tests *(respecified 2026-07-17, Session 21 — the ruled ten cases, written
+- [x] **S2.12** Tests *(respecified 2026-07-17, Session 21 — the ruled ten cases, written
       against the post-Design-B/post-rename shape)*: (1) full legal path
       register→assign→start→done→deliver asserting exact stage rows incl. the
       `nil→registered` birth row · (2) every verb refused at every illegal stage — loop over
@@ -460,6 +484,18 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       (10) one Capybara journey: SA registers → assigns → tech starts + marks done (confirm
       dialog) → SA delivers → timeline complete; plus one forged POST → refusal flash,
       not a 500.
+      *(**Built 2026-07-17, Session 22, commits `bee2c2a`.** All ten cases landed:
+      `test/services/job_actions_test.rb` (1–8) + two additions to `test/models/job_test.rb`
+      (9 — `Job.active` and `started_work?` were the only real gaps; canonicalization,
+      timeline order, and current-crew reads were already covered) +
+      `test/system/job_lifecycle_test.rb` (10, two tests). System-test gotcha found and
+      fixed: `page.text` is a raw synchronous read that doesn't wait for Turbo
+      redirects — early debug output raced the page and lied; switched every check to
+      `assert_text`, which polls, matching the S1.14 precedent (async sign-out race) with a
+      sign-in-side twin. Forged-POST gotcha: the XHR itself follows the redirect and Rails'
+      flash sweep clears it there — a later `visit` finds the flash already gone (read-once);
+      asserted on the XHR's own response body instead, which **is** the rendered, redirected
+      page. 64/64 green (61 model/service + 3 system, incl. the pre-existing crew journey).)*
 
 ---
 

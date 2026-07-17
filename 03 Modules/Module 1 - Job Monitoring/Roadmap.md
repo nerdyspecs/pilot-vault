@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-07-17
+updated: 2026-07-17 (Sprint 2 closed)
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -13,8 +13,8 @@ exists; **needs design** = real thinking still required before/while building.
 | #   | Slice                                                        | Status                   |
 | --- | ------------------------------------------------------------- | ------------------------ |
 | 0   | Setup (repo, Rails, Postgres, Devise, deploy skeleton)        | mechanical               |
-| 1   | Engine — Job + stages + transitions + JobStageTransition      | ✅ designed               |
-| 2   | Tenancy + Employment edges + role-gated transitions (ONE DOOR) | ✅ designed               |
+| 1   | Engine — Job + stages + transitions + JobStageTransition      | ✅ **built** (Sprint 2 closed 2026-07-17) |
+| 2   | Tenancy + WorkshopEmployment/WorkshopOwnership edges + role-gated transitions (ONE DOOR) | ✅ **built** (Sprint 2 closed 2026-07-17) |
 | 3   | Live job list & filtering                                     | mostly mechanical        |
 | 4   | Blockers                                                      | ⚠ needs respec at Sprint 3 kickoff |
 | 5   | Acknowledged handoffs + in-app inbox                          | ✅ designed              |
