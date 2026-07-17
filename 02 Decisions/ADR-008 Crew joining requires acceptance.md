@@ -80,3 +80,10 @@ core (Ownership vs Employment split, thin User, one access door) — only its on
 ## Related
 - [[ADR-006 Ownership separate from Employment]] · [[ADR-005 Acknowledged handoffs in V1]] ·
   [[ADR-007 Row-Level Security pulled into Sprint 1]] · [[Positioning]] · [[Sprint plan]]
+
+---
+**Footnote 2026-07-17 (Session 21) — edge models renamed, decision unchanged.** `Employment` →
+`WorkshopEmployment`, `Ownership` → `WorkshopOwnership` (tables/FKs follow): organisation-prefixed
+naming, mirroring the v2 fleet edges (`CompanyEmployment` / `CompanyOwnership`-style, one
+reusable organisation─membership─governance pattern, never one table). Every clause of this
+ADR reads with the new names; nothing else changes.

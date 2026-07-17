@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-16
+updated: 2026-07-17 (Design B crew restructure)
 ---
 # Event log
 The immutable, timestamped history that powers all the time math. **Append-only — never edited.**
@@ -16,14 +16,28 @@ ack pair** (`acknowledged_at` / `acknowledged_by` — lit in Sprint 4,
 mutation** on any tracker row — everything else is write-once, which is what makes
 append-only a discipline the schema helps hold rather than fights.
 
+**⚠ Superseded in part 2026-07-17 (Session 21, "Design B" — crew only).** The "entities are
+written once" claim narrowed for crew: the crew entity is now a **present-tense membership
+table** (`job_technicians` — a row means "on this job's crew right now"; created on assign,
+**deleted** on remove), and its event table (`job_technician_transitions`) became
+**self-contained** — each event carries `job_id` + `workshop_employment_id` directly, so
+history never depends on a membership row surviving. What makes the deletion safe is this
+note's own insight: **the events carry the complete history** — "who was ever on this job,
+when" is answered by the log; "who is on it now" by the table. **Append-only binds the event
+log, always; membership is a read model.** The ack pair remains the only designed mutation
+on any *event* row. Stage and blocker trackers are untouched: `Job` is never deleted, and
+Sprint 3's `JobBlocker` items stay written-once (an item's lifecycle lives in its events).
+
 ## What's recorded
 Three axes:
 - **Stage changes** — `Job` (the entity) + `JobStageTransition` (`from`, `to`, who, when).
-- **Crew** — `JobMechanic` (the engagement: "Ah Boy on WVK 3721"; the same person can have
-  several over a job's life — count engagements, not events) + `JobMechanicTransition`
-  (`joined` / `left` events). *(Split from one table 2026-07-16: a leave needs its own
-  receipt — one ack pair can't shake hands twice — and the old `removed_at` was a timeline
-  event hiding in a column mutation, the same smell as editing history.)*
+- **Crew** — `JobTechnician` (membership: "Ah Boy is on WVK 3721 *right now*") +
+  `JobTechnicianTransition` (`joined` / `left` events — the full history, self-contained).
+  *(Split from one table 2026-07-16: a leave needs its own receipt — one ack pair can't
+  shake hands twice — and the old `removed_at` was a timeline event hiding in a column
+  mutation, the same smell as editing history. Restructured to Design B + renamed
+  mechanic→technician 2026-07-17 — see the supersession note above. A returning technician's
+  stints are counted from the event pairs, not membership rows.)*
 - **Blocker raise/resolve** — catalog + `JobBlocker` items + `JobBlockerTransition` events.
   Sprint 3; see [[Blocker]] (items are independent — two subcons on one car — each with its
   own raise/resolve cycle).
@@ -63,24 +77,29 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
 - The full audit answer to "what happened to this job, and when?"
 
 ## Rules
-- Append-only; no silent or retroactive edits. Corrections and retractions are **compensating
-  events** (a `left` row, a backward stage move) — never deletes.
+- **The event log is append-only**; no silent or retroactive edits. Corrections and
+  retractions are **compensating events** (a `left` row, a backward stage move) — never
+  deletes. *(2026-07-17: "never deletes" binds the event tables; the crew membership table
+  is a present-tense read model whose rows may be deleted — the events keep the history.)*
 - Log the **initial entry into Registered** (a `nil → Registered` row at creation) so every
   stage has a clean entry timestamp.
-- An engagement asserts **responsibility, not real-time presence** — see
+- A crew membership asserts **responsibility, not real-time presence** — see
   [[M1-F1 Status flow and transitions]] (the removal-legality rule).
 
 ## In Rails
 - `JobStageTransition`: `workshop_id, job_id, from_stage` (null only on the birth row),
   `to_stage, created_by, created_at, acknowledged_at, acknowledged_by`.
-- `JobMechanic` (engagement): `workshop_id, job_id, employment_id, created_at` — **no ack
-  columns; no `lead` flag in v1** (deferred with helpers, [[Deferred design]]). Current crew =
-  engagements with no `left` event — a query, not a column. *(2026-07-16, Session 19:
-  `user_id` → `employment_id` — an engagement is held by a stint; actor columns
-  (`created_by`/`acknowledged_by`) stay User, owners act but hold no employment. The
-  actor/holder split — [[Data model]] §Resolved.)*
-- `JobMechanicTransition`: `workshop_id, job_mechanic_id, action (joined | left), created_by,
-  created_at, acknowledged_at, acknowledged_by`.
+- `JobTechnician` (membership): `workshop_id, job_id, workshop_employment_id, created_at` —
+  unique `(job_id, workshop_employment_id)`; **no ack columns; no `lead` flag in v1**
+  (deferred with helpers, [[Deferred design]]). **Current crew = the table itself** — rows
+  are created on assign and deleted on remove (Design B, 2026-07-17; replaced the
+  no-`left`-event `.current` subquery). Points at the **stint** (`workshop_employment_id`,
+  not `user_id` — the actor/holder split, [[Data model]] §Resolved); actor columns
+  (`created_by`/`acknowledged_by`) stay User everywhere — owners act but hold no employment.
+- `JobTechnicianTransition` (self-contained history): `workshop_id, job_id,
+  workshop_employment_id, action (joined | left), created_by, created_at, acknowledged_at,
+  acknowledged_by` — relates to membership only by the composite key, never an FK, so
+  history survives the membership row's deletion. Read via `Job#timeline` or the employment.
 - `JobBlocker` + `JobBlockerTransition` — Sprint 3; column detail in [[Blocker]].
 
 The **"waiting on me" inbox** = one query across the event tables via **the handoff predicate**

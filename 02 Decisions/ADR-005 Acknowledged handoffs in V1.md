@@ -69,3 +69,11 @@ handoff predicate (a bare NULL check overcounts; NULL also means "never was a ha
 
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[M1-F1 Status flow and transitions]] · [[Event log]] · [[Blocker]] · [[Data model]] · [[Design laws]]
+
+**Footnote 2026-07-17 (Session 21) — names only, decision unchanged.** The crew tracker was
+restructured to "Design B" and renamed mechanic→technician: the 2026-07-16 footnote's
+`JobMechanic`/`JobMechanicTransition` are now `JobTechnician` (present-tense membership,
+deleted on remove) / `JobTechnicianTransition` (self-contained history). This *tightens* this
+ADR again: the ack pair lives exclusively on event rows, and event rows are now the sole
+permanent crew record. Edge models also renamed (`WorkshopEmployment`/`WorkshopOwnership`).
+See [[Event log]].

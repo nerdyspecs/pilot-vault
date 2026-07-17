@@ -110,3 +110,10 @@ account-enumeration oracle — [[Risk ledger]] R10, accepted for v1). If worksho
 DB-level hiding, the shape is an edge-based `own_rows`-species policy
 (`id IN (my ownerships/employments)`) — but v1 has no surface that lists workshops bare, so
 it buys nothing today. See [[Job visibility]] for the per-party map on the policed side.
+
+**2026-07-17 (Session 21) — edge models renamed.** `Employment` → `WorkshopEmployment`,
+`Ownership` → `WorkshopOwnership` (organisation-prefixed, mirrors the v2 fleet edges).
+The policies this ADR describes ride `rename_table` untouched — Postgres keeps
+policies/FKs bound through renames; only index names are refreshed in the same migration
+for tidiness. Table names in the examples above read as the old names — the record of what
+was built; the live names are `workshop_employments` / `workshop_ownerships`.

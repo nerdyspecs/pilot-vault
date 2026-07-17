@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-17 (Session 21 — S2.11 ticked)
+updated: 2026-07-17 (Session 21 — Design B/rename supersessions, S2.12 respec, S0.8 Heroku)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -74,6 +74,14 @@ that ends in something demoable.
       *(2026-07-14: S1.12 long since passed, still un-deployed — builder re-parked to
       **Sprint 2's exit** instead: ship the tenancy spine together with a demoable job
       engine, one deploy instead of two. Prereqs unchanged.)*
+      *(2026-07-17, Session 21 — **Heroku ruled** (builder: familiarity; the RLS axis was a
+      tie — managed PG grants no superuser/BYPASSRLS anywhere, and `FORCE ROW LEVEL
+      SECURITY` is already on every policed table). Shape: Procfile — not `render.yaml` as
+      the task line originally said — + release-phase `db:migrate` (`structure.sql` loads
+      fine); Eco dyno + Mini Postgres ≈ $10/mo floor, US/EU-region latency accepted.
+      Deploy-day proof: `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname =
+      current_user` + an unset-GUC zero-rows smoke test. Re-verify current Heroku
+      pricing/docs live before deploy day.)*
 - [x] **S0.9** First commit(s), tagged `S0`. *(2026-07-08: branches unified — `v1-db-setup`
       fast-forwarded into `main` and deleted; `main` = `fc821b7` pushed to private GitHub +
       annotated tag `S0`. Note: GitHub immediately opened 3 dependabot PRs (Rails 8.1.3 +
@@ -330,6 +338,11 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       → **`employment_id`** — an engagement is held by a *stint*, not a login; actor/audit
       columns stay User. The actor/holder split + the append-only-employments pin:
       [[Data model]] §Resolved.)*
+      *(**⚠ Superseded in part 2026-07-17, Session 21 "Design B":** engagement → present-tense
+      **membership** `job_technicians` (deleted on remove); events → self-contained
+      `job_technician_transitions` (direct `job_id` + `workshop_employment_id`, no FK to
+      membership; `.current` scope deleted). This tick's annotation stands as the record of
+      what S2.6 built; the current shape is [[Event log]]'s supersession note.)*
 - [x] **S2.7** **`JobActions`** (ONE DOOR) — the class + the stage verbs *(respecified
       2026-07-16, Phase 3 rulings: **named verbs, no generic `change_stage!`** — each move is
       its own `def`/`end` block with a first-line stage guard, so the allow-list IS the verb
@@ -394,6 +407,11 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       the assignee's **Employment** — `ensure_active_technician!` returns the stint the
       engagement belongs to; crew lookups join through `employments`. `employment.jobs`
       now answers "work done this stint" directly. See [[Data model]] §Resolved.)*
+      *(**⚠ Superseded in part 2026-07-17, Session 21 "Design B":** verbs renamed
+      `assign_technician!`/`remove_technician!`; removal now writes the `left` event then
+      **deletes** the membership row; the fullness check becomes a bare `exists?` and the
+      fresh-`.current`-re-check gotcha dissolves with the scope. Responsibility rule,
+      three-rows-one-transaction, and crew-method-private `registered↔assigned` all stand.)*
 - [x] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
       the Job **and** logs the `nil → registered` birth transition, one transaction (clean
       entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to
@@ -425,11 +443,23 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       `turbo_confirm` on mark-done, full register→assign→start→done→deliver lifecycle,
       375px mobile check. JSON responses for door mutations consciously deferred —
       [[Deferred design]].)*
-- [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·
-      assignment one-motion (three rows, one transaction) · `nil→registered` logged ·
-      join/leave receipts (ack pair on **events**, never the engagement) · removal legality
-      (responsibility rule: last-mechanic removal refused once `in_progress` was ever touched;
-      compensating rollback fires when legal).
+- [ ] **S2.12** Tests *(respecified 2026-07-17, Session 21 — the ruled ten cases, written
+      against the post-Design-B/post-rename shape)*: (1) full legal path
+      register→assign→start→done→deliver asserting exact stage rows incl. the
+      `nil→registered` birth row · (2) every verb refused at every illegal stage — loop over
+      stages, the allow-list under test · (3) Done freeze: only `deliver!` accepts `done`,
+      nothing accepts terminals · (4) role gating: counter verbs refuse
+      technician/parts advisor, floor verbs refuse a technician not on this job's crew,
+      manager/owner pass everywhere · (5) assignment = three rows one transaction; a refused
+      assign writes zero rows (`assert_no_difference`) · (6) birth row + busy-vehicle guard
+      · (7) removal legality: legal at untouched-`assigned` (membership deleted + `left`
+      event + compensating `assigned→registered`), refused after `send_back!`
+      (`started_work?` is history) · (8) schema assertion: ack pair on transition tables
+      only, never membership · (9) model tests: Customer/Vehicle canonicalization,
+      `Job.active`, `started_work?`, `timeline` merge order, current-crew read ·
+      (10) one Capybara journey: SA registers → assigns → tech starts + marks done (confirm
+      dialog) → SA delivers → timeline complete; plus one forged POST → refusal flash,
+      not a 500.
 
 ---
 
@@ -459,11 +489,16 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
 (partial-adoption) before building** ([[Product gaps]]). **Exit:** handoffs land in the receiver's inbox; ack clears them; stale ones flag.
 
 - [ ] **S4.1** `JobActions#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on an
-      **event row**: `JobStageTransition` / `JobMechanicTransition` / `JobBlockerTransition`.
+      **event row**: `JobStageTransition` / `JobTechnicianTransition` / `JobBlockerTransition`.
       *(2026-07-17 correction: pre-restructure wording said `JobMechanic` — engagements carry
-      **no ack columns** after the 2026-07-16 tracker split; acks live only on events — [[Event log]].)*
-- [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · mechanic added →
-      that mechanic · blocker raised → the `cleared_by_role` holder(s).
+      **no ack columns** after the 2026-07-16 tracker split; acks live only on events — [[Event log]].
+      Names updated to Design B, Session 21.)*
+- [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · technician added →
+      that technician · blocker raised → the `cleared_by_role` holder(s).
+      *(⚠ design-pass item, noted 2026-07-17: a technician **removed before acking their
+      `joined` event** — the debt's receiver is no longer on the crew; decide whether the
+      dropped-handoff debt dies with the removal or stays owed. Exists in both crew designs;
+      the events survive removal (Design B self-containment), so either answer is buildable.)*
 - [ ] **S4.3** "Waiting on me" query across the event tables — via **the handoff predicate**
       (`.pending_ack`, design-pass item named 2026-07-16): unacked AND not-self-caused AND
       role-resolved to me, in ONE shared scope used by inbox, manager board, and limbo flag

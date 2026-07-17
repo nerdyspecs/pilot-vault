@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-16
+updated: 2026-07-17 (Design B crew names)
 ---
 # Job
 A single repair/service instance for one vehicle. The centre of Module 1.
@@ -12,8 +12,9 @@ as "double-stamped" 2026-07-16 and corrected — the customer stamp landed 2026-
 ## A Job always knows
 - **Stage** — where it is in the work (exactly one). See [[Stage model]].
 - **Active blockers** — what's pausing it, if anything (**can be several**). See [[Blocker]].
-- **Crew** — which mechanic is **responsible** for it (single mechanic in v1; helpers + `lead`
-  flag deferred). An engagement asserts responsibility, not real-time presence. See [[Event log]].
+- **Crew** — which technician is **responsible** for it (single technician in v1; helpers +
+  `lead` flag deferred). A membership asserts responsibility, not real-time presence.
+  See [[Event log]].
 - **Responsible owner** — who is accountable *right now*. Shifts to the resolver(s) of any active blocker while blocked.
 - **History** — the immutable trail of stage changes, blockers, and crew. See [[Event log]].
 
@@ -37,9 +38,10 @@ without ever moving its stage.
 - `Job has_many :job_stage_transitions` — stage events + ack (see [[Event log]])
 - `Job has_many :job_blockers` (+ their `job_blocker_transitions`) — blocker items + events
   (Sprint 3); **active blockers** = items with no resolve (a query, can be several)
-- `Job has_many :job_mechanics` (+ their `job_mechanic_transitions`) — crew engagements +
-  joined/left events; current crew = engagements with no `left` event (a query); no `lead`
-  flag in v1 ([[Deferred design]])
+- `Job has_many :job_technicians` — the crew **right now** (membership rows, deleted on
+  remove — Design B 2026-07-17); no `lead` flag in v1 ([[Deferred design]])
+- `Job has_many :job_technician_transitions` — joined/left **history**, a direct
+  association (events are self-contained; no longer reached `:through` membership)
 - `Job#timeline` — the event tables merged by timestamp (see [[Event log]])
 - `Job has_many :job_sheet_field_values` — this car's jobsheet answers (see [[Data model]])
 - **Immutable once Done** — answers/history frozen; corrections open a new job ([[Design laws]] #8)

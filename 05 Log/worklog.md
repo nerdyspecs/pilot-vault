@@ -1,11 +1,38 @@
 ---
 type: log
-updated: 2026-07-17 (Session 21, addendum — Sprint 2 completion review rulings)
+updated: 2026-07-17 (Session 21, addendum 3 — vault half of the close-out plan landed)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-17 · Session 21 addendum 3 — the vault half of the close-out plan, landed
+
+**Summary.** The rulings from addenda 1–2 are now written into the docs they bind, ahead of
+any app code (house discipline: the spec is true before the build starts). One commit.
+- **Design B** recorded as a dated partial supersession of Session 17: [[Event log]] (the
+  careful one — "entities written once" narrowed to *crew membership is a present-tense read
+  model; append-only binds the event log, always*; In-Rails shapes for `job_technicians` +
+  self-contained `job_technician_transitions`), [[M1-F1 Status flow and transitions]] (crew
+  bullet + verb renames), [[Job]], [[Data model]] (diagram + trackers bullet).
+- **Edge rename** (`WorkshopEmployment`/`WorkshopOwnership`): dated footnotes on ADR-004/
+  006/007/008 (decisions unchanged, names only; ADR-007 notes policies ride `rename_table`);
+  [[Data model]] entities + diagram; CLAUDE.md invariants. Design laws needed nothing —
+  law #1 names no tables. **Pinned in [[Data model]] §Resolved: "holdings point at the
+  stint, actions point at the person."**
+- Also landed: [[Deferred design]] crew entries updated (the `lead` flag lives on membership
+  rows; swap verb names); Sprint plan — S2.6/S2.9 tick annotations get supersession pointers
+  (history preserved, current truth linked), **S2.12 respecified to the ruled ten cases**,
+  S4.1/S4.2 names + the new ⚠ S4 design-pass item (technician removed before acking their
+  `joined` — decide if the debt dies with removal), **S0.8 Heroku ruling** recorded
+  (Procfile not render.yaml, release-phase migrate, deploy-day RLS proof).
+- Fixed in passing: [[Data model]]'s diagram still listed `owner` in the role enum — stale
+  since ADR-006 removed it; caught while redrawing.
+- Open for the coding plan: the Mechanic-vs-Technician **user-facing label** question
+  (internals say technician; screens currently say "Mechanic") — builder rules at plan time.
 
 ---
 

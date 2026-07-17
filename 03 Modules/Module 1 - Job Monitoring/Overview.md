@@ -21,9 +21,12 @@ A job's situation is two axes plus a history:
 - [[Data model]] — customers, vehicles, jobsheets (who owns it / who we talk to)
 
 ## Roles
-Five roles, on **Employment** (not on User): technician, service_advisor, parts_advisor,
-workshop_manager, owner. workshop_manager/owner are explicit god-mode. Full matrix in
-[[M1-F1 Status flow and transitions]].
+Four roles, on **WorkshopEmployment** (not on User): technician, service_advisor,
+parts_advisor, workshop_manager. The **owner** is not a role — it's the separate
+**WorkshopOwnership** governance edge (ADR-006; a working owner holds both).
+workshop_manager/owner are explicit god-mode. Full matrix in
+[[M1-F1 Status flow and transitions]]. *(2026-07-17: stale "five roles incl. owner" fixed —
+predated ADR-006; edge names updated in the same pass.)*
 
 ## Features
 - [[M1-F1 Status flow and transitions]] — role-gated stage transitions + acknowledged handoffs *(first build)*

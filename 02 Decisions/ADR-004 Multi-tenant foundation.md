@@ -61,3 +61,10 @@ RLS-first, and more.
 
 ## Related
 - [[ADR-001 Core stack]] · [[Design laws]] · [[Rejected alternatives]] · [[Data model]]
+
+---
+**Footnote 2026-07-17 (Session 21) — edge models renamed, decision unchanged.** `Employment` →
+`WorkshopEmployment`, `Ownership` → `WorkshopOwnership` (tables/FKs follow): organisation-prefixed
+naming, mirroring the v2 fleet edges (`CompanyEmployment` / `CompanyOwnership`-style, one
+reusable organisation─membership─governance pattern, never one table). Every clause of this
+ADR reads with the new names; nothing else changes.

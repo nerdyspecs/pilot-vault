@@ -76,3 +76,10 @@ per-request re-verification) is unchanged.
 
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[ADR-008 Crew joining requires acceptance]] · [[Design laws]] · [[Positioning]] · [[Sprint plan]]
+
+---
+**Footnote 2026-07-17 (Session 21) — edge models renamed, decision unchanged.** `Employment` →
+`WorkshopEmployment`, `Ownership` → `WorkshopOwnership` (tables/FKs follow): organisation-prefixed
+naming, mirroring the v2 fleet edges (`CompanyEmployment` / `CompanyOwnership`-style, one
+reusable organisation─membership─governance pattern, never one table). Every clause of this
+ADR reads with the new names; nothing else changes.

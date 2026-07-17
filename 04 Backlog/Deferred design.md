@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-17 (Session 21 — JSON door responses entry)
+updated: 2026-07-17 (Session 21 — Design B notes on crew entries)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -79,7 +79,11 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   v1 mechanic *was* the lead). Named `lead`, not `primary`: PRIMARY is a reserved SQL keyword
   (quoting tax on the raw-psql audit sweeps run every session) and reads ambiguously next to
   "primary key". **Naming settled now so it isn't re-litigated.** See
-  [[M1-F1 Status flow and transitions]] Settled 2026-07-16.
+  [[M1-F1 Status flow and transitions]] Settled 2026-07-16. *(2026-07-17, Design B: when it
+  lands, the `lead` flag lives on **membership rows** (`job_technicians`) — current stints
+  only; past stints are event pairs and carry no flag. `default: true` still honestly
+  backfills — every membership row that exists at flag-time is a v1 single-technician crew's
+  lead. Table renamed from `job_mechanics` in the same restructure.)*
 - **Crew self-join / self-leave (2026-07-16).** The event shape supports it (`joined`/`left`
   events don't care who `created_by` is — the receiver derivation already handles "the party
   who didn't act"), but v1 capability is counter-only: one `ensure_counter!` guard in the
@@ -97,9 +101,10 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   manager/owner exemption in the crew gate means a manager can still drive a stuck job to
   `done` themselves — the workshop is never trapped, the job just keeps naming the sick tech
   as responsible. **Trigger to revisit:** the first real mid-job handover need from the
-  floor. When it lands it's one door verb (old `left` + new engagement/`joined`, one
-  transaction) — purely additive. See [[M1-F1 Status flow and transitions]] Settled
-  2026-07-16 (Phase 3).
+  floor. When it lands it's one door verb (old member's `left` + row deleted, new member +
+  `joined`, one transaction — Design B shape, 2026-07-17; crew verbs now named
+  `assign_technician!`/`remove_technician!`) — purely additive. See
+  [[M1-F1 Status flow and transitions]] Settled 2026-07-16 (Phase 3).
 - **Token page × RLS — how the note reaches Postgres (2026-07-14).** The Sprint 7 status page
   is unauthenticated: no `app.user_id`, no `app.workshop_id` — under fail-closed RLS the page
   can't even look up the job by token (zero rows). Needs its own read key at build time: either

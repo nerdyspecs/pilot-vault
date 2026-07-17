@@ -35,7 +35,13 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 - **Crew tracker split — entity + event log** ([[Event log]]): `JobMechanic` (engagement) +
   `JobMechanicTransition` (`joined`/`left` events, each with author + ack pair). Assignment =
   one transaction, three rows (engagement + `joined` + stage transition). Removal writes a
-  `left` event — compensating events, never deletion.
+  `left` event — compensating events, never deletion. *(⚠ Superseded in part 2026-07-17,
+  Session 21 "Design B": the engagement became a **present-tense membership** —
+  `JobTechnician`, deleted on remove — and the events (`JobTechnicianTransition`) became
+  self-contained history carrying `job_id` + `workshop_employment_id` directly.
+  "Never deletion" now binds the event log only. Vocabulary unified to **technician**
+  (matches the role enum). Three-rows-one-transaction and the ack shape stand. See
+  [[Event log]]'s supersession note.)*
 - **Only the counter touches crew in v1**: service_advisor + workshop_manager/owner
   assign/remove — one `ensure_counter!` guard in the door. Self-join/leave is
   schema-supported but **capability-deferred** ([[Deferred design]]); waking it supersedes
@@ -75,7 +81,8 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 - **Named verbs, no generic `change_stage!`.** The door's public surface is **eight** bang
   methods — `register_job!`, `assign_mechanic!`, `remove_mechanic!`, `start_work!`,
   `mark_done!`, `deliver!`, `send_back!`, `cancel!` — each its own `def`/`end` block with a
-  first-line stage guard. The allow-list **is** the verb set: no verb accepts `done` except
+  first-line stage guard. *(2026-07-17: crew verbs renamed `assign_technician!` /
+  `remove_technician!` — vocabulary unified to technician, Session 21.)* The allow-list **is** the verb set: no verb accepts `done` except
   `deliver!`, none accepts `delivered`/`cancelled` — the Done-freeze is structural, not a
   checked rule. Refusals raise `JobActions::Refused` (human message); every verb wraps
   read-check-write in `job.with_lock` (the row-lock deferral **woken** — [[Deferred design]]).
@@ -99,8 +106,9 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   `delivered`). Softened with a confirm dialog in S2.11.
 - **Positioning invariant (pinned):** Knot tracks **job statuses**, never real-time tech
   activity. Many `in_progress` jobs per tech is normal; no pause/resume ever joins the stage
-  axis. Per-tech workload is a query (`joins job_mechanics` merged with
-  `JobMechanic.current`) feeding S5.2 — zero Phase 3 work.
+  axis. Per-tech workload is a query feeding S5.2 — zero Phase 3 work. *(2026-07-17,
+  Design B: even simpler — `joins :job_technicians`; membership IS the current crew,
+  no `.current` merge needed.)*
 
 ## Permission matrix (v1)
 | Role | Stage transitions (via ONE DOOR) | Blockers | Crew |
@@ -112,7 +120,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 | owner | all | all (overrides any blocker's role fields) | all |
 
 - **Stages:** Registered → Assigned → In-Progress → Done → Delivered, + **Cancelled** (see [[Stage model]]).
-- **Assignment** = one motion, three rows *(2026-07-16)*: `JobMechanic` engagement + its
+- **Assignment** = one motion, three rows *(2026-07-16; names per Design B 2026-07-17)*: `JobTechnician` membership + its
   `joined` event + the Registered → Assigned stage transition, one transaction.
 - **Blockers** — who can raise/clear which blocker type is data on the [[Blocker]] catalog
   (`raised_by_role` / `cleared_by_role`), not hardcoded here. `workshop_manager`/`owner` always override.
@@ -145,7 +153,7 @@ Inbox ("waiting on me") = a query across the event tables via the **handoff pred
 
 ## Acceptance (draft)
 - [ ] A job moves through the stages; each transition permitted only for the right role.
-- [ ] Assignment creates a `JobMechanic` + moves stage in one motion; the mechanic acknowledges.
+- [ ] Assignment creates a `JobTechnician` + moves stage in one motion; the technician acknowledges (the `joined` event).
 - [ ] A raised blocker checks the catalog's `raised_by_role`; resolving checks `cleared_by_role`.
 - [ ] Illegal transitions rejected; a Done job rejects all edits.
 - [ ] Every transition writes a `JobStageTransition`.

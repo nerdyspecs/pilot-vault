@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-16
+updated: 2026-07-17 (edge rename + Design B)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -12,8 +12,9 @@ live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is th
 
 ## Entities (v1)
 ```
-User (thin login) ─*─ Employment ─*─ Workshop (tenant)
-      role: technician | service_advisor | parts_advisor | workshop_manager | owner
+User (thin login) ─*─ WorkshopEmployment ─*─ Workshop (tenant)
+      role: technician | service_advisor | parts_advisor | workshop_manager
+User (thin login) ─*─ WorkshopOwnership ─*─ Workshop   (governance — ADR-006)
 
 Workshop ─*─ Customer (person | company; name, phone, email)
 Workshop ─*─ Vehicle ── belongs_to Customer (required)
@@ -21,17 +22,25 @@ Vehicle  ─*─ Job     ── triple-stamped: workshop_id + vehicle_id + custo
 Job      ─*─ JobSheetFieldValue
 Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
 
-Job      ─*─ JobStageTransition                     (stage events + ack)
-Job      ─*─ JobMechanic ─*─ JobMechanicTransition  (crew engagement + joined/left events)
-              └ belongs_to Employment   (the stint, not the login — 2026-07-16, see Resolved)
-Job      ─*─ JobBlocker ─*─ JobBlockerTransition    (blocker items + events — Sprint 3)
+Job      ─*─ JobStageTransition                 (stage events + ack)
+Job      ─*─ JobTechnician                      (crew membership NOW — deleted on remove)
+              └ belongs_to WorkshopEmployment   (the stint, not the login — see Resolved)
+Job      ─*─ JobTechnicianTransition            (joined/left history — self-contained:
+              carries job_id + workshop_employment_id directly; no FK to membership)
+Job      ─*─ JobBlocker ─*─ JobBlockerTransition (blocker items + events — Sprint 3)
               └ belongs_to Blocker
-Workshop ─*─ Blocker                                (workshop's blocker catalog)
+Workshop ─*─ Blocker                            (workshop's blocker catalog)
 ```
+*(2026-07-17, Session 21: edges renamed `Employment`→`WorkshopEmployment`,
+`Ownership`→`WorkshopOwnership` — organisation-prefixed, mirroring v2's
+`CompanyEmployment`/`CompanyOwnership`; crew tracker restructured to "Design B" —
+membership + self-contained events, technician vocabulary; a stale `owner` in the role
+list above was also dropped, removed by ADR-006 long before.)*
 
 - **User** — global, thin Devise login. No role, no org. Roles live on **Employment** ([[Design laws]] #1).
 - **Workshop** — the tenant. Every tenant row carries `workshop_id`, queried via `Current.workshop` ([[Design laws]] #2).
-- **Employment** — User↔Workshop edge + role + `ended_at`. See [[ADR-004 Multi-tenant foundation]].
+- **WorkshopEmployment** — User↔Workshop edge + role + `ended_at` (renamed from `Employment`
+  2026-07-17; `WorkshopOwnership` likewise from `Ownership`). See [[ADR-004 Multi-tenant foundation]].
 - **Customer** — tenant-scoped owner *record* (not a login). `kind: person | company`; holds `name, phone, email` directly.
   **Phone is required** *(builder ruling 2026-07-15: no customer without a phone — it's the
   person-lookup key ([[Intake flow]]) and the notification channel; NOT NULL + validation,
@@ -42,10 +51,12 @@ Workshop ─*─ Blocker                                (workshop's blocker cata
 - **Job** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
   registration — see Resolved below). The tracked unit ([[Job]]). Per-visit.
 - **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).
-- **Trackers — entity + event log** *(restructured 2026-07-16)*: `JobMechanic` (engagement)
-  + `JobMechanicTransition` (joined/left); `JobBlocker` (item) + `JobBlockerTransition`
-  (Sprint 3); stage events ride `Job` itself via `JobStageTransition`. Ack columns live on
-  **event rows only**, never entities ([[Event log]], [[ADR-005 Acknowledged handoffs in V1]]).
+- **Trackers** *(restructured 2026-07-16; crew re-restructured to Design B 2026-07-17)*:
+  `JobTechnician` (present-tense membership, deleted on remove) + `JobTechnicianTransition`
+  (self-contained joined/left history); `JobBlocker` (item, written once) +
+  `JobBlockerTransition` (Sprint 3); stage events ride `Job` itself via `JobStageTransition`.
+  Ack columns live on **event rows only**, never membership/items ([[Event log]],
+  [[ADR-005 Acknowledged handoffs in V1]]).
 - **Blocker** — the workshop's catalog of blocker types, each with `raised_by_role`/`cleared_by_role` (seed "Hold For Payment"); all state lives in `JobBlockerTransition` ([[Blocker]]).
 
 ## The jobsheet — a configurable inspection form
@@ -67,7 +78,7 @@ its answers are frozen** — corrections open a new job ([[Design laws]] #8). Pe
 are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 
 ## A Job's two responsibility sides
-- **Internal** — which staff/role acts. Resolved by Employment role; all changes via ONE DOOR ([[M1-F1 Status flow and transitions]]).
+- **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via ONE DOOR ([[M1-F1 Status flow and transitions]]).
 - **External** — who we notify. v1: the Customer's own `phone`/`email` + the job's token link.
 
 ## Resolved
@@ -87,13 +98,17 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
   the job's notification target ("External" side) against mid-job reassignment. A
   `VehicleOwnership` period-edge table was considered and rejected for v1 (over-engineering).
 - **Who tracker rows point at — the actor/holder split** *(2026-07-16, builder ruling,
-  Session 19; app commit `6799438`)*. Two different questions, two different FK targets:
-  - **Engagements point at `Employment`** (`job_mechanics.employment_id`, not `user_id`).
-    A crew engagement is a *responsibility held by a stint* — "Ah Boy-as-technician-here",
+  Session 19; app commit `6799438`)*. **Pinned as the general law (2026-07-17): holdings
+  point at the stint, actions point at the person.** Two different questions, two different
+  FK targets:
+  - **Crew rows point at `WorkshopEmployment`** (`workshop_employment_id`, not `user_id`) —
+    both the membership and its history events, post-Design-B. A crew membership is a
+    *responsibility held by a stint* — "Ah Boy-as-technician-here",
     not "login #42". No owner gap: every legal assignee holds an active technician
     employment by the door's own guard. Payoff is direct stint attribution —
-    `employment.jobs` answers "what did he do while employed here"; a re-employed mechanic's
-    two stints each own their jobs; an engagement pointing at an ended employment reads
+    `workshop_employment.jobs` answers "what did he do while employed here" (current work
+    via membership; full per-stint history via the events); a re-employed technician's
+    two stints each own their work; an event pointing at an ended employment reads
     truthfully as history.
   - **Actor/audit columns stay `User`** (`created_by`/`acknowledged_by` on all event
     tables). Actions are taken by *people*, and owners act through the door constantly but
@@ -105,9 +120,10 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
     employments are append-only**, the invariant this ruling makes load-bearing (below).
 - **Employments are append-only** *(pinned 2026-07-16, now load-bearing)*: terminate =
   `end!` (sets `ended_at`), role change = end + new row, **delete = never** once referenced
-  — engagements FK to employments, so deletion would orphan job history. Enforced twice:
-  `dependent: :restrict_with_error` + the DB FK. If in-place role edits ever appear, the
-  audit story above collapses — don't.
+  — crew rows FK to employments *(post-Design-B: membership AND every history event —
+  the history FK makes this pin harder, not softer)*, so deletion would orphan job history.
+  Enforced twice: `dependent: :restrict_with_error` + the DB FKs. If in-place role edits
+  ever appear, the audit story above collapses — don't.
 
 ## v2 — additive, do not build
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.
