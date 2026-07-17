@@ -120,10 +120,35 @@ Sprint 3 kickoff before the first blocker migration). Rulings, in discussion ord
 Review findings: finding 1 (the mechanics controller's single-mechanic `.current.first`)
 is **mooted by Design B** — `job.job_mechanics.first` becomes plainly correct. Finding 2
 (`Job#timeline` merges/sorts in Ruby — fine per job, must never be called in a loop; Sprint
-8 reports get their own SQL per Design law #3) — proposed as a pin in the S8 design-pass
-line, **not yet ruled**. Also open, one-liners: the builder's sketch said `job_technicians`
-— casual or a table-rename wish? And the Sprint-4 edge (a mechanic removed before acking
-their `joined` event) exists in both designs — note for the S4 design pass.
+8 reports get their own SQL per Design law #3) — proposed as a Sprint-plan pin; **builder
+ruled: skip** — left to the S8 design pass. The Sprint-4 edge (a mechanic removed before
+acking their `joined` event) exists in both designs — note for the S4 design pass.
+
+**Addendum 2 — plan-readiness rulings (the five naming/scope decisions closed).**
+1. **FK columns follow the rename:** `employment_id` → `workshop_employment_id` on the two
+   crew tables (the only tables carrying it post-restructure; nothing references
+   `ownerships`). Zero `foreign_key:` overrides left behind.
+2. **Full Ruby sweep, no aliases:** associations (`user.workshop_employments`),
+   `Current.workshop_employment` / `Current.workshop_ownership`, every call site — one
+   vocabulary everywhere; table-only renames would recreate the founder-incident smell.
+3. **Crew vocabulary unified: technician.** The builder's `job_technicians` sketch surfaced
+   a pre-existing split — the role enum and assignee guard said *technician*
+   (`role: :technician`, `ensure_active_technician!`) while the crew tables and verbs said
+   *mechanic* (`JobMechanic`, `assign_mechanic!`). Ruled while the table is being rebuilt
+   anyway: **align to technician** — `job_technicians` + `job_technician_transitions`
+   tables, `JobTechnician` / `JobTechnicianTransition` models, door verbs
+   **`assign_technician!`** / **`remove_technician!`**, `Jobs::TechniciansController`.
+   M1-F1 / Event log / Data model wording gets dated notes with the build. (Open one-liner
+   for plan time: user-facing view labels — keep "mechanic" as natural workshop language
+   over technician internals (the Pilot/Knot precedent), or say technician everywhere.)
+4. **No membership→events association:** under Design B, events relate to a membership row
+   only by composite `(job_id, employment)` — no fake FK association; events are read via
+   `Job#timeline` or the employment.
+5. **Sequencing accepted:** crew restructure → edge rename → S2.12 (against the final
+   shape) → S0.8 Heroku deploy. Rename-after-restructure means the sweep also catches the
+   new transition columns.
+No code this session; the full carry-back for the main session's coding plan was produced
+at session close.
 
 ---
 
