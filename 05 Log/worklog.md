@@ -1,11 +1,66 @@
 ---
 type: log
-updated: 2026-07-17 (Session 20, addendum 2 — audit carry-back)
+updated: 2026-07-17 (Session 21 — S2.11 built)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-17 · Session 21 — S2.11 built: the job engine gets its first UI
+
+**Summary.** S2.11 (controller + views for create-job / show-job / stage buttons) built and
+live-verified in one session. Four app commits: `16c750a` (foundations), `f6c4bb4`
+(routes + controllers), `3dd4cc6` (views), `e2c30a0` (mobile fix). 51/51 suite green
+throughout; full lifecycle walked live in the browser under all three personas. Sprint 2 now
+stands at everything-built-except-tests: S2.12 (test batch) and S0.8 (first deploy, parked
+twice to this exit) are all that remain before sprint close.
+
+**Housekeeping first — the Session 20 audit carried into code.** Before any S2.11 work, the
+uncommitted `create_with_founder!` half-rename was **reverted** per the audit ruling
+(vocabulary stays *owner* — ADR-006's term; no third word). Then the seeds finding became
+S2.11's opening tick exactly as the new planning convention prescribed (current state vs
+suggested fix): `db/seeds.rb`'s bare `Job.create!` calls rerouted through
+`JobActions.register_job!`/the door verbs, so seeded jobs now carry real birth rows and
+timelines (`16c750a`).
+
+**The intake-flow discussion that re-shaped `jobs#new`.** The naive version — dropdown of
+all vehicles — was rejected in discussion: [[Intake flow]] 1c says a vehicle with an active
+job cannot take another (Risk ledger R5), so offering busy vehicles just manufactures
+refusals. Ruling: `jobs/new` lists **eligible vehicles only** (no active job), and the door
+itself gains a matching **busy-vehicle guard in `register_job!`** — a readable refusal ahead
+of the R5 index's last-resort `RecordNotUnique`. Defense in depth: the view filters, the
+door refuses politely, the index backstops. `Job.active` (stage 0/1/2) landed as the named
+scope both sides share.
+
+**Permissions: door predicates + a delegating helper — one source of truth.** "Which buttons
+does this user see" (the CanCanCan trigger watched for since Session 19) resolved without a
+gem: `JobActions` gained boolean predicates `counter_staff?`/`job_crew?` — the same logic
+its `ensure_*!` guards raise on — and a `PermissionsHelper` that **only delegates** to them.
+Views ask the door what's allowed; the door remains the single authority; a forged POST hits
+the same rule as a hidden button. Role-gated buttons verified live: SA sees counter verbs,
+technician-on-crew sees start/mark-done, parts advisor sees no verbs.
+
+**Views + the stage→color ruling.** `jobs/show`: stage badge, crew card, role-gated verb
+buttons, merged timeline (the S2.6 `Job#timeline` rendering for the first time).
+`_stage_badge` partial + badge CSS on the sacred palette; ruled at build:
+registered/assigned/cancelled = **neutral**, in_progress = **info blue**, done/delivered =
+**success green** — amber stays reserved for aging (S5.3), red for blockers (S3). Dashboard
+gained the active-jobs list. `send_back!` correctly appears on no technician screen.
+
+**Verification.** 51/51 green after every commit. Live browser walk: full
+register→assign→start→done→deliver lifecycle; forged POST (technician firing a counter
+verb) → refusal flash, not a 500; `turbo_confirm` guards mark-done; 375px mobile check
+caught a timeline wrap bug, fixed in `e2c30a0`.
+
+**Deferred:** JSON responses for the door mutations (ADR-001's "every mutation available as
+JSON") — builder ruling: HTML first; ~2 lines per action whenever a non-browser consumer
+appears. Entry in [[Deferred design]].
+
+**Next:** Sprint 2 completion review (aims vs built, how the engine carries the later
+sprints, v2/v3 receptiveness audit), then S2.12 scope + S0.8 deploy research.
 
 ---
 

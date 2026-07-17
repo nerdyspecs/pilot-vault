@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-16
+updated: 2026-07-17 (Session 21 — JSON door responses entry)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -119,6 +119,13 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   spreading across controllers/views faster than the guard-method pattern keeps tidy —
   likely visible at S2.11 or Sprint 5's role-shaped screens. Adds a dependency — builder
   decides at trigger time.
+- **JSON responses for door mutations (2026-07-17, builder ruling at S2.11: HTML first).**
+  [[ADR-001 Core stack]] commits to "every mutation available as JSON", but S2.11's
+  controllers ship HTML-only — `rescue_from JobActions::Refused` renders flash, success
+  redirects. Consciously deferred, not dropped: no non-browser consumer exists yet, and all
+  business logic lives in `JobActions`, so adding JSON later is ~2 lines per action
+  (`respond_to` + a status payload) with zero logic movement. **Trigger to revisit:** the
+  first non-browser consumer — a mobile app or a React front-end.
 - **Dark mode = steel-blue chrome (2026-07-05).** v1 ships light mode only (high-contrast, per
   device-posture decision). When dark mode comes, the dark theme's surfaces derive from the brand
   steel blue (~`#22456B` family) — chosen because the navy app-bar sample read as "dark mode" and

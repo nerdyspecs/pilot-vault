@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-17 (Session 20)
+updated: 2026-07-17 (Session 21 — S2.11 ticked)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -404,8 +404,27 @@ Includes **minimal** Customer/Vehicle (Job must belong to a Vehicle; rich intake
       `ActiveRecord::Base.transaction` — no job row exists yet to lock. Console-verified:
       birth row `from_stage` nil, `customer` defaults from the vehicle. Suite 51/51 green
       after each of the three commits; S2.12 tests deferred to sprint close, builder ruling.)*
-- [ ] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
+- [x] **S2.11** Controller + views: create a job (pick vehicle), show a job (stage + crew), stage-advance
       buttons calling `JobActions`. **Technician-facing buttons mobile-friendly** ([[Tech stack]]).
+      *(2026-07-17: built + live-verified. Four commits: `16c750a` (seeds rerouted through the
+      door — the Session 20 audit finding, first tick per the current-state/fix convention —
+      + `Job.active` scope + a busy-vehicle guard in `register_job!` + `JobActions` predicates
+      `counter_staff?`/`job_crew?` + a delegation-only `PermissionsHelper`, one source of
+      truth for buttons and refusals alike); `f6c4bb4` (job routes as named member verbs +
+      `JobsController` + `Jobs::MechanicsController`, one `rescue_from JobActions::Refused`
+      each → flash, never a 500); `3dd4cc6` (views: `jobs/new` eligible-vehicles dropdown per
+      [[Intake flow]] 1c, `jobs/show` with stage badge / crew card / role-gated buttons /
+      timeline, `_stage_badge` partial, sacred-palette badge CSS, dashboard active-jobs list);
+      `e2c30a0` (mobile timeline wrap fix). **Stage→color mapping ruled at build:**
+      registered/assigned/cancelled = neutral, in_progress = info blue, done/delivered =
+      success green — amber reserved for aging, red for blockers ([[Visual theme]] status
+      colors stay sacred). Also applied first: the uncommitted `create_with_founder!`
+      half-rename reverted per the Session 20 audit ruling — vocabulary stays *owner*.
+      Verified: 51/51 suite green throughout; live browser walk of all personas
+      (SA / technician / parts advisor) incl. forged-POST refusal → flash not 500,
+      `turbo_confirm` on mark-done, full register→assign→start→done→deliver lifecycle,
+      375px mobile check. JSON responses for door mutations consciously deferred —
+      [[Deferred design]].)*
 - [ ] **S2.12** Tests (service-heavy): legal/illegal transitions · role gating · Done freeze ·
       assignment one-motion (three rows, one transaction) · `nil→registered` logged ·
       join/leave receipts (ack pair on **events**, never the engagement) · removal legality
