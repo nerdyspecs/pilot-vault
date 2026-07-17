@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-07-17 (Session 21 — S2.11 built)
+updated: 2026-07-17 (Session 21, addendum — Sprint 2 completion review rulings)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -61,6 +61,69 @@ appears. Entry in [[Deferred design]].
 
 **Next:** Sprint 2 completion review (aims vs built, how the engine carries the later
 sprints, v2/v3 receptiveness audit), then S2.12 scope + S0.8 deploy research.
+
+**Addendum — Sprint 2 completion review (builder rulings).**
+The review ran in full: aims-vs-built (exit met, everything built beyond spec; S2.12 tests +
+S0.8 deploy are all that remain), the engine-completes-Knot trace (every later v1 feature
+lands additively on the Sprint 2 rails), and the v2/v3 receptiveness audit (**Design law #5
+clean** — lead-flag backfill, employment-stint split, dormant ack pairs, fleet-customer
+claims, v3 skill tracking all additive-confirmed against the schema as built; the one risk
+is process, not schema: the S3.2 blocker respec + HFP→done collision must be resolved at
+Sprint 3 kickoff before the first blocker migration). Rulings, in discussion order:
+
+1. **S2.12 scope approved** — the ten-case list: legal path with exact rows · illegal moves
+   exhaustively (the allow-list under test) · Done freeze · role gating incl. the
+   manager/owner escape hatch · assignment three-rows-one-txn + refused-assign-writes-zero ·
+   birth row + busy-vehicle guard · removal legality (responsibility rule, `started_work?`
+   as history) · acks-live-on-events schema assertion · the sprint's model tests
+   (canonicalization, `Job.active`, `started_work?`, `timeline`, current-crew read) · one
+   Capybara journey (register→assign→start→done→deliver + a forged-POST refusal → flash).
+2. **Deploy target = Heroku** (S0.8). RLS axis is a tie — managed Postgres on either
+   platform never grants superuser/BYPASSRLS, and every policed table already carries
+   `FORCE ROW LEVEL SECURITY`, which binds RLS onto a table-owning role (the S1.8 local
+   problem structurally can't recur). Builder picks Heroku on familiarity; accepts US/EU
+   region latency (Render's Singapore region was the counter-argument, on record). Procfile
+   + release-phase `db:migrate`; Eco + Mini Postgres ≈ $10/mo floor; deploy-day proof =
+   `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user` + the
+   unset-GUC → zero-rows smoke test. S0.8's `render.yaml` wording to be corrected to
+   Procfile when built.
+3. **Edge-table rename ruled — both edges, one scheme:** `Employment` →
+   **`WorkshopEmployment`**, `Ownership` → **`WorkshopOwnership`** — organisation-prefixed
+   edges, mirroring v2's `CompanyEmployment` / `CompanyOwnership`-style pair (no
+   half-applied scheme; the founder-incident lesson). **No code this session** — parked to
+   the carry-back; the main session composes the plan (current-state-vs-fix per item, app +
+   vault + ADR-004/006/007/008 dated footnotes landing together). Reaffirmed alongside:
+   the actor/holder rule stands — **holdings point at the stint, actions point at the
+   person** (owners act but hold no employment).
+4. **Crew tracker restructure ruled — "Design B", supersedes the Session 17
+   engagement-permanence half.** `job_mechanics` becomes a **pure membership table** (the
+   crew *right now*): rows created on assign, **deleted on remove**; unique
+   `(job_id, employment_id)`. `job_mechanic_transitions` becomes **self-contained history**:
+   gains direct `job_id` + `employment_id`, drops the `job_mechanic_id` FK; keeps `action`
+   (`joined`/`left`), `created_by`, the dormant ack pair, `workshop_id`. Both tables keep
+   their own `id`. Consequences accepted with eyes open: `JobMechanic.current` disappears
+   (the table read IS the crew — the builder's readability motivation, and it makes crew
+   symmetric with the stage tracker's mutable-entity + event-log shape); past stints become
+   event *pairs*, not rows (Sprint 8 attribution reconstructs by pairing; the deferred
+   `lead` flag will live on membership rows — current stints only); the tracker pattern
+   goes non-uniform vs Sprint 3's blocker items (which stay undeleted — they carry
+   notes/attribution). Safety property that makes deletion honest: removal is only legal
+   before work starts (responsibility rule), so only never-worked mistake-assignments are
+   ever deleted, and their receipts survive in the events. Why `.first` was wrong under the
+   old shape, on record so it isn't re-derived: engagements were append-only history — after
+   assign→remove→assign, the bare association's first row was the *removed* mechanic, and a
+   crew-emptiness check against it would have refused every re-assignment forever;
+   `.current` (no-left-event subquery) was the history/present separator. Design B removes
+   the trap by making the table present-only. Doc supersessions (Event log, M1-F1,
+   Data model, Deferred-design lead entry) travel with the build plan, dated notes.
+
+Review findings: finding 1 (the mechanics controller's single-mechanic `.current.first`)
+is **mooted by Design B** — `job.job_mechanics.first` becomes plainly correct. Finding 2
+(`Job#timeline` merges/sorts in Ruby — fine per job, must never be called in a loop; Sprint
+8 reports get their own SQL per Design law #3) — proposed as a pin in the S8 design-pass
+line, **not yet ruled**. Also open, one-liners: the builder's sketch said `job_technicians`
+— casual or a table-rename wish? And the Sprint-4 edge (a mechanic removed before acking
+their `joined` event) exists in both designs — note for the S4 design pass.
 
 ---
 
