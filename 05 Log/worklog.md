@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-07-17 (Session 20, audit addendum)
+updated: 2026-07-17 (Session 20, addendum 2 — audit carry-back)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -62,6 +62,34 @@ comment — seeded jobs carry no birth rows, so the in_progress seed job has an 
 and `started_work?` = false; cheap to reroute through `JobActions` before S2.11 views render
 dev data. Low note: `ensure_job_crew!` inlines `ended_at: nil` instead of merging
 `Employment.active` — fine today, drifts if "active" ever grows a second condition.
+
+**Addendum 2 — audit carry-back (builder rulings on the three findings).**
+The audit findings were discussed with the builder; verdicts, in finding order:
+
+1. **Vocabulary stays *owner* — the half-rename is reverted, not finished.** The uncommitted
+   `workshops_controller.rb` diff calling `Workshop.create_with_founder!(founder:)` goes back
+   to `create_with_owner!(owner:)`. "Founder" would be a third word for a concept ADR-006 and
+   the whole vault call *owner*/Ownership; the codebase stays consistent with the vault's
+   vocabulary. (Builder to apply the one-line revert in their working tree — no audit-session
+   code changes.)
+2. **New planning convention (standing, applies from S2.11 onward): every coding plan opens
+   with *current state of the code* vs. *suggested fix*.** A plan must first state what the
+   code does today (file:line where useful), then the proposed change — so the delta is
+   explicit and reviewable before any code is written. First application: the S2.11 plan
+   should open with the seeds finding in exactly this shape (current: `db/seeds.rb` writes
+   jobs with bare `Job.create!`, no birth rows, stale pre-Phase-3 comment; fix: reroute the
+   three seed jobs through `JobActions` as the session's first tick).
+3. **`ensure_job_crew!` keeps its inline `ended_at: nil`.** Ruled fine as-is — swapping it
+   for a `merge(Employment.active)` later is cheap, and touching working door code for a
+   one-condition duplication isn't worth it. Parked, not a debt.
+
+**Session summary.** This session was a read-only audit of the Sessions 18–19 job engine
+against the vault (addendum above: everything matches, 51/51 green, console lifecycle +
+RLS proof, three findings). The discussion then settled fix-timing: the half-rename is the
+only blocker (dirty working tree next to where S2.11 code will land, invisible to the test
+suite); the seeds reroute becomes S2.11's opening task rather than a pre-task; the guard
+duplication is accepted. Next session: plan S2.11 under the new current-state/suggested-fix
+convention.
 
 ---
 
