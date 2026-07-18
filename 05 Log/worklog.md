@@ -1,11 +1,73 @@
 ---
 type: log
-updated: 2026-07-17 (Session 23 — Sprint 2.5 designed)
+updated: 2026-07-18 (Session 24 — Sprint 2.5 built)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-18 · Session 24 — Sprint 2.5 built: cold-start intake / customer–vehicle CRUD
+
+**Summary.** Built the Session 23 design in full — S2.5.1–S2.5.7, four commits
+(`fb710e2`, `33583fd`, `cea8a66`, plus the migration folded into the first). The cold-start
+hole is closed: a fresh 0-customer workshop can now take in its first car end to end, no
+console needed. Both entry paths (plate-first search, customer-first via the new Customers
+index) live-verified in-browser; the exit criterion is also an executable system test.
+69/69 suite green (64 model/service + 5 system).
+
+**What landed.** `CustomersController` (index/show/new/create/edit/update, all
+`for_current_workshop`-scoped and `require_counter!`-gated — a new guard delegating to
+`JobActions.counter_staff?`, the same one-source-of-truth pattern as `PermissionsHelper`).
+`Customer` gained `total_jobs`/`last_visit`/`active_job_count` (activity only, no money —
+ADR-002) and a `.search` scope (name ILIKE or the canonicalized phone). Two additive
+columns, `address` + `contact_person`. `Vehicle.canonicalize` extracted from the model's
+`before_validation` so the new plate-search reuses the exact normalization storage uses —
+search and storage can never disagree. `Customers::JobsController` is the slice's one door
+touch: finds or births the vehicle under the customer (which is *why* `job.customer ==
+vehicle.customer` at birth in every S2.5 path — the S2.5/S6 line holds structurally, not by
+convention). `JobsController#new`/`#create` reworked from S2.11's dropdown into a plate
+search: hit-with-active-job redirects to the open job (Intake flow §1c), hit-with-free
+redirects to the add-job confirm screen, miss redirects to customer-first creation carrying
+the plate through.
+
+**Two real bugs caught by live browser verification, not by the test suite** (both fixed
+before committing) — worth naming because they're the kind unit tests structurally can't
+catch:
+1. **`@customer.vehicles.create!(registration_number: ...)` silently left `workshop_id`
+   nil.** Rails only auto-populates the FK of the association being traversed
+   (`customer_id`); `Vehicle`'s separate `belongs_to :workshop` isn't inferred from
+   `customer.vehicles`. This tripped `belongs_to`'s presence validation — which my own
+   rescue then *mislabeled* as "already in the book" (a real collision message
+   masking a completely different failure). Fixed by passing `workshop: @customer.workshop`
+   explicitly. The log trace (`workshop_id IS NULL` in the uniqueness-check SQL) is what
+   gave it away — a symptom worth remembering: a rescue that catches too broadly can hide
+   the wrong bug behind a right-sounding message.
+2. **The typed plate didn't survive the miss→create-customer→add-job hop.** The customer
+   form carried `registration_number` through as a hidden field correctly, but the
+   downstream add-job view never read it back into the "new vehicle" text field — so the SA
+   would land on an empty field after typing the plate twice already. Fixed by threading
+   `params[:registration_number]` into the field's `value`. Caught by reading the DOM's
+   actual `.value` (not just its accessible-name label, which showed the placeholder either
+   way) — a reminder that accessibility-tree reads can mask a genuinely empty field.
+
+**Regression caught in the same session:** S2.12's `job_lifecycle_test.rb` (Session 22)
+still drove the vehicle dropdown this sprint replaced — `select "WLC1234", from:
+"job_vehicle_id"` no longer exists. Updated to the plate-search flow it now needs; full
+suite re-confirmed green before commit.
+
+**Verified live, beyond the automated suite:** all three plate-search branches (miss,
+hit-with-active-job via §1c, hit-with-free-vehicle after pushing a seeded job to
+`delivered`); the customer index's search scope; the activity panel's counts against a real
+two-job customer; `require_counter!` correctly refusing a technician (redirect + flash, no
+500) exactly the way the door's own guards refuse.
+
+**Open, carried forward.** Sprint 3 (blockers) kickoff — still needs its own design pass
+(the three-record respec, the Hold-For-Payment/`→done` collision). S0.8 deploy stays
+re-parked to "a stable/semi-full v1." Sprint 6 inherits the full disambiguation tree, the
+mismatch confirm, and vehicle reassignment — none of which S2.5 touched, by design.
 
 ---
 

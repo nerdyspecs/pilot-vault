@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-17 (Session 23 — Sprint 2.5 designed: minimal intake / customer-vehicle CRUD)
+updated: 2026-07-18 (Session 24 — Sprint 2.5 built: cold-start intake)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -499,7 +499,7 @@ URL to be true.
 
 ---
 
-## Sprint 2.5 · Minimal intake / customer–vehicle management ⚠️ *designed 2026-07-17 (Session 23), not built*
+## Sprint 2.5 · Minimal intake / customer–vehicle management — ✅ **built 2026-07-18 (Session 24)**
 **Goal:** the front-desk UI that **creates** a Customer and a Vehicle, so a fresh
 0-customer workshop can take in its first car. Forms in front of the already-built job
 engine — closes the cold-start hole (models existed since S2.1/S2.2 but had no UI, only
@@ -533,28 +533,64 @@ hit, to the just-created customer on a miss. So `job.customer == vehicle.custome
 the deferred match-validation / two-branch confirm stays cleanly parked until the plate-first
 override lands in S6 ([[Deferred design]]).
 
-- [ ] **S2.5.1** `CustomersController` + `resources :customers` (new/create): `kind` toggle
+- [x] **S2.5.1** `CustomersController` + `resources :customers` (new/create): `kind` toggle
       (person | company), flat fields, `for_current_workshop`-scoped, counter-gated at the
       controller. **Additive flat fields ruled 2026-07-17:** `address` (both kinds) +
       `contact_person` (company) — legit workshop contact info, not v2 schema. *(v1 =
       **contact**, not company-structure accuracy — see the company ruling below.)*
-- [ ] **S2.5.2** `customers#index` — a searchable rolodex (by name / phone — the cheap dedup
+      *(2026-07-18: built, commit `fb710e2`/`33583fd`. Migration adds both columns nullable,
+      no backfill. `require_counter!` added to `ApplicationController`, delegating to
+      `JobActions.counter_staff?` — one source of truth with the door's own guard, same
+      pattern as `PermissionsHelper`.)*
+- [x] **S2.5.2** `customers#index` — a searchable rolodex (by name / phone — the cheap dedup
       aid), **vehicle count per row** (not plucked plates — keeps the cell clean).
-- [ ] **S2.5.3** `customers#show` — read page: basic info + an **activity panel** (vehicles
+      *(2026-07-18: built, commit `33583fd`. `Customer.search(term)` scope: name ILIKE OR
+      phone = the canonicalized term — reuses the same digits-only key contacts are stored
+      under. Live-verified: search narrows correctly, `pluralize` fixed a "1 vehicles" nit.)*
+- [x] **S2.5.3** `customers#show` — read page: basic info + an **activity panel** (vehicles
       owned · total jobs · last visit · active jobs — **activity only, no money** per
       [[ADR-002 V1 scope]]; a grows-into-it panel) + **"Add job"** as the one primary action
       + **"Maintain customer"** as a quiet secondary → edit. Editing is rare (create once at
       intake), which is the argument *for* the distinct quiet button (UI law 3).
-- [ ] **S2.5.4** `customers#edit` / `#update`.
-- [ ] **S2.5.5** **"Add job"** = customer-first vehicle+job birth → `JobActions.register_job!`
+      *(2026-07-18: built, commit `fb710e2`/`33583fd`. `Customer#total_jobs`/`#last_visit`/
+      `#active_job_count` (the last reuses `Job.active` from S2.11) — explicit `def`/`end`,
+      no logic in the view. Live-verified against a real customer with two jobs (one
+      delivered, one registered): counts and last-visit date all correct.)*
+- [x] **S2.5.4** `customers#edit` / `#update`. *(2026-07-18: built, commit `33583fd`.)*
+- [x] **S2.5.5** **"Add job"** = customer-first vehicle+job birth → `JobActions.register_job!`
       (the one door touch in this slice). Reg-number collision on a "new" plate → rescue
       `ActiveRecord::RecordNotUnique` → friendly flash *"already in the book — pick it from
       the list"* (accepted v1 stand-in; the crude seed of S6's lookup-first).
-- [ ] **S2.5.6** **Plate-search entry** — replaces S2.11's dumb dropdown: hit → found-vehicle
+      *(2026-07-18: built, commit `33583fd`. `Customers::JobsController` — birthing the
+      vehicle under the customer is what makes `job.customer == vehicle.customer` at birth
+      (the S2.5/S6 line, held). **Real bug caught live:** `@customer.vehicles.create!` only
+      auto-populates the association's own FK (`customer_id`) — `workshop_id` stayed nil,
+      tripping `belongs_to :workshop`'s presence validation, which the rescue then
+      mislabeled as "already in the book." Fixed by passing `workshop:` explicitly. Also
+      rescues `ActiveRecord::RecordInvalid` (the uniqueness validation fires before the DB
+      constraint does). Live-verified: the typed plate now survives the whole
+      miss→create-customer→add-job chain (the pre-fill was originally dropped between
+      screens — fixed by threading `params[:registration_number]` through the view).)*
+- [x] **S2.5.6** **Plate-search entry** — replaces S2.11's dumb dropdown: hit → found-vehicle
       screen (active-job guard, §1c) → job; miss → customer-first creation.
-- [ ] **S2.5.7** Tests: customer CRUD + canonicalization (model layer mostly covered by S2.1)
+      *(2026-07-18: built, commit `33583fd`. `JobsController#new`/`#create` reworked into a
+      search: `Vehicle.canonicalize` (extracted from the model's `before_validation`, so
+      search and storage can never disagree) → hit-with-active-job redirects straight to
+      the open job (§1c); hit-with-free-vehicle → the customer's add-job confirm screen;
+      miss → `new_customer_path` carrying the plate through. All three branches
+      live-verified in-browser, including pushing a seeded job to `delivered` to re-test
+      the freed vehicle.)*
+- [x] **S2.5.7** Tests: customer CRUD + canonicalization (model layer mostly covered by S2.1)
       · intake creates the customer→vehicle→job graph · one Capybara **cold-start journey**
       (0 customers → new customer → add job → job appears on the board).
+      *(2026-07-18: built, commit `cea8a66`. `Customer#total_jobs`/`#last_visit`/
+      `#active_job_count`/`.search` unit-tested; `Vehicle.canonicalize` given a direct test
+      (previously only exercised indirectly). Two system tests: the plate-miss cold-start
+      journey (the sprint's exit criterion, executable) and the customer-first path (add
+      customer → Add job from their page). **Regression caught and fixed in the same
+      commit:** S2.12's `job_lifecycle_test.rb` still drove the old vehicle dropdown this
+      sprint replaced — updated to the plate-search flow. Full suite 69/69 green (64
+      model/service + 5 system).)*
 
 **Company handling (v1) — flat record, not an org** *(ruled 2026-07-17)*: companies are
 flat `Customer` rows via the `kind: person | company` toggle. **No** Company org entity,
