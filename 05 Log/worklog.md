@@ -1,11 +1,67 @@
 ---
 type: log
-updated: 2026-07-17 (Session 22 — Sprint 2 closed)
+updated: 2026-07-17 (Session 23 — Sprint 2.5 designed)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-17 · Session 23 — Sprint 2.5 designed: cold-start intake / customer–vehicle CRUD
+
+**Summary.** Design-only session (no code). Spotted a hole while reviewing where "taking in
+jobs" sits: **there is no UI to create a Customer or Vehicle at all** — the models shipped
+S2.1/S2.2 but rows only entered via seeds/console, so a fresh 0-customer workshop can't take
+in its first car (S2.11's new-job form is a dropdown of *existing* vehicles → dead end from
+empty). Converged with the builder on a new **Sprint 2.5** slice (between the closed Sprint 2
+and unstarted Sprint 3) — customer CRUD + a customer-first intake motion — recorded in the
+[[Sprint plan]]. Full task list + the hard S2.5/S6 boundary live there; this entry keeps the
+reasoning chain.
+
+**Vehicle stays a first-class entity — the decisive argument named.** The question "do we
+even need a vehicle database?" got a real look. History and R5 are fakeable with a
+registration-number string; the clincher is **ownership change over time** — a car outlives
+its owners, and only an entity can carry `vehicle.customer` as a mutable-present pointer while
+`job.customer` stays the frozen stamp (the sold-car design, [[Data model]] §Resolved).
+Framing to keep: **the vehicle is the persistent identity; the customer is the changing
+relationship.** Corollary that shaped the whole slice: **a vehicle alone is meaningless** —
+it's born at intake beside its first job, never standalone. So "Add job" is the verb, a
+vehicle is the byproduct; no orphan "add vehicle" CRUD.
+
+**Job is the point of contact, not the vehicle** (builder's deliberate trap, confirmed):
+frozen `job.customer` = who we bill/call *this visit*; `vehicle.customer` = the mutable
+present owner. History accrues on the frozen stamps — so the v2 "pleasant surprise" vehicle
+history needs **zero v1 work** (already accruing; v2 is an additive column + the hard,
+deferred cross-tenant RLS).
+
+**Routing, not ownership** (the company ruling). Person-vs-company (`kind` toggle on the flat
+`Customer`) picks the *file/phone to route to*, never legal ownership. The boss's lorry and
+the boss's private car are **two cards, correctly** — different phones/payers. v1 ships
+companies as flat records only: **no** Company org entity, logins, `customers.user_id`, or
+person→company edge — all v2, gated behind the unsolved cross-tenant RLS ([[Data model]] v2 /
+Session 14). Three traps the builder set and we caught and declined: (a) "company works like a
+workshop" (= v2 cross-tenant, ruled out Session 14); (b) "encapsulate users in v1" (inert
+column = false readiness); (c) "person as a company's owner" link edge (v2 claim machinery
+through the side door). Builder *won* one against initial resistance: flat additive fields
+`address` (both kinds) + `contact_person` (company) — legit workshop contact info, not v2
+schema.
+
+**The S2.5 / S6 line, stated hard.** 2.5 = **lookup** ("does this exist?"); S6 =
+**disambiguation** (phone verify, the four forks, the two-branch mismatch confirm,
+changed-hands reassignment). The structural tell: **2.5 has no "who's paying?" override** —
+the stamp defaults silently (`vehicle.customer` on a plate hit, the just-created customer on a
+miss), so `job.customer == vehicle.customer` at birth in *both* branches → a mismatch is
+**unrepresentable** in 2.5. That's *why* the deferred match-validation / confirm stays cleanly
+parked ([[Deferred design]]) until the plate-first override arrives at S6 — no contradiction,
+no rework. Dedup is the real v2-surprise-spoiler; plate-first screening + name/phone customer
+search are the cheap v1 mitigations, the full phone-first dedup tree is S6.
+
+**Open for the build:** the reg-collision stand-in (rescue `RecordNotUnique` → "pick from the
+list"), `customers#show` primary/secondary layout ("Add job" vs quiet "Maintain customer"),
+and the plate-search entry replacing S2.11's dropdown — all in the [[Sprint plan]] S2.5 tasks.
+Next: build on the builder's go (no app code yet).
 
 ---
 

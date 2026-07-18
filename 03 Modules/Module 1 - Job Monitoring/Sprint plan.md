@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-17 (Session 22 — Sprint 2 closed: Design B + rename built, S2.12 shipped, S0.8 re-parked)
+updated: 2026-07-17 (Session 23 — Sprint 2.5 designed: minimal intake / customer-vehicle CRUD)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -496,6 +496,74 @@ URL to be true.
       flash sweep clears it there — a later `visit` finds the flash already gone (read-once);
       asserted on the XHR's own response body instead, which **is** the rendered, redirected
       page. 64/64 green (61 model/service + 3 system, incl. the pre-existing crew journey).)*
+
+---
+
+## Sprint 2.5 · Minimal intake / customer–vehicle management ⚠️ *designed 2026-07-17 (Session 23), not built*
+**Goal:** the front-desk UI that **creates** a Customer and a Vehicle, so a fresh
+0-customer workshop can take in its first car. Forms in front of the already-built job
+engine — closes the cold-start hole (models existed since S2.1/S2.2 but had no UI, only
+seeds/console), and unblocks eventual dogfooding + the parked S0.8 deploy.
+**Exit:** from an empty DB, a counter user creates a customer, adds a job (which births the
+vehicle), and the job appears on the board — no console needed.
+
+**Why it exists / why it's a new slice** *(designed Session 23; sits between the closed
+Sprint 2 and unstarted Sprint 3)*: S2.11 shipped a deliberately-dumb dropdown of *existing*
+vehicles — from 0 rows it's a dead end. This slice adds the create surface. **Ruled: the
+fuller slice** (customer CRUD + intake motion), not a minimal create-only path; **new
+"Sprint 2.5"** — Sprint 2 stays closed (exit met, `bee2c2a`), Sprint 3 keeps its number.
+
+> **⚠ ARCHITECTURE BOUNDARY — read before building.** [[Design laws]] #7 ONE DOOR governs
+> **job state only**. Customer and Vehicle create/edit are **ordinary Rails CRUD** (plain
+> controllers + AR models) — **not** through `JobActions`. Only the job-creation step goes
+> through the door (`register_job!`, already built). This slice is *forms*, no new engine.
+
+**Entry is plate-first; creation is customer-first — two phases, not a contradiction:**
+- **Plate hit** → surface the vehicle (+ the active-job guard: [[Intake flow]] §1c
+  "in-house: job #N" instead of a register) → create job.
+- **Plate miss** → customer-first creation (find/create the customer, then birth the vehicle
+  under them) → create job.
+
+**The hard S2.5 / S6 boundary — keep it:** 2.5 is **lookup** ("does this exist?"); Sprint 6
+is **disambiguation** (phone verify, the four forks — bill husband / I'm paying / I bought it
+/ old number — the two-branch mismatch confirm, changed-hands reassignment). The tell: **2.5
+has NO "who's paying?" override** — the stamp defaults silently to `vehicle.customer` on a
+hit, to the just-created customer on a miss. So `job.customer == vehicle.customer` at birth in
+**both** branches → a mismatch is structurally unrepresentable in 2.5, which is exactly why
+the deferred match-validation / two-branch confirm stays cleanly parked until the plate-first
+override lands in S6 ([[Deferred design]]).
+
+- [ ] **S2.5.1** `CustomersController` + `resources :customers` (new/create): `kind` toggle
+      (person | company), flat fields, `for_current_workshop`-scoped, counter-gated at the
+      controller. **Additive flat fields ruled 2026-07-17:** `address` (both kinds) +
+      `contact_person` (company) — legit workshop contact info, not v2 schema. *(v1 =
+      **contact**, not company-structure accuracy — see the company ruling below.)*
+- [ ] **S2.5.2** `customers#index` — a searchable rolodex (by name / phone — the cheap dedup
+      aid), **vehicle count per row** (not plucked plates — keeps the cell clean).
+- [ ] **S2.5.3** `customers#show` — read page: basic info + an **activity panel** (vehicles
+      owned · total jobs · last visit · active jobs — **activity only, no money** per
+      [[ADR-002 V1 scope]]; a grows-into-it panel) + **"Add job"** as the one primary action
+      + **"Maintain customer"** as a quiet secondary → edit. Editing is rare (create once at
+      intake), which is the argument *for* the distinct quiet button (UI law 3).
+- [ ] **S2.5.4** `customers#edit` / `#update`.
+- [ ] **S2.5.5** **"Add job"** = customer-first vehicle+job birth → `JobActions.register_job!`
+      (the one door touch in this slice). Reg-number collision on a "new" plate → rescue
+      `ActiveRecord::RecordNotUnique` → friendly flash *"already in the book — pick it from
+      the list"* (accepted v1 stand-in; the crude seed of S6's lookup-first).
+- [ ] **S2.5.6** **Plate-search entry** — replaces S2.11's dumb dropdown: hit → found-vehicle
+      screen (active-job guard, §1c) → job; miss → customer-first creation.
+- [ ] **S2.5.7** Tests: customer CRUD + canonicalization (model layer mostly covered by S2.1)
+      · intake creates the customer→vehicle→job graph · one Capybara **cold-start journey**
+      (0 customers → new customer → add job → job appears on the board).
+
+**Company handling (v1) — flat record, not an org** *(ruled 2026-07-17)*: companies are
+flat `Customer` rows via the `kind: person | company` toggle. **No** Company org entity,
+**no** logins, **no** `customers.user_id`, **no** person→company link edge — all v2, gated
+behind the unsolved cross-tenant-RLS question ([[Data model]] v2 notes, worklog Session 14).
+The boss's lorry and the boss's private car are **two cards, correctly** (different
+phones/payers) — routing by responsible-contact, never legal-ownership; v2 claim machinery
+reunites the views if ever needed. **Vehicle reassignment** ("park cars under a company")
+defers to Sprint 6 with its changed-hands sibling.
 
 ---
 

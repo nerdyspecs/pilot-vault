@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-17 (Session 21 — Design B notes on crew entries)
+updated: 2026-07-17 (Session 23 — S2.5 lands lookup half; match-confirm stays S6)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -72,6 +72,17 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   log (accepted — the frozen stamps form a de facto timeline); (3) v2 nuance: a borrowed-car
   job is visible to the payer, not the vehicle's owner — person-inward being consistent;
   note it in the v2 design pass. See [[Job visibility]].
+  **⚠ 2026-07-17 (Session 23) — Sprint 2.5 lands the LOOKUP half, this confirm stays parked
+  to Sprint 6.** The new Sprint 2.5 intake ([[Sprint plan]]) builds customer/vehicle *create*
+  + plate-first lookup, but deliberately has **no "who's paying?" override**: the stamp
+  defaults silently (`vehicle.customer` on a plate hit, the just-created customer on a miss),
+  so `job.customer == vehicle.customer` at birth in both branches — a mismatch is
+  **structurally unrepresentable** in 2.5, which is exactly what keeps this two-branch confirm
+  cleanly deferred (nothing in 2.5 can produce the state it resolves). It circles back with
+  the **plate-first override** at Sprint 6, alongside the phone-first dedup tree. Accepted 2.5
+  gap in the meantime: **weaker dedup** (no phone-first dedup) — mitigated cheaply by
+  plate-first screening + a name/phone-searchable customer index (S2.5.2), the full tree
+  still S6.
 - **Crew: helpers + the `lead` flag (2026-07-16, builder ruling).** v1 crews are a single
   responsible mechanic; S2.6 ships `job_mechanics` **without** any lead/primary flag — all
   v1 technicians on a job are treated the same. When helpers arrive, the flag lands as
