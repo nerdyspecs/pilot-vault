@@ -19,6 +19,7 @@ New structural choice → new ADR with the next number.
 - [[ADR-007 Row-Level Security pulled into Sprint 1]] — database-enforced tenant isolation (Postgres RLS) built alongside the tenant tables, not deferred; schema-per-tenant re-examined and rejected again
 - [[ADR-008 Crew joining requires acceptance]] — joining a workshop is bilateral (invitee accepts); leaving is unilateral (termination needs no ack); the `Invitation` becomes a `pending → fired → accepted/declined` state machine; supersedes ADR-006's passive add-crew clause
 - [[ADR-009 Account deletion is refusal-first]] — **carries the lifetime invariant: a workshop cannot exist without an Ownership.** Deletion refused for accounts with edges/history (derived from that invariant + append-only history); bare accounts delete freely; last owner can never delete while the workshop stands (escape routes parked); PDPA/anonymization deferred with a dated trigger
+- [[ADR-010 WorkshopStaff supersedes the edge split]] — `WorkshopEmployment` + `WorkshopOwnership` collapse into one `WorkshopStaff` record (`owner` boolean, governance) + append-only `WorkshopStaffRole` rows (operations); actors AND holdings point at the tenant-local person via a composite `(actor_id, workshop_id)` FK (DB-enforced actor isolation); supersedes ADR-006 §1 and Data model's "actions → User"
 
 See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 

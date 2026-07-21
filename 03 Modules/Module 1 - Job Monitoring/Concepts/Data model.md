@@ -125,6 +125,22 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
   Enforced twice: `dependent: :restrict_with_error` + the DB FKs. If in-place role edits
   ever appear, the audit story above collapses — don't.
 
+> [!note] Superseded 2026-07-21 by [[ADR-010 WorkshopStaff supersedes the edge split]]
+> The actor/holder split's **"holdings → stint" half stands**; its **"actions → person
+> (`User`)" half is reversed** — actions point at the tenant-local person too. Both halves
+> now target one record: **`WorkshopStaff`** (`WorkshopEmployment` + `WorkshopOwnership`
+> collapsed into it; roles moved to append-only `WorkshopStaffRole` rows). `created_by` /
+> `acknowledged_by` and the crew holding (`job_technicians.workshop_staff_id`) are all
+> `WorkshopStaff`, each with a composite FK `(actor_id, workshop_id) → workshop_staff`.
+> **Why the 2026-07-16 rejection above no longer holds:** "actions stay `User`" existed *only*
+> because owners held no `Employment`, so an employment FK was unrecordable for them — that was
+> the polymorphic-actor trap. Collapsing the two edges removes it: an owner is a `WorkshopStaff`
+> like anyone (an `owner` boolean, no role), so the actor is a single non-polymorphic FK that
+> the DB can tenant-check. Role-at-action-time no longer needs the `(user_id, workshop_id,
+> created_at)` derivation — the stamped `WorkshopStaffRole` is immutable per row and carries it
+> directly. The append-only invariant migrates from employments to `WorkshopStaffRole`. See
+> ADR-010 for the full shape and accepted trade-offs (no ownership history in v1).
+
 ## v2 — additive, do not build
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.
   *(2026-07-13, builder: Company also gets its own **governance edge** (`CompanyOwnership`-style),

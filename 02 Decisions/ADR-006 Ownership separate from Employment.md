@@ -83,3 +83,16 @@ per-request re-verification) is unchanged.
 naming, mirroring the v2 fleet edges (`CompanyEmployment` / `CompanyOwnership`-style, one
 reusable organisation─membership─governance pattern, never one table). Every clause of this
 ADR reads with the new names; nothing else changes.
+
+---
+**Footnote 2026-07-21 — §1 superseded by [[ADR-010 WorkshopStaff supersedes the edge split]].**
+The two-edge split (§1) is replaced: `WorkshopEmployment` + `WorkshopOwnership` collapse into
+**one `WorkshopStaff`** record (an `owner` boolean discriminator) + append-only
+`WorkshopStaffRole` rows. Reason: a global-`User` actor FK can't be tenant-checked at the DB;
+pointing actors/holdings at the tenant-local person + a composite `(actor_id, workshop_id)` FK
+makes cross-tenant actors a foreign-key violation — and the merge dissolves the polymorphic-actor
+problem that forced actions onto `User` in the first place (Data model §Resolved, also
+footnoted). **§2 (onboarding split), §3 (one-door access), §4 (landing-by-edge-count) all
+stand**, now reading against `WorkshopStaff`; "owner not in the role enum" stands too — the
+distinction moved onto the boolean, not back into a role. The v2 note holds with the shape
+adjusted: one `CompanyStaff`/`CompanyStaffRole` pair, not two company edges.

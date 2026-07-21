@@ -102,6 +102,16 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
   history survives the membership row's deletion. Read via `Job#timeline` or the employment.
 - `JobBlocker` + `JobBlockerTransition` — Sprint 3; column detail in [[Blocker]].
 
+> [!note] Updated 2026-07-21 by [[ADR-010 WorkshopStaff supersedes the edge split]]
+> The bullets above read post-Design-B; ADR-010 renames the actor/holder targets. **`WorkshopStaff`
+> replaces `WorkshopEmployment`** as the holder (`job_technicians.workshop_staff_id`,
+> `job_technician_transitions.workshop_staff_id`), and — reversing the "actor columns stay User"
+> line above — **`created_by`/`acknowledged_by` are now `WorkshopStaff` too** (the tenant-local
+> person), each with a composite FK `(actor_id, workshop_id) → workshop_staff` so a cross-tenant
+> actor is a DB foreign-key violation, not just an app check. Membership still carries no ack
+> columns; the self-contained-history shape is unchanged. Operational roles live on append-only
+> `WorkshopStaffRole` rows; `owner` is a governance boolean on `WorkshopStaff`, not a role.
+
 The **"waiting on me" inbox** = one query across the event tables via **the handoff predicate**
 (`.pending_ack`, a Sprint 4 design-pass item): unacknowledged AND not-self-caused AND
 role-resolved to me. A bare `acknowledged_at IS NULL` **overcounts** — NULL has two meanings
