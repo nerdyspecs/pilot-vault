@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-21 (closed sprints archived)
+updated: 2026-07-24 (Sprint 3 built + ticked)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -54,24 +54,33 @@ event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth 
 
 ---
 
-## Sprint 3 · Blockers
-**Goal:** the overlay axis — see [[Blocker]]. **Exit:** raise/clear blockers per role; a job shows its (possibly several) active blockers.
+## Sprint 3 · Blockers ✅ *(built 2026-07-24 — three coding plans A/B/C, all green)*
+**Goal:** the overlay axis — see [[Blocker]]. **Exit (met):** raise/clear blockers per role; a job shows its (possibly several) active blockers.
+Design deep-dive settled three deltas before build: the **`blocks` stage-guard** resolving the
+Hold-For-Payment vs `→ done` collision (HFP guards `delivered`); the **crew-aware** raise/resolve
+guard; and raise refused past the guarded stage. 89 unit + 9 system green.
 
-- [ ] **S3.1** Migration + model **Blocker** (catalog): `workshop_id, label, raised_by_role,
-      cleared_by_role`. **Seed "Hold For Payment"** (`raised_by/cleared_by: service_advisor`).
-- [ ] **S3.2** Migration + model **JobBlockerTransition**: `workshop_id, job_id, blocker_id,
-      action:integer(raised/resolved), note, created_by_id, acknowledged_at, acknowledged_by_id`.
-      *(⚠ 2026-07-16: respecify at Sprint 3 kickoff — the tracker restructure makes blockers
-      **three records** (catalog + `JobBlocker` items + events, with a `noted` action);
-      also carry the ruled `→ done` guard + the unresolved Hold-For-Payment collision into
-      S3.3 — see [[Blocker]] and [[Event log]].)*
-- [ ] **S3.3** Extend `JobActions`: `raise_blocker` / `resolve_blocker` — check the actor's role against
-      the catalog's `raised_by_role` / `cleared_by_role` (manager/owner always override).
-- [ ] **S3.4** `Job#active_blockers` scope: raises with no later matching resolve (a query, [[Design laws]] #3).
-- [ ] **S3.5** Controller + views: raise a blocker (pick from catalog + note), resolve a blocker, show
-      active blockers on the job. Tech raise flow mobile-friendly.
-- [ ] **S3.6** *(deferrable)* Blocker-catalog admin — owner adds blocker types. Can slip to later.
-- [ ] **S3.7** Tests: raise/resolve · role checks via catalog · multiple active · manager override.
+- [x] **S3.1** Migration + model **Blocker** (catalog): `workshop_id, label, raised_by_role,
+      cleared_by_role, blocks`. *(2026-07-24, `f47a4f6`.)* Built with a **`blocks` stage-guard**
+      column (DB `CHECK` to `in_progress`/`done`/`delivered`) — not in the original spec, it's what
+      resolved the HFP collision. **Four seeds** at `create_with_owner!`, not just HFP (Subcon /
+      Parts / Technical → `done`; **Hold for payment → `delivered`**) — see [[Blocker]].
+- [x] **S3.2** Migrations + models **`JobBlocker`** (item) + **`JobBlockerTransition`** (events).
+      *(2026-07-24, `f47a4f6`.)* Respecified per the ⚠ note: **three records**, events carry
+      `job_blocker_id` (not a direct `blocker_id`), `action` includes **`noted`**, and
+      `created_by`/`acknowledged_by` → `WorkshopStaff` composite FK (ADR-010).
+- [x] **S3.3** Extend `JobActions`: `raise_blocker!` / `resolve_blocker!` / `note_blocker!` + the
+      stage veto. *(2026-07-24, `9fe5156`.)* Role check is **crew-aware** (a `technician` side needs
+      *this job's* crew; manager/owner override); the veto lives once in `transition!`.
+- [x] **S3.4** `Job#active_blockers` scope: items with no `resolved` event (a query, [[Design laws]] #3). *(2026-07-24, `4009792` — also spliced blocker events into `Job#timeline`.)*
+- [x] **S3.5** Controller + views: the Blockers card — raise from catalog + note, resolve, add-note,
+      show active blockers; tech raise flow mobile-friendly. *(2026-07-24, `0ae84c2` wiring +
+      `eb377d0` views + `7273db9` system tests.)*
+- [x] **S3.6** Blocker-catalog admin — owner/manager adds + edits types (no delete: append-only
+      catalog). *(2026-07-24, `8a27e1d` + `4686bfb` tests.)* Built now rather than slipped.
+- [x] **S3.7** Tests: raise/resolve/note · crew-aware role checks · multiple active items · manager
+      override · the veto both directions · composite-FK actor integrity. *(Model/door units in
+      `job_actions_test.rb` 9–15 + `blocker_*_test.rb`; two system flows.)*
 
 ---
 
@@ -103,6 +112,11 @@ event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth 
 - [ ] **S4.6** *(Product-gap #5)* graceful degradation per the decision — e.g. ack-on-behalf (logged as
       "by X for Y") and/or a limbo threshold/snooze.
 - [ ] **S4.7** Tests: inbox shows the right pending items · ack clears them · limbo flagged.
+- [ ] **S4.8** *(B2 — carried from Sprint 3, 2026-07-24)* **Directed blocker notes.** Decide whether
+      a `noted` event can be a handoff routed to an inbox (a parts advisor's "arrived, verify" → the
+      tech) — the note's receiver can flip mid-thread, which is why it was deferred here. The ack
+      pair already exists on note rows, so a receiver is one nullable `directed_to_role` added
+      **additively** — no S3 rework, old notes read as neutral. See [[Blocker]] B1/B2 split.
 
 ---
 

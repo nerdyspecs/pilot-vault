@@ -117,3 +117,19 @@ The policies this ADR describes ride `rename_table` untouched — Postgres keeps
 policies/FKs bound through renames; only index names are refreshed in the same migration
 for tidiness. Table names in the examples above read as the old names — the record of what
 was built; the live names are `workshop_employments` / `workshop_ownerships`.
+
+**2026-07-24 (Session 26) — `workshop_staff_roles` gains a read-only `own_rows`.** The tenant-spine
+squash (ADR-010) noted own_rows on the roles table would be "dead weight — Gate 2 never needs to read
+a role before a workshop is chosen." **Landing routing falsified that.** `User#accessible_workshops`
+must exclude a dormant husk (every role ended), which means evaluating `WorkshopStaff#active?` —
+which reads `workshop_staff_roles` — *before* any workshop is selected, when `app.workshop_id` is
+blank and `tenant_isolation` alone hides every role row (collapsing `active?` to `owner?`-only and
+locking out live non-owner staff). Added a **`FOR SELECT own_rows`** policy: `workshop_staff_id IN
+(SELECT id FROM workshop_staff WHERE user_id = NULLIF(current_setting('app.user_id', true),
+'')::bigint)` — reached through `workshop_staff` because the roles table has no `user_id` of its own
+(and `workshop_staff`'s own own_rows narrows that subquery to the caller; no recursion). Read-only:
+see your own role-periods pre-workshop, never write. **Safe against leaks** because every app read of
+`workshop_staff_roles` is already association-keyed or `.for_current_workshop`, so the app-level
+WHERE always intersects the (now wider) RLS result back down to the current tenant — own_rows can't
+pollute a tenant-scoped role query. App commit `a283a27`; the model half made `accessible_workshops`
+bottom out in the same `active?` the access door uses, so the two can't drift again.

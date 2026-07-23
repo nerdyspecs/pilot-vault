@@ -1,11 +1,71 @@
 ---
 type: log
-updated: 2026-07-21 (Session 25 — tenant-spine collapse + ADR-010)
+updated: 2026-07-24 (Session 26 — Sprint 3 built + RLS lockout fix)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-07-24 · Session 26 — Sprint 3 (Blockers) built end to end + the RLS lockout fix
+
+**Summary.** Shipped **Sprint 3 — the overlay axis** across three coding plans (A: records + door +
+scope; B: controller + views; C: catalog admin), preceded by a design deep-dive that settled the
+hard parts before any code. Blockers are now three records (`Blocker` catalog + `JobBlocker` item +
+`JobBlockerTransition` events), raise/resolve/note through the door, a mobile-friendly Blockers card
+on the job page, and owner/manager catalog admin. Along the way a **pre-existing RLS lockout bug**
+surfaced (system tests aren't in `bin/rails test`, so it had gone unnoticed) and was fixed. **89 unit
++ 9 system green.** [[Blocker]] rewritten to the built reality (the "Restructure pending" warning is
+gone).
+
+**The design deltas that shaped the build (deep-dive, then confirmed).** Three decisions turned the
+Session-17 sketch into buildable code:
+1. **The `blocks` stage-guard resolved the Hold-For-Payment collision.** The old ruling "open
+   blockers stop `→ done`" would trap HFP forever (the car *is* done, you just can't release it).
+   Fix: each catalog type carries a `blocks` column naming the one forward stage it vetoes —
+   work blockers guard `done`, **HFP guards `delivered`**. Constrained to `in_progress`/`done`/
+   `delivered` (DB `CHECK` + validation) so the veto — which lives **once**, in the door's
+   `transition!` — provably can't bite `send_back!`/`cancel!`/`assign`. A blocked job stays
+   cancellable, which falls out for free.
+2. **The raise/resolve guard is crew-aware.** A `technician`-side check requires *this job's* crew
+   (mirrors `start_work!`/`mark_done!`), not merely holding the role somewhere; other roles = hold
+   the role; manager/owner override. This drew the same floor-vs-counter line the door already uses.
+3. **Raise refuses past the guarded stage** — no raising a `done`-guard blocker on an already-done
+   car (the veto only stops *entering* a stage, never pulls a job back). Keeps `active_blockers`
+   honest.
+
+**Design B shipped.** One `JobBlocker` item carries a whole incident — `raised` once, `resolved` at
+most once, any number of `noted` events between (subcon A fails → subcon B works = one item, the
+bounce recorded as notes; you never resolve-then-reopen). `noted` ships in v1 (verb + mobile UI, the
+"B1" half). **B2 — routing an individual note to an inbox** (receiver flips mid-thread) — deferred to
+Sprint 4 and pinned there as **S4.8**; it's additive (one nullable `directed_to_role`), no S3 rework.
+Acks stay dormant on every event row until Sprint 4.
+
+**Build shape: model-first paid off.** Plan A concentrated every subtle decision (the guard, the
+veto, the birth-row idiom, `active_blockers`) in a fully unit-tested model layer — green before any
+UI. Plan B was then thin wiring + the Blockers card, and Plan C ordinary tenant CRUD (no door verb —
+a catalog type isn't job state), append-only like `WorkshopStaffRole` (no delete: a type referenced
+by an item can't vanish). Two real defects were caught building the admin UI: an unscoped `form_with`
+that would've missed `params.require(:blocker)`, and duplicate DOM ids across the per-row edit forms.
+
+**The RLS lockout bug — and finally getting hands dirty in `Current`/RLS.** `crew_management_test`
+failed: after an owner ended a mechanic's only role, the mechanic still saw the workshop listed on
+their landing page. Root cause was **two access checks that had drifted** — `User#access_for` (the
+door) filters by `WorkshopStaff#active?` and correctly denied, but `User#accessible_workshops` never
+filtered, so it listed the dormant husk. The trap: the naive one-line fix (add `active?`) *locks out
+live non-owner staff*, because `active?` reads `workshop_staff_roles`, which only had the
+`tenant_isolation` RLS policy — and on the landing page **no workshop is selected**, so
+`app.workshop_id` is blank and `active?` silently collapses to `owner?`-only. Real fix: a read-only
+**`own_rows` policy on `workshop_staff_roles`** (reached through `workshop_staff` via subquery, since
+roles has no `user_id`), making `active?` evaluable pre-workshop-selection; then `accessible_workshops`
+filters by the *same* `active?` predicate the door uses, so the two can't drift again. Safe because
+every app read of the roles table is already association-keyed or `.for_current_workshop`, so widening
+its RLS can't leak across tenants. This falsified the tenancy squash's "own_rows on roles would be
+dead weight" note — recorded as a dated footnote on [[ADR-007 Row-Level Security pulled into Sprint 1]]
+(app commit `a283a27`). A chip-out teaching session first walked the RLS/`Current`/access-door
+machinery end to end so the fix was understood, not just applied.
 
 ---
 
