@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-07-14
+updated: 2026-07-28 (ADR-011 reshaped to stored receiver + retitled; ADR-005 line vocab)
 ---
 # Decisions
 Why the product is built the way it is. **One file per decision (ADR).** Once accepted, an
@@ -14,12 +14,13 @@ New structural choice → new ADR with the next number.
 - [[ADR-002 V1 scope]] — V1 = job monitoring only; parts → V2, technician → V3; pricing deferred
 - [[ADR-003 Digitized jobsheet in V1]] — V1 also includes an owner-configurable jobsheet (the adoption wedge)
 - [[ADR-004 Multi-tenant foundation]] — Workshop tenant, thin User, Employment edges, session re-verification
-- [[ADR-005 Acknowledged handoffs in V1]] — every ownership handoff (stage / blocker / mechanic) is acknowledged; the ack lives on the event record
+- [[ADR-005 Acknowledged handoffs in V1]] — every ownership handoff (stage / blocker / technician) is acknowledged; the ack lives on the event record
 - [[ADR-006 Ownership separate from Employment]] — Ownership edge (governance) split from Employment (operations); signup creates the person, workshop creation is a post-signup act; access resolved through one door
 - [[ADR-007 Row-Level Security pulled into Sprint 1]] — database-enforced tenant isolation (Postgres RLS) built alongside the tenant tables, not deferred; schema-per-tenant re-examined and rejected again
 - [[ADR-008 Crew joining requires acceptance]] — joining a workshop is bilateral (invitee accepts); leaving is unilateral (termination needs no ack); the `Invitation` becomes a `pending → fired → accepted/declined` state machine; supersedes ADR-006's passive add-crew clause
 - [[ADR-009 Account deletion is refusal-first]] — **carries the lifetime invariant: a workshop cannot exist without an Ownership.** Deletion refused for accounts with edges/history (derived from that invariant + append-only history); bare accounts delete freely; last owner can never delete while the workshop stands (escape routes parked); PDPA/anonymization deferred with a dated trigger
 - [[ADR-010 WorkshopStaff supersedes the edge split]] — `WorkshopEmployment` + `WorkshopOwnership` collapse into one `WorkshopStaff` record (`owner` boolean, governance) + append-only `WorkshopStaffRole` rows (operations); actors AND holdings point at the tenant-local person via a composite `(actor_id, workshop_id)` FK (DB-enforced actor isolation); supersedes ADR-006 §1 and Data model's "actions → User"
+- [[ADR-011 Acknowledgement as stored visibility]] — **extends ADR-005, does not supersede it**: the receiver is **stored at write time** (`receiver_id`), so "waiting on whom" is a plain, always-answerable query — **no inbox, no confirm button**, just a *"Waiting on &lt;name&gt;"* line on the manager's board, cleared implicitly by acting on the job. Restores ADR-005's original `to_user` and fixes an append-only bug; settles [[Product gaps]] #5 (the Sprint 4 gate). *(Reshaped 2026-07-28 — the 2026-07-24 holder model was studied and dropped.)*
 
 See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 

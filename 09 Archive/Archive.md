@@ -24,5 +24,5 @@ docs focused on what's current. Nothing here is deleted or rewritten; it's reloc
   current shape of the system; they're updated in place, not sprint-scoped history.
 
 ## Index
-- [[Sprint plan (Sprints 0-2.5, closed)]] — Sprints 0, 1, 2, 2.5 (setup, tenancy spine, job engine, cold-start intake), moved 2026-07-21
+- [[Sprint plan (Sprints 0-3, closed)]] — Sprints 0, 1, 2, 2.5, 3 (setup, tenancy spine, job engine, cold-start intake, blockers), moved 2026-07-21 (Sprint 3 added 2026-07-24)
 - [[Worklog (Sessions 1-11)]] — Sessions 1–11 (vault/Rails setup through Sprint 1's close), moved 2026-07-21

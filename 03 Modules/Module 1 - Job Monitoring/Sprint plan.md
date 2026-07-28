@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-24 (Sprint 3 built + ticked)
+updated: 2026-07-28 (Sprint 4 reshaped by ADR-011 stored-receiver; S4.1/S4.3/S4.4/S4.7 built 982f7e9; colour → S5.7)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -40,10 +40,10 @@ that ends in something demoable.
 
 ---
 
-## Sprints 0–2.5 — closed
-Setup, tenancy spine, the job engine, and cold-start intake are built, tested, and shipped.
-Full task detail (ticks, dated annotations, commit hashes) moved to
-[[Sprint plan (Sprints 0-2.5, closed)]] to keep this file focused on current work.
+## Sprints 0–3 — closed
+Setup, tenancy spine, the job engine, cold-start intake, and blockers are built, tested, and
+shipped. Full task detail (ticks, dated annotations, commit hashes) moved to
+[[Sprint plan (Sprints 0-3, closed)]] to keep this file focused on current work.
 
 ## Tenant-spine collapse — done before Sprint 3 *(2026-07-21)*
 A prerequisite, not a numbered sprint: `WorkshopEmployment` + `WorkshopOwnership` collapsed into
@@ -54,69 +54,54 @@ event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth 
 
 ---
 
-## Sprint 3 · Blockers ✅ *(built 2026-07-24 — three coding plans A/B/C, all green)*
-**Goal:** the overlay axis — see [[Blocker]]. **Exit (met):** raise/clear blockers per role; a job shows its (possibly several) active blockers.
-Design deep-dive settled three deltas before build: the **`blocks` stage-guard** resolving the
-Hold-For-Payment vs `→ done` collision (HFP guards `delivered`); the **crew-aware** raise/resolve
-guard; and raise refused past the guarded stage. 89 unit + 9 system green.
+## Sprint 4 · Acknowledgement as visibility
+**Goal:** the differentiator — see [[ADR-005 Acknowledged handoffs in V1]] as extended by
+**[[ADR-011 Acknowledgement as stored visibility]]** (Product-gap #5 gate **settled**). **Exit:** every
+active job — including a finished car awaiting delivery — shows *"Waiting on &lt;name&gt;"* on the
+board when a handoff hasn't been picked up; acting on a job clears it.
 
-- [x] **S3.1** Migration + model **Blocker** (catalog): `workshop_id, label, raised_by_role,
-      cleared_by_role, blocks`. *(2026-07-24, `f47a4f6`.)* Built with a **`blocks` stage-guard**
-      column (DB `CHECK` to `in_progress`/`done`/`delivered`) — not in the original spec, it's what
-      resolved the HFP collision. **Four seeds** at `create_with_owner!`, not just HFP (Subcon /
-      Parts / Technical → `done`; **Hold for payment → `delivered`**) — see [[Blocker]].
-- [x] **S3.2** Migrations + models **`JobBlocker`** (item) + **`JobBlockerTransition`** (events).
-      *(2026-07-24, `f47a4f6`.)* Respecified per the ⚠ note: **three records**, events carry
-      `job_blocker_id` (not a direct `blocker_id`), `action` includes **`noted`**, and
-      `created_by`/`acknowledged_by` → `WorkshopStaff` composite FK (ADR-010).
-- [x] **S3.3** Extend `JobActions`: `raise_blocker!` / `resolve_blocker!` / `note_blocker!` + the
-      stage veto. *(2026-07-24, `9fe5156`.)* Role check is **crew-aware** (a `technician` side needs
-      *this job's* crew; manager/owner override); the veto lives once in `transition!`.
-- [x] **S3.4** `Job#active_blockers` scope: items with no `resolved` event (a query, [[Design laws]] #3). *(2026-07-24, `4009792` — also spliced blocker events into `Job#timeline`.)*
-- [x] **S3.5** Controller + views: the Blockers card — raise from catalog + note, resolve, add-note,
-      show active blockers; tech raise flow mobile-friendly. *(2026-07-24, `0ae84c2` wiring +
-      `eb377d0` views + `7273db9` system tests.)*
-- [x] **S3.6** Blocker-catalog admin — owner/manager adds + edits types (no delete: append-only
-      catalog). *(2026-07-24, `8a27e1d` + `4686bfb` tests.)* Built now rather than slipped.
-- [x] **S3.7** Tests: raise/resolve/note · crew-aware role checks · multiple active items · manager
-      override · the veto both directions · composite-FK actor integrity. *(Model/door units in
-      `job_actions_test.rb` 9–15 + `blocker_*_test.rb`; two system flows.)*
+**The frame (ADR-011):** the receiver is **stored at write time** (`receiver_id`), so "waiting on
+whom" is a plain query, always answerable regardless of adoption. **No inbox, no routing, no confirm
+button** — the answer surfaces on the manager's board and they walk over. The 2026-07-24 *holder*
+model was studied and dropped (ADR-011 Rejected alternatives).
 
----
-
-## Sprint 4 · Acknowledgement + inbox
-**Goal:** the differentiator — see [[ADR-005 Acknowledged handoffs in V1]]. ⚠️ **Decide Product-gap #5
-(partial-adoption) before building** ([[Product gaps]]). **Exit:** handoffs land in the receiver's inbox; ack clears them; stale ones flag.
-
-- [ ] **S4.1** `JobActions#acknowledge(record, by:)` — sets `acknowledged_at` + `acknowledged_by` on an
-      **event row**: `JobStageTransition` / `JobTechnicianTransition` / `JobBlockerTransition`.
-      *(2026-07-17 correction: pre-restructure wording said `JobMechanic` — engagements carry
-      **no ack columns** after the 2026-07-16 tracker split; acks live only on events — [[Event log]].
-      Names updated to Design B, Session 21.)*
-- [ ] **S4.2** Receiver logic (a query, not stored): stage change → service advisor · technician added →
-      that technician · blocker raised → the `cleared_by_role` holder(s).
-      *(⚠ design-pass item, noted 2026-07-17: a technician **removed before acking their
-      `joined` event** — the debt's receiver is no longer on the crew; decide whether the
-      dropped-handoff debt dies with the removal or stays owed. Exists in both crew designs;
-      the events survive removal (Design B self-containment), so either answer is buildable.)*
-- [ ] **S4.3** "Waiting on me" query across the event tables — via **the handoff predicate**
-      (`.pending_ack`, design-pass item named 2026-07-16): unacked AND not-self-caused AND
-      role-resolved to me, in ONE shared scope used by inbox, manager board, and limbo flag
-      alike (a bare `acknowledged_at IS NULL` overcounts — NULL also means "never was a
-      handoff"; [[Event log]]). Orphaned debts (role resolves to nobody) render as "pending,
-      unheld role" — never vanish. Manager's chase board = the union view grouped by debtor,
-      distinct from each person's own inbox.
-- [ ] **S4.4** Inbox controller + view: my pending acks + an "acknowledge" button each. **Mobile-friendly
-      — techs live here.**
-- [ ] **S4.5** Limbo surfacing: flag handoffs unacked beyond a threshold.
-- [ ] **S4.6** *(Product-gap #5)* graceful degradation per the decision — e.g. ack-on-behalf (logged as
-      "by X for Y") and/or a limbo threshold/snooze.
-- [ ] **S4.7** Tests: inbox shows the right pending items · ack clears them · limbo flagged.
-- [ ] **S4.8** *(B2 — carried from Sprint 3, 2026-07-24)* **Directed blocker notes.** Decide whether
-      a `noted` event can be a handoff routed to an inbox (a parts advisor's "arrived, verify" → the
-      tech) — the note's receiver can flip mid-thread, which is why it was deferred here. The ack
-      pair already exists on note rows, so a receiver is one nullable `directed_to_role` added
-      **additively** — no S3 rework, old notes read as neutral. See [[Blocker]] B1/B2 split.
+- [x] **S4.1** The acknowledgement writer — `982f7e9`. Rename the dormant `acknowledged_by_id` →
+      **`receiver_id`** on all three event tables (never populated → no data migration). A 4-method
+      **`Acknowledgeable`** concern (`has_receiver?` / `acknowledged?` / `awaiting_from?` /
+      `acknowledge!` + `scope :unacknowledged`) included bare in each transition model. The door
+      stamps receivers: `joined`→technician, `left`→technician, `mark_done`→intake SA, `send_back`→
+      technician, `resolve_blocker`→raiser; `raised` and the terminals pin nobody.
+      **Implicit acknowledgement** via `JobActions.acknowledge_pending!` — `transition!`'s first line
+      plus the three blocker verbs — under `job.with_lock`, so a refused verb rolls its sweep back.
+- [x] **S4.2** ~~Receiver logic~~ **RULED, folded into S4.1** *(reshaped 2026-07-28)*: `left` pins
+      the technician (they should know they're off). Removal is only legal at `assigned` before work
+      starts and already rolls the job back to `registered` (`app/services/job_actions.rb`), which
+      **returns the job to the service advisor by itself** — no orphan, no new columns.
+- [x] **S4.3** **The board read** — `982f7e9`. `Job.pending_acknowledgements_by_job(jobs)` (three
+      flat queries, no N+1) and `WorkshopStaff#pending_acknowledgements`, both a plain
+      `receiver_id IS NOT NULL AND acknowledged_at IS NULL`. **Replaces the old holder derivation and
+      deletes the `.pending_ack` predicate** — the stored NULL check *is* "not a handoff", so no
+      classifier is needed ([[Event log]]).
+- [x] **S4.4** **The board surface (not an inbox)** — `982f7e9` + `8fad8c9` (done pin). A muted
+      *"Waiting on &lt;name&gt;"* line on each board row (`jobs/_waiting_pin`, `jobs/_board_row`), on
+      `workshops#show`. **Done is not terminal:** a **"Done — awaiting delivery"** group surfaces the
+      finished-car pin, since `Job.active` excludes `done` (the founding pain). Mobile-verified at
+      375px. There is no receiver "inbox" and no sender-side view — one board, read by the manager.
+- [ ] **S4.5** ~~Ageing colour~~ — **moved to S5.7** *(deferred 2026-07-28)*. The pin ships muted;
+      amber/red at a threshold, on the chip never the row, is a styling pass after real use. Bands +
+      the overnight-hours wart parked in [[Deferred design]].
+- [x] **S4.6** *(Product-gap #5 — the mechanisms)* satisfied by the above: **stored receiver read**
+      (S4.3) · **board surface** (S4.4) · **acting confirms** (S4.1) · colour deferred (S5.7).
+      **Surviving law: never deleted, never faked** — no auto-ack, no expiry, no purge; a terminal
+      verb writes no closing lie, the open row stays honestly NULL and just leaves the board.
+- [x] **S4.7** Tests — `982f7e9`. 13 new (102 unit + 9 system green): receiver correct per verb ·
+      an unconfirmed pass stays put and acting clears it · a refused verb rolls its sweep back ·
+      **the append-only bug regression** (editing `cleared_by_role` doesn't re-point open handoffs) ·
+      a counter-only workshop generates zero confirmation traffic and still reads correctly (the
+      Product-gap #5 proof, executable).
+- [ ] ~~**S4.8** Directed blocker notes (B2)~~ — **deferred again** (ADR-011). Still additive (one
+      nullable `directed_to_role`, no rework), and `raise` pins nobody precisely so a second traffic
+      generator waits for a real workshop. See [[Blocker]] B1/B2 split · [[Deferred design]].
 
 ---
 
@@ -126,10 +111,23 @@ guard; and raise refused past the guarded stage. 89 unit + 9 system green.
 - [ ] **S5.1** Jobs index: active jobs for `Current.workshop` (exclude `delivered/cancelled`), showing
       stage, crew, active blockers.
 - [ ] **S5.2** Filters: by stage, by technician (crew), by blocker.
+- [ ] **S5.2a** *(added 2026-07-24, ADR-011)* **Per-job grouping — whiteboard parity**: the car,
+      its stage, and how long it has been sitting. The board a workshop already draws, made live.
+- [ ] **S5.2b** *(added 2026-07-24, ADR-011)* **Per-technician grouping**: load, long-running
+      `in_progress` jobs, last activity. ⚠ **Frame it as the manager's diagnostic on stuck jobs,
+      never a scoreboard** — the builder's "saucy one". What keeps it honest is ADR-011's
+      **symmetry**: the counter is measured identically (an unconfirmed `done` ages exactly like an
+      unconfirmed assignment), so this is not a lens aimed at the floor. Stays inside the
+      positioning invariant because it aggregates **jobs**, never real-time technician activity.
 - [ ] **S5.3** *(Product-gap #2)* aging highlight: flag jobs sitting in a stage beyond N days.
 - [ ] **S5.4** *(optional)* Turbo Streams for near-live updates — a plain refresh is fine first.
 - [ ] **S5.5** PC layout primary; a clean "my jobs" view readable on a technician's phone.
 - [ ] **S5.6** Tests: tenant scoping of the index · filters · aging flag.
+- [ ] **S5.7** *(carried from Sprint 4)* **Ageing colour on the waiting pin** — under 1h neutral ·
+      1h–1d amber (the palette's existing *Waiting / aging*) · over 1d red ("stuck, act now", whose
+      two causes are a blocker and an unclaimed handoff — the chip text says which). **Colour the
+      chip, never the row.** One workshop-wide constant, one place. Bands + the overnight-hours wart:
+      [[Deferred design]].
 
 ---
 

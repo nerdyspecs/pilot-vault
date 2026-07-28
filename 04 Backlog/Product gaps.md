@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-07-04
-updated: 2026-07-04
+updated: 2026-07-28 (#5 decided — ADR-011 reshaped to stored receiver; verdict amended)
 ---
 # Product gaps — V1 design review
 > **Reviewed: 2026-07-04** (Session 3). Snapshot of the vault as of this date — re-check how much
@@ -26,7 +26,7 @@ already wrote down?
 
 | # | Gap | Why it matters | Suggested |
 |---|---|---|---|
-| 5 | **Ack model assumes full adoption** | Our constraint says "partial use must still provide value." But ack is receiver-must-act: non-adopting techs → flooded inbox + screaming limbo → "system doesn't work." Need a graceful-degradation story (SA ack *on behalf of*, logged? snooze/threshold on limbo?). | **Pull into V1** (design the degradation) |
+| 5 | **Ack model assumes full adoption** | Our constraint says "partial use must still provide value." But ack is receiver-must-act: non-adopting techs → flooded inbox + screaming limbo → "system doesn't work." Need a graceful-degradation story (SA ack *on behalf of*, logged? snooze/threshold on limbo?). | ✅ **Decided 2026-07-28** — [[ADR-011 Acknowledgement as stored visibility]]: the receiver is **stored at write time**, so "waiting on whom" is a plain query that is always answerable regardless of who adopts. There is **no inbox** to flood — the answer surfaces on the manager's board, and the manager (an adopter by definition) reads it and walks over. Acknowledgement is **implicit**: acting on a job clears what you owe, so a counter-only shop generates zero confirmation traffic and still reads correctly. Ack-on-behalf, snooze, and the 2026-07-24 holder model were all **rejected** (see the ADR). |
 | 6 | **Floor device & login reality** | Techs auth via Devise/accounts/email — many floor techs have no email, won't do passwords on a shared greasy phone. Shared tablet per bay? PIN fast-switch? This decides whether acknowledgement *physically happens* — i.e. whether the key feature works at all. | ✅ **Decided 2026-07-04** — standard web login on phone; technician screens absolutely mobile-friendly; SA/owner PC-primary + owner mobile health view; special floor-device/PIN revisited later → [[Tech stack]] |
 | 7 | **No photos** | Jobsheet is checkbox\|text only. Real intake needs damage photos (liability at collection) + repair evidence. One place digital beats paper → strengthens the adoption wedge. "Photos attach to the job" is enough. | Decide (V1 or V2) |
 | 8 | **Customer approval has no record** | Quotation deferred (fine), but the *approval moment* still happens (SA calls, customer says go). No trace → dispute risk ("I never approved this!"). Could be a disciplined blocker-resolve note. | Decide (small, V1-friendly) |
@@ -43,6 +43,11 @@ The core loop (intake → jobsheet → assign → track → blockers → deliver
 the differentiator) is a **sellable wedge** — a real product. But as specced it would likely fail
 its first workshop on **#1 (no ETA)** and **#5 (partial-adoption)** — those decide *survival*
 (**#6 floor access** since **decided**, see row); **#2 (aging)** decides whether the *manager* renews.
+
+*(**Updated 2026-07-28:** **#5 is no longer an open survival risk** — settled by
+[[ADR-011 Acknowledgement as stored visibility]], which makes "waiting on whom" a stored, always-answerable
+query with no inbox to flood. **#1 (no ETA) remains the open survival item**, still parked at Sprint
+task S6.6.)*
 
 Suggested cut when we act on this: pull **#1, #2, #5** (and cheap **#9**) into V1; make explicit
 *decisions* to defer **#3, #4, #7, #8** so they're parked on purpose, not by omission.

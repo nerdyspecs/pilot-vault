@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knot — UI sample 16/7 (static mockup)</title>
+<!--
+  Static look-and-feel mockup, 2026-07-16. No database, no framework — hand CSS on the
+  Visual theme tokens. Role dropdown (top right) switches persona screens.
+  Data = the Session 17 walkthrough cast: Siti (SA), Ah Boy (tech), Lim Ah Huat / WVK 3721.
+-->
+<style>
+  :root {
+    --brand: #22456B;
+    --action: #2D5E94;
+    --action-hover: #24507F;
+    --page: #F5F6F8;
+    --surface: #FFFFFF;
+    --border: #E2E6EB;
+    --text: #1C2B3A;
+    --text-muted: #5C6670;
+    /* Status colors — SACRED, semantic only */
+    --st-neutral-bg: #F1EFE8;  --st-neutral-tx: #444441;
+    --st-info-bg: #E6F1FB;     --st-info-tx: #0C447C;
+    --st-aging-bg: #FAEEDA;    --st-aging-tx: #633806;
+    --st-danger-bg: #FCEBEB;   --st-danger-tx: #791F1F;
+    --st-success-bg: #EAF3DE;  --st-success-tx: #27500A;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--page); color: var(--text); font-size: 15px; line-height: 1.45; }
+
+  /* ── App bar: chrome whispers (all-light, Option A) ─────────────────── */
+  .appbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px; padding: 10px 20px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .wordmark { font-weight: 700; font-size: 20px; color: var(--brand); letter-spacing: .5px; }
+  .shopname { color: var(--text-muted); font-size: 14px; border-left: 1px solid var(--border); padding-left: 16px; }
+  .appbar .spacer { flex: 1; }
+  .rolewrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+  .rolepill {
+    font: inherit; font-size: 13px; padding: 8px 12px; min-height: 40px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+    color: var(--text-muted);
+  }
+  .rolepill.on { border-color: var(--action); color: var(--action); font-weight: 600; }
+  /* Static-mockup toast: dead buttons say so instead of silently ignoring the click */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px;
+    border-radius: 8px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 99;
+  }
+  #toast.show { opacity: .92; }
+  .whoami { font-size: 13px; color: var(--text-muted); }
+  .whoami b { color: var(--text); font-weight: 600; }
+
+  /* ── Shared components (law 7: same component, every screen) ────────── */
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 64px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  h1 { font-size: 21px; margin-bottom: 4px; }
+  h2 { font-size: 16px; margin-bottom: 10px; }
+  .sub { color: var(--text-muted); font-size: 13.5px; margin-bottom: 20px; }
+  .plate { font-family: var(--font-mono); font-weight: 600; letter-spacing: .5px; }
+  .muted { color: var(--text-muted); font-size: 13px; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 600; white-space: nowrap;
+  }
+  .st-registered { background: var(--st-neutral-bg); color: var(--st-neutral-tx); }
+  .st-assigned   { background: var(--st-info-bg);    color: var(--st-info-tx); }
+  .st-inprogress { background: var(--st-info-bg);    color: var(--st-info-tx); }
+  .st-done       { background: var(--st-success-bg); color: var(--st-success-tx); }
+  .st-delivered  { background: var(--st-success-bg); color: var(--st-success-tx); }
+  .st-blocked    { background: var(--st-danger-bg);  color: var(--st-danger-tx); }
+  .st-aging      { background: var(--st-aging-bg);   color: var(--st-aging-tx); }
+
+  .btn {
+    display: inline-block; font: inherit; font-weight: 600; font-size: 14px;
+    padding: 10px 16px; min-height: 44px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--action); background: var(--surface); color: var(--action);
+    text-align: center;
+  }
+  .btn:hover { border-color: var(--action-hover); color: var(--action-hover); }
+  .btn-solid { background: var(--action); color: #fff; }
+  .btn-solid:hover { background: var(--action-hover); color: #fff; }
+  .btn-quiet { border-color: var(--border); color: var(--text-muted); }
+  .btn-wide { display: block; width: 100%; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .4px;
+       color: var(--text-muted); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr.rowlink { cursor: pointer; }
+  tr.rowlink:hover td { background: #FAFBFC; }
+
+  .filters { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+  .chip {
+    font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  }
+  .chip.on { border-color: var(--action); color: var(--action); font-weight: 600; }
+
+  .attn { border-left: 4px solid var(--st-aging-tx); }
+  .attn.hot { border-left-color: var(--st-danger-tx); }
+  .attnrow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .attnrow .grow { flex: 1; min-width: 220px; }
+
+  /* Timeline */
+  .tl { list-style: none; }
+  .tl li { display: grid; grid-template-columns: 58px 92px 1fr auto; gap: 12px;
+           padding: 9px 4px; border-bottom: 1px dashed var(--border); align-items: baseline; }
+  .tl li:last-child { border-bottom: none; }
+  .tl time { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted); }
+  .tl .kind { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); }
+  .tl .ackyes { font-size: 12.5px; color: var(--st-success-tx); }
+  .tl .ackno  { font-size: 12.5px; color: var(--st-danger-tx); font-weight: 600; }
+  .tl .acksil { font-size: 12.5px; color: var(--text-muted); }
+
+  /* Stat tiles (manager) */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .stat .n { font-size: 26px; font-weight: 700; }
+  .stat .l { font-size: 12.5px; color: var(--text-muted); }
+
+  /* Technician + owner: phone posture (narrow column, thumb-first) */
+  .phone { max-width: 430px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .jobcard h3 { font-size: 17px; margin-bottom: 2px; }
+  .jobcard .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
+  .btnrow { display: flex; gap: 10px; margin-top: 14px; }
+  .btnrow .btn { flex: 1; }
+
+  /* Owner status steps */
+  .steps { list-style: none; margin: 18px 0 6px; }
+  .steps li { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; position: relative; top: 2px;
+         border: 2px solid var(--border); background: var(--surface); }
+  .dot.past { background: var(--st-success-tx); border-color: var(--st-success-tx); }
+  .dot.now  { background: var(--st-info-tx); border-color: var(--st-info-tx); }
+  .steps .lbl { flex: 1; }
+  .steps .done-lbl { color: var(--text-muted); }
+
+  .screen { display: none; }
+  .screen.on { display: block; }
+  .foot { margin-top: 28px; font-size: 12px; color: var(--text-muted); text-align: center; }
+  .gap { height: 18px; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <span class="wordmark">Knot</span>
+  <span class="shopname">Hin Fatt Auto Works</span>
+  <span class="spacer"></span>
+  <span class="whoami" id="whoami">Signed in as <b>Siti</b> · service advisor</span>
+  <span class="rolewrap">View as
+    <button class="rolepill on" data-role="sa" onclick="switchRole('sa', this)">Service Advisor</button>
+    <button class="rolepill" data-role="tech" onclick="switchRole('tech', this)">Technician</button>
+    <button class="rolepill" data-role="mgr" onclick="switchRole('mgr', this)">Manager</button>
+    <button class="rolepill" data-role="owner" onclick="switchRole('owner', this)">Owner link</button>
+  </span>
+</header>
+
+<!-- ════════════ SERVICE ADVISOR — PC posture: dense board ════════════ -->
+<main class="wrap screen on" id="screen-sa">
+  <h1>Live board</h1>
+  <p class="sub">Where is every job right now? · Wednesday 16 Jul, 3:12 pm</p>
+
+  <!-- Waiting on the counter: unacked handoffs flowing floor → counter -->
+  <div class="card attn hot" style="margin-bottom:12px">
+    <div class="attnrow">
+      <span class="badge st-done">Done</span>
+      <div class="grow">
+        <span class="plate">BMT 8055</span> · Hino 300 · Speedy Deliveries Sdn Bhd —
+        finished <b>yesterday 5:45 pm</b>, customer not called yet.
+        <span class="badge st-aging">overnight</span>
+      </div>
+      <button class="btn">Acknowledge — calling customer</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <span class="chip on">Active (5)</span>
+    <span class="chip">Registered (1)</span>
+    <span class="chip">In progress (3)</span>
+    <span class="chip">Blocked (1)</span>
+    <span class="chip">Done (1)</span>
+    <span class="chip">Delivered · Cancelled</span>
+    <span style="flex:1"></span>
+    <button class="btn btn-solid">Register a car</button>
+  </div>
+
+  <div class="card" style="padding:6px 12px">
+    <table>
+      <thead>
+        <tr><th>Vehicle</th><th>Customer</th><th>Stage</th><th>Blockers</th><th>Crew</th><th>In stage since</th></tr>
+      </thead>
+      <tbody>
+        <tr class="rowlink" onclick="toggleDetail()" title="Click: job detail + timeline">
+          <td><span class="plate">WVK 3721</span><div class="muted">Proton Saga</div></td>
+          <td>Lim Ah Huat</td>
+          <td><span class="badge st-inprogress">In progress</span></td>
+          <td class="muted">— <div>(parts wait, resolved 2:30)</div></td>
+          <td>Ah Boy</td>
+          <td>10:20 am</td>
+        </tr>
+        <tr>
+          <td><span class="plate">WJR 2088</span><div class="muted">Perodua Myvi</div></td>
+          <td>Tan Mei Ling</td>
+          <td><span class="badge st-assigned">Assigned</span></td>
+          <td class="muted">—</td>
+          <td>Ah Boy <span class="badge st-aging">unacked 32m</span></td>
+          <td>2:40 pm</td>
+        </tr>
+        <tr>
+          <td><span class="plate">BMT 8055</span><div class="muted">Hino 300</div></td>
+          <td>Speedy Deliveries Sdn Bhd</td>
+          <td><span class="badge st-done">Done</span></td>
+          <td class="muted">—</td>
+          <td>Ah Seng</td>
+          <td>Yesterday 5:45 pm <span class="badge st-aging">overnight</span></td>
+        </tr>
+        <tr>
+          <td><span class="plate">BMT 8056</span><div class="muted">Hino 300</div></td>
+          <td>Speedy Deliveries Sdn Bhd</td>
+          <td><span class="badge st-inprogress">In progress</span></td>
+          <td><span class="badge st-blocked">Hold For Payment</span></td>
+          <td>Ah Seng</td>
+          <td>11:05 am</td>
+        </tr>
+        <tr>
+          <td><span class="plate">WXY 4412</span><div class="muted">Honda City</div></td>
+          <td>Wong Kar Fai</td>
+          <td><span class="badge st-registered">Registered</span></td>
+          <td class="muted">—</td>
+          <td class="muted">unassigned</td>
+          <td>2:47 pm</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Job detail + timeline (the Job#timeline read, rendered) -->
+  <div class="gap"></div>
+  <div class="card" id="jobdetail">
+    <h2><span class="plate">WVK 3721</span> · Proton Saga · Lim Ah Huat &nbsp;
+        <span class="badge st-inprogress">In progress</span></h2>
+    <p class="muted" style="margin-bottom:10px">Job #104 · registered today 9:02 am · crew: Ah Boy</p>
+    <ul class="tl">
+      <li><time>9:02</time><span class="kind">stage</span><span>Registered — car received at counter · <span class="muted">Siti</span></span><span class="acksil">—</span></li>
+      <li><time>9:40</time><span class="kind">stage</span><span>Registered → Assigned · <span class="muted">Siti</span></span><span class="acksil">no handoff</span></li>
+      <li><time>9:40</time><span class="kind">crew</span><span><b>Ah Boy joined</b> the job · <span class="muted">assigned by Siti</span></span><span class="ackyes">✓ acked 10:15 by Ah Boy</span></li>
+      <li><time>10:20</time><span class="kind">stage</span><span>Assigned → In progress · <span class="muted">Ah Boy</span></span><span class="ackyes">✓ acked 10:24 by Siti</span></li>
+      <li><time>11:05</time><span class="kind">blocker</span><span><b>Waiting for parts</b> raised — “absorber, kedai says 2pm” · <span class="muted">Ah Boy</span></span><span class="ackyes">✓ acked 11:12 by Siti</span></li>
+      <li><time>2:30</time><span class="kind">blocker</span><span>Waiting for parts <b>resolved</b> · <span class="muted">Siti</span></span><span class="ackyes">✓ acked 2:41 by Ah Boy</span></li>
+    </ul>
+    <div class="btnrow" style="max-width:460px">
+      <button class="btn">Raise blocker</button>
+      <button class="btn btn-quiet">Reassign mechanic</button>
+      <button class="btn btn-quiet">Cancel job…</button>
+    </div>
+  </div>
+
+  <p class="foot">Static mockup — nothing here is wired up. Status colors per Visual theme (sacred).</p>
+</main>
+
+<!-- ════════════ TECHNICIAN — phone posture: thumb-first ════════════ -->
+<main class="wrap screen" id="screen-tech">
+  <div class="phone">
+    <h1>My jobs</h1>
+    <p class="sub" style="margin-bottom:2px">Ah Boy · Wednesday 3:12 pm</p>
+
+    <!-- The pending handshake: counter → floor. THE primary action on this screen. -->
+    <div class="card attn">
+      <span class="badge st-assigned">New assignment</span>
+      <h3 style="margin-top:8px"><span class="plate">WJR 2088</span> · Perodua Myvi</h3>
+      <p class="muted">Assigned to you by Siti · 32 minutes ago</p>
+      <div class="btnrow">
+        <button class="btn btn-solid btn-wide">Acknowledge — I’ve got it</button>
+      </div>
+    </div>
+
+    <div class="card jobcard">
+      <div class="row">
+        <h3><span class="plate">WVK 3721</span> · Proton Saga</h3>
+        <span class="badge st-inprogress">In progress</span>
+      </div>
+      <p class="muted">Started 10:20 am · parts arrived 2:30 pm</p>
+      <div class="btnrow">
+        <button class="btn">Mark done</button>
+        <button class="btn btn-quiet">Raise blocker</button>
+      </div>
+    </div>
+
+    <div class="card jobcard">
+      <div class="row">
+        <h3><span class="plate">BMT 8056</span> · Hino 300</h3>
+        <span class="badge st-blocked">Hold For Payment</span>
+      </div>
+      <p class="muted">Helping Ah Seng · blocked since 11:05 am — nothing for you until the counter clears it.</p>
+    </div>
+
+    <p class="foot">One solid button per screen — the most likely next step. Everything else outlined.</p>
+  </div>
+</main>
+
+<!-- ════════════ WORKSHOP MANAGER — PC posture: chase board ════════════ -->
+<main class="wrap screen" id="screen-mgr">
+  <h1>Handoffs waiting</h1>
+  <p class="sub">Every unacknowledged handoff, oldest first — who do I chase?</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">5</div><div class="l">active jobs</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">blocked</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">handoffs waiting</div></div>
+    <div class="stat"><div class="n" style="color:var(--st-danger-tx)">18h</div><div class="l">oldest handoff</div></div>
+  </div>
+
+  <div class="card" style="padding:6px 12px; margin-bottom:16px">
+    <table>
+      <thead>
+        <tr><th>Waiting since</th><th>Job</th><th>What happened</th><th>Waiting on</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Yesterday 5:45 pm <span class="badge st-aging">18h</span></td>
+          <td><span class="plate">BMT 8055</span></td>
+          <td><span class="badge st-done">Done</span> — finished, customer not called</td>
+          <td><b>Counter</b> (service advisor)</td>
+          <td><button class="btn btn-solid">Follow up</button></td>
+        </tr>
+        <tr>
+          <td>2:40 pm <span class="muted">(32m)</span></td>
+          <td><span class="plate">WJR 2088</span></td>
+          <td><span class="badge st-assigned">Assigned</span> — joined the crew, not yet seen</td>
+          <td><b>Ah Boy</b></td>
+          <td><button class="btn btn-quiet">Follow up</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="max-width:460px">
+    <h2>By person</h2>
+    <table>
+      <tbody>
+        <tr><td>Counter (service advisor)</td><td style="text-align:right"><b>1</b> waiting · oldest 18h</td></tr>
+        <tr><td>Ah Boy</td><td style="text-align:right"><b>1</b> waiting · oldest 32m</td></tr>
+        <tr><td>Ah Seng</td><td style="text-align:right" class="muted">0 waiting</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="foot">Hold For Payment on BMT 8056 isn’t listed — raised and cleared by the same
+  role, so it never owes a handshake (by design).</p>
+</main>
+
+<!-- ════════════ VEHICLE OWNER — phone, read-only token page ════════════ -->
+<main class="wrap screen" id="screen-owner">
+  <div class="phone">
+    <div class="card">
+      <p class="muted" style="margin-bottom:10px">Hin Fatt Auto Works</p>
+      <h1><span class="plate">WVK 3721</span></h1>
+      <p class="muted">Proton Saga · in for service since Wed 9:02 am</p>
+
+      <ul class="steps">
+        <li><span class="dot past"></span><span class="lbl done-lbl">Received</span><span class="muted">9:02 am</span></li>
+        <li><span class="dot past"></span><span class="lbl done-lbl">Mechanic assigned</span><span class="muted">9:40 am</span></li>
+        <li><span class="dot now"></span><span class="lbl"><b>Being worked on</b></span><span class="badge st-inprogress">now</span></li>
+        <li><span class="dot"></span><span class="lbl muted">Ready for collection</span></li>
+        <li><span class="dot"></span><span class="lbl muted">Collected</span></li>
+      </ul>
+
+      <p class="muted" style="margin-top:10px">We’ll message you when it’s ready.
+      Questions? Call the workshop: 03-5510 1234.</p>
+    </div>
+    <p class="foot">Read-only — this page has no buttons on purpose. Reached via the job’s
+    token link, no login.</p>
+  </div>
+</main>
+
+<div id="toast">Static mockup — this button isn’t wired up</div>
+
+<script>
+  function switchRole(role, pill) {
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("on"); });
+    document.getElementById("screen-" + role).classList.add("on");
+    document.querySelectorAll(".rolepill").forEach(function (p) { p.classList.remove("on"); });
+    pill.classList.add("on");
+    var who = {
+      sa:    "Signed in as <b>Siti</b> · service advisor",
+      tech:  "Signed in as <b>Ah Boy</b> · technician",
+      mgr:   "Signed in as <b>Towkay</b> · workshop manager",
+      owner: "Viewing the owner’s token link — no sign-in"
+    };
+    document.getElementById("whoami").innerHTML = who[role];
+    window.scrollTo(0, 0);
+  }
+  function toggleDetail() {
+    var d = document.getElementById("jobdetail");
+    d.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  // Dead buttons announce themselves instead of silently swallowing the click.
+  var toastTimer = null;
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".btn");
+    if (!btn) { return; }
+    var toast = document.getElementById("toast");
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 1400);
+  });
+</script>
+</body>
+</html>

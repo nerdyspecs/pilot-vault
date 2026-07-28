@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-17 (edge rename + Design B)
+updated: 2026-07-24 (top ADR-010 pointer added; §Resolved note dated 2026-07-21, body preserved)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -9,6 +9,12 @@ Customers, vehicles, jobs, and who's allowed to touch them.
 **The shape: a routing problem, not a customer database.** Every entity answers, per job,
 *"who's responsible and who do we talk to?"* — see [[Product overview]]. Tenancy + user rules
 live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is the entity map.
+
+> [!warning] The entity map below predates [[ADR-010 WorkshopStaff supersedes the edge split]] (2026-07-21)
+> The `WorkshopEmployment` / `WorkshopOwnership` edges shown below **no longer exist** — they
+> collapsed into one **`WorkshopStaff`** record (`owner` boolean) + append-only
+> **`WorkshopStaffRole`** rows, and every actor/holder column points at `WorkshopStaff`. The old
+> shape is kept for its reasoning; the reconciliation is the `[!note]` under §Resolved and ADR-010.
 
 ## Entities (v1)
 ```

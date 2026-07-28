@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-07-12
+updated: 2026-07-24 (ADR-011 — the crew veto no longer breaks the product; #5 bet answered)
 ---
 # Brand positioning
 Locked 2026-07-06 (worked out interactively — options pressure-tested, choices deliberate).
@@ -38,6 +38,13 @@ is the product/brand. Nothing internal needs renaming.)*
   unilateral call. Consent to bind, no veto on unbind. The one-tap accept is trivial, one-time
   friction that never touches the daily-update ease this veto is really about; it buys consent
   and mis-add safety.)*
+  *(2026-07-24, [[ADR-011 Acknowledgement as stored visibility]] — **the veto no longer breaks the product.**
+  A crew that stops updating stops handoffs *moving*; it never leaves a job unowned, because an
+  unconfirmed pass stays with its **sender**, who is by definition someone using Knot. The
+  positioning invariant — **job statuses, never real-time technician activity** — is unchanged, and
+  explicitly **includes** per-technician *job* aggregation (load, stuck jobs, last activity): that
+  counts **jobs**, not people's minutes, and ADR-011's symmetry measures the counter identically,
+  so it is a manager's diagnostic, **never a scoreboard aimed at the floor**.)*
 - **Real competitor:** doing nothing. The whiteboard is free and "mostly works." Every claim
   must survive *"why pay to replace what's free?"* — so we never sell the replacement, we sell
   what the whiteboard can't do.
@@ -68,6 +75,15 @@ adoption is what survives the veto. Brand signals: one honest fee, get everyone 
 Same bet as [[Product gaps]] #5 (the ack model assumes full crew adoption) — the marketing claim
 and the product's graceful-degradation design (Sprint task S4.6) rise or fall together; one
 workshop validation session settles both.
+
+*(**Answered 2026-07-28 — [[ADR-011 Acknowledgement as stored visibility]].** The design half is settled: the
+receiver is **stored** at write time, so "waiting on whom" is always answerable — partial adoption
+degrades the *flow* of handoffs, never the *truth* of who each is for. A counter-only shop generates
+zero acknowledgement traffic and still reads correctly on every job — so **"No job goes unseen" is
+defensible as copy even at minimum adoption.** What still needs a real workshop is the **assumption**,
+not the mechanism:
+whether mechanics experience the handshake as protection, or merely as the boss's mandate. Keep
+the "crew insurance" line out of copy until that session happens.)*
 
 ## Related
 - [[Voice and tone]] · [[Product overview]] · [[Visual theme]] · [[Builder identity]]

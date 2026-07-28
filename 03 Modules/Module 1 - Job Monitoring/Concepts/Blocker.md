@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-24 (Sprint 3 built — three records, blocks stage-guard, Design B)
+updated: 2026-07-24 (Sprint 3 built; ADR-011 — resolve echo tapped-never-inferred, B2 deferred past S4)
 ---
 # Blocker
 The **overlay axis** — something pausing a job. The job keeps its stage; the blocker sits on top.
@@ -85,19 +85,31 @@ catalog admin:
 A subcon blocker is `raised_by: technician, cleared_by: service_advisor` on purpose —
 tech-cleared would make the raise self-caused and the SA would never hear of it.
 
-## Acknowledgement — dormant until Sprint 4
-Raising a blocker is a **handoff**. Receivers are derived, not stored: **raise → the catalog's
-`cleared_by_role`**; **resolve → the item's raiser** (`created_by` on its `raised` event — the echo
-back, doubling as a verification receipt in the subcon flow). Same-role blockers (Hold for payment,
-SA-raised SA-cleared) generate **zero ack traffic** by design. The `acknowledged_at` /
-`acknowledged_by` pair already exists on every event row (incl. notes) but stays NULL in v1 — lit in
-Sprint 4 ([[ADR-005 Acknowledged handoffs in V1]]).
+## Acknowledgement — stored receiver *(built, Sprint 4)*
+**Resolving** a blocker is a handoff; **raising** one is not. Receivers are **stored** at write time
+(ADR-011), not derived: **`raised` → nobody** (a raised blocker is already visible, and
+`cleared_by_role` routes who may clear it — pinning a person would only manufacture a to-do);
+**`resolved` → the item's raiser** (`created_by` on its `raised` event, via `JobBlocker#raised_by`).
+Same-role blockers (Hold for payment, SA-raised SA-cleared) generate **zero ack traffic** — the
+resolver already holds the raise side, so the sweep clears it in the same breath. The `receiver_id` /
+`acknowledged_at` pair rides every event row; a `noted` event pins nobody and stays NULL
+([[ADR-005 Acknowledged handoffs in V1]], [[ADR-011 Acknowledgement as stored visibility]]).
 
-**B1 / B2 split.** B1 (built) is the long-lived item + the neutral note chain. **B2 (deferred to
-Sprint 4)** is routing an *individual* note to someone's inbox (a parts advisor's "arrived, please
-verify" landing in the tech's "waiting on me") — the note's receiver can flip mid-thread. No S3
-rework: if directed notes need a receiver it's one nullable `directed_to_role` added additively, old
-notes reading as neutral.
+**B1 / B2 split.** B1 (built) is the long-lived item + the neutral note chain. **B2** is stamping a
+`raised` or `noted` event with a **stored receiver pinned to a person** (a parts advisor's "arrived,
+please verify" showing as *"waiting on"* that technician on the board) — the receiver can flip
+mid-thread, which is why Sprint 4 pins **nobody** on `raised`. No rework when it lands: the
+`receiver_id` column already exists; the verbs just start stamping it, old rows reading as neutral.
+*(**B2 deferred again, past Sprint 4** — ADR-011. Still additive, so nothing is lost by waiting; the
+base acknowledgement loop should meet a real workshop before a second traffic generator is added.
+Now parked in [[Deferred design]] rather than scheduled.)*
+
+**The resolve echo sweeps like everything else** *(reshaped 2026-07-28, [[ADR-011 Acknowledgement as stored visibility]])*.
+A `resolved` event pins the **raiser** as receiver; the raiser acting on the job acknowledges it. The
+2026-07-24 draft carved this out ("tapped, never inferred", because a resolve doubles as verification
+— "I checked the part arrived") — but the reshape has **no confirm button**, so exempting it would
+leave it permanently unacknowledgeable. It sweeps like every other handoff; the verification content
+lives in the `note` column, which carries "I checked the part arrived" better than a tap ever did.
 
 ## Related
-- [[Job]] · [[Stage model]] · [[Event log]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-010 WorkshopStaff supersedes the edge split]]
+- [[Job]] · [[Stage model]] · [[Event log]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-010 WorkshopStaff supersedes the edge split]] · [[ADR-011 Acknowledgement as stored visibility]]

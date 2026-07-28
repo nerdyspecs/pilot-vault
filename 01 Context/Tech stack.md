@@ -46,7 +46,7 @@ special floor-device / PIN mechanism yet ("as is" for now — revisit later).
 - Keep infrastructure boring — no Kubernetes, no Docker complexity for now
 
 ## Notifications
-- **Staff (in-app):** settled — the "waiting on me" inbox is a query over unacknowledged handoffs, no separate channel ([[ADR-005 Acknowledged handoffs in V1]]).
+- **Staff (in-app):** settled — "waiting on whom" is a query over unacknowledged handoffs surfaced on the board, **no inbox and no separate channel** ([[ADR-005 Acknowledged handoffs in V1]], [[ADR-011 Acknowledgement as stored visibility]]).
 - **Owner:** OPEN — how job-status updates reach the vehicle owner isn't decided (v1 = a manual copy-paste message; SMS / WhatsApp / email automation later). Decide before building the intake flow.
 
 ## Gems — guiding rule

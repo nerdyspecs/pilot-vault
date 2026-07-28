@@ -1,11 +1,18 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-17 (Design B crew restructure)
+updated: 2026-07-28 (ADR-011 reshaped — receiver stored at write time, read-time classifier deleted; ADR-010 pointer)
 ---
 # Event log
 The immutable, timestamped history that powers all the time math. **Append-only — never edited.**
 Written **only via ONE DOOR** ([[Design laws]] #7) — nothing changes a job's state without also logging it.
+
+> [!warning] The "In Rails" column names below predate [[ADR-010 WorkshopStaff supersedes the edge split]] (2026-07-21)
+> Wherever this doc says `workshop_employment_id` (the holder) or "actor columns stay User",
+> read **`workshop_staff_id`** — both holder and actor now point at the one tenant-local
+> **`WorkshopStaff`** record, each with a composite `(actor_id, workshop_id)` FK. The full
+> reconciliation is the `[!note]` further down ("Updated 2026-07-21 by ADR-010"); the old shape
+> is kept for its reasoning.
 
 ## The tracker pattern: entity + event log *(restructured 2026-07-16, Session 17)*
 Every tracker is **an entity plus its append-only event table**, mirroring the original
@@ -69,6 +76,28 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
   unacked `in_progress → done` — finished car the counter hasn't noticed — is the product's
   founding pain expressed as a single NULL.
 
+> [!note] Reshaped 2026-07-28 by [[ADR-011 Acknowledgement as stored visibility]]
+> ADR-011 answers the question the framings left open — **what the system says when nobody
+> acknowledges** — and in doing so **reverses the "Receivers are derived, never stored" bullet
+> above.** The 2026-07-24 draft first answered with a *holder* model (an unconfirmed pass leaves the
+> sender holding the job); the 2026-07-28 study replaced it with a simpler answer:
+> - **The receiver is stored at write time.** A `receiver_id` column (the dormant
+>   `acknowledged_by_id`, renamed) is stamped by the door as each event is written, and never
+>   changes. This **restores** ADR-005's original stored `to_user` — dropped by the 2026-07-16
+>   footnote — and **deletes the read-time classifier** (`.pending_ack` + a role comparison) that
+>   existed only because the column was removed. "Is this a handoff?" is now `receiver_id IS NOT NULL`.
+> - **Why stored, not derived:** a receiver derived from `cleared_by_role` silently re-points every
+>   *already-open* handoff when the catalog type is edited (shipped Sprint 3, `8a27e1d`). A log whose
+>   rows change meaning when config is edited is not append-only. Storing intent makes the claim true.
+> - **No inbox, no routing, no confirm button.** The stored receiver exists so the board answers
+>   "waiting on whom"; the manager reads it and walks over. Acknowledgement is **implicit** — acting
+>   on a job through any door verb clears what you owe on it (`JobActions.acknowledge_pending!`),
+>   under `job.with_lock` so a refusal rolls it back. The blocker-resolve echo **sweeps like
+>   everything else** (no button means no carve-out); its verification content lives in the `note`
+>   column, which carries it better than a tap.
+> The rest of ADR-005's mechanism is unchanged: ack on the event row, non-blocking, the board is a
+> query. The holder model and why it was dropped live in ADR-011's Rejected alternatives.
+
 ## What it powers
 - **Time-in-stage** — gap between consecutive `JobStageTransition`s.
 - **Time-blocked, by type** — each blocker item's raise→resolve, attributed to its resolver.
@@ -109,16 +138,21 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
 > line above — **`created_by`/`acknowledged_by` are now `WorkshopStaff` too** (the tenant-local
 > person), each with a composite FK `(actor_id, workshop_id) → workshop_staff` so a cross-tenant
 > actor is a DB foreign-key violation, not just an app check. Membership still carries no ack
-> columns; the self-contained-history shape is unchanged. Operational roles live on append-only
+> columns; the self-contained-history shape is unchanged. *(2026-07-28, ADR-011: the column named
+> `acknowledged_by` throughout this doc shipped as **`receiver_id`** — it was renamed before first
+> use to mean "who this event is for", stamped at write time. The composite FK is unchanged.)* Operational roles live on append-only
 > `WorkshopStaffRole` rows; `owner` is a governance boolean on `WorkshopStaff`, not a role.
 
-The **"waiting on me" inbox** = one query across the event tables via **the handoff predicate**
-(`.pending_ack`, a Sprint 4 design-pass item): unacknowledged AND not-self-caused AND
-role-resolved to me. A bare `acknowledged_at IS NULL` **overcounts** — NULL has two meanings
-(dropped handoff vs. never-was-a-handoff), and only the predicate tells them apart; it lives
-in ONE shared scope so every inbox, manager board, and limbo flag agrees. Orphaned debts (a
-role that resolves to nobody) render as "pending, unheld role" — never vanish. A query, not a
-table ([[Design laws]] #3).
+The **"waiting on whom" board read** = one query across the event tables:
+`receiver_id IS NOT NULL AND acknowledged_at IS NULL`, grouped by job
+(`Job.pending_acknowledgements_by_job`) or filtered to a person
+(`WorkshopStaff#pending_acknowledgements`). A query, not a table ([[Design laws]] #3), and there is
+no inbox — the board is the only surface. *(2026-07-28, [[ADR-011 Acknowledgement as stored
+visibility]]: the earlier `.pending_ack` handoff predicate is **deleted**. It solved the "a bare
+`acknowledged_at IS NULL` overcounts" problem — NULL meaning both dropped-handoff and
+never-was-a-handoff — with a read-time classifier; storing `receiver_id` solves the same overcount
+structurally: `receiver_id IS NULL` **is** "never was a handoff", so the two-column check is exact
+with no classification. Everything is still ONE shared read so board and per-person agree.)*
 
 ## Related
 - [[Job]] · [[Stage model]] · [[Blocker]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]]

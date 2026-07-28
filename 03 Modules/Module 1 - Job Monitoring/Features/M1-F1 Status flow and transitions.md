@@ -3,7 +3,7 @@ id: M1-F1
 type: feature
 module: M1
 status: settled
-updated: 2026-07-17
+updated: 2026-07-24 (ADR-010 read-against note; ADR-011 implicit confirmation + echo exception)
 ---
 # M1-F1 — Status flow & role-gated transitions
 
@@ -11,6 +11,19 @@ updated: 2026-07-17
 Move a job through its [[Stage model]] stages, each transition permitted only for the right
 Employment role, **all through ONE DOOR** (`JobActions` — [[Design laws]] #7). Every
 ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged handoffs in V1]]).
+
+> [!note] Read against [[ADR-010 WorkshopStaff supersedes the edge split]] (2026-07-21)
+> This doc predates ADR-010 and still says **"Employment role"** throughout (and **"mechanic"**
+> in the permission matrix / ack table below). Substitute as you read — the *rules are unchanged*,
+> only where a role is stored moved:
+> - A person's operational role now lives on an append-only **`WorkshopStaffRole`** row attached
+>   to their single **`WorkshopStaff`** record — not a separate `WorkshopEmployment` edge. "owner"
+>   is a **governance boolean** on `WorkshopStaff`, not a role. Who may do what per role is exactly
+>   as the matrix states; only the table it's read from changed.
+> - Vocabulary is **technician** everywhere in code; the "mechanic" cells below are pre-2026-07-17
+>   wording kept for history.
+> - The door's guard methods settled at build as `ensure_counter_staff!` / `ensure_job_crew!` /
+>   `ensure_active_technician!` — this doc's `ensure_counter!` etc. are the design-time names.
 
 ## Settled 2026-07-12 (pre-Sprint-2 design session, builder decisions)
 - **Job creation goes through the door too** — `JobActions` owns it. Creation is already a
@@ -131,15 +144,35 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 The change takes effect immediately, but **ownership isn't transferred until acknowledged** — an
 unacknowledged handoff stays visible as limbo. Three triggers:
 
-| Trigger | Passed by | Acknowledged by |
-|---|---|---|
-| Mechanic joined/left | service_advisor | that mechanic — a **receipt**, never consent (ADR-005) |
-| Stage change | technician | service_advisor (role — any holder clears it) |
-| Blocker raised | raiser (per catalog) | resolver (per catalog) |
+Under [[ADR-011 Acknowledgement as stored visibility]] the receiver is **stored** at write time,
+not derived, and it is a **person** (or nobody), never a role:
 
-Inbox ("waiting on me") = a query across the event tables via the **handoff predicate**
-(`.pending_ack` — unacked AND not-self-caused AND role-resolved; a bare
-`acknowledged_at IS NULL` overcounts — [[Event log]]).
+| Event (verb) | Passed by (`created_by`) | Receiver (stored `receiver_id`) |
+|---|---|---|
+| `joined` / `left` (crew) | service advisor | that **technician** — a receipt, never consent (ADR-005) |
+| `in_progress → done` (`mark_done!`) | technician | the **intake SA** (`registered_by`) |
+| `in_progress → assigned` (`send_back!`) | counter | the job's **technician** |
+| `resolved` (blocker) | resolver | the **raiser** |
+| birth · `raised` · terminals | — | **nobody** — not a handoff |
+
+"Waiting on whom" = a query across the event tables:
+`receiver_id IS NOT NULL AND acknowledged_at IS NULL`, grouped by job. **No inbox** — it surfaces on
+the manager's board as a muted *"Waiting on &lt;name&gt;"* line ([[Event log]]).
+
+> [!note] Reshaped 2026-07-28 by [[ADR-011 Acknowledgement as stored visibility]]
+> The 2026-07-24 draft answered with a *holder* model (an unconfirmed pass leaves the sender holding
+> the job); the reshape stores the receiver instead. The table above is the result — stamped at write
+> time, so a row's meaning never shifts when catalog config is edited (the append-only fix). One
+> behaviour to note:
+> - **Acting on a job acknowledges it.** A door verb by whoever an open handoff is *for* stamps
+>   `acknowledged_at` honestly (`JobActions.acknowledge_pending!`) — there is no confirm button, so
+>   this is the only thing that ever fills it. Under `job.with_lock`, so a refused verb rolls it back.
+> - The 2026-07-24 "blocker-resolve echo is tapped, never inferred" carve-out **retired** — with no
+>   button it would be permanently unacknowledgeable, so it sweeps like everything else; its
+>   verification lives in the `note` column.
+>
+> No inbox and no sender-side view — one board, read by the manager. The `.pending_ack` predicate is
+> **deleted**: `receiver_id IS NULL` *is* "not a handoff", so no classifier is needed.
 
 ## State axis — before vs after Done
 - **Before Done:** workshop roles edit per the matrix above.
@@ -159,4 +192,4 @@ Inbox ("waiting on me") = a query across the event tables via the **handoff pred
 - [ ] Every transition writes a `JobStageTransition`.
 
 ## Related
-- [[Stage model]] · [[Blocker]] · [[Event log]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-004 Multi-tenant foundation]]
+- [[Stage model]] · [[Blocker]] · [[Event log]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-010 WorkshopStaff supersedes the edge split]]

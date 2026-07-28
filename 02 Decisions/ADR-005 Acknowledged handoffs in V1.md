@@ -70,6 +70,24 @@ handoff predicate (a bare NULL check overcounts; NULL also means "never was a ha
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[M1-F1 Status flow and transitions]] · [[Event log]] · [[Blocker]] · [[Data model]] · [[Design laws]]
 
+**Footnote 2026-07-28 (Sessions 27–28) — extended, not superseded, by
+[[ADR-011 Acknowledgement as stored visibility]].** This ADR decided *that* handoffs are acknowledged
+and *where* the ack lives; it never said what the system **stores or shows** when a handoff **isn't**
+acknowledged — the silence that became [[Product gaps]] #5 (partial adoption). ADR-011 settles it,
+and does so by **restoring this ADR's own original design.** The Model table above keyed the inbox on
+a stored `to_user`; the 2026-07-16 footnote (just above) removed that column, called the sketch
+"illustrative", and handed the problem to a read-time `.pending_ack` predicate. ADR-011 **puts the
+column back** as **`receiver_id`**, stamped by the door at write time — so the predicate that existed
+only because the column was removed is **deleted**, and "is this a handoff?" is a plain
+`receiver_id IS NOT NULL`. Storing the receiver also fixes a real append-only bug: a receiver derived
+from a blocker's `cleared_by_role` silently re-points every open handoff when that catalog type is
+edited. Two more things land back here: **acting on a job implicitly acknowledges it** (a door verb
+by whoever the open handoff is *for* stamps it honestly — a stronger receipt than a confirm tap, of
+which there is none in v1, and consistent with receipt-never-consent above); and the feature is
+**visibility, not an inbox** — the stored receiver exists so the board answers "waiting on whom", and
+the manager walks over. Nothing in this ADR's mechanism changes — the ack still rides the event row,
+still non-blocking, still a query for the board.
+
 **Footnote 2026-07-17 (Session 21) — names only, decision unchanged.** The crew tracker was
 restructured to "Design B" and renamed mechanic→technician: the 2026-07-16 footnote's
 `JobMechanic`/`JobMechanicTransition` are now `JobTechnician` (present-tense membership,

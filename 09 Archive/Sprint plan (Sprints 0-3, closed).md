@@ -1,12 +1,12 @@
 ---
 type: archive
 module: M1
-archived: 2026-07-21
+archived: 2026-07-21 (Sprint 3 added 2026-07-24)
 ---
-# Sprint plan — closed sprints (0, 1, 2, 2.5)
+# Sprint plan — closed sprints (0, 1, 2, 2.5, 3)
 Relocated from [[Sprint plan]] to keep the live roadmap focused on current/upcoming work.
 Content is unchanged from the live file at archive time — task ticks, dated annotations,
-and commit hashes all stand as originally written. See [[Sprint plan]] for Sprint 3 onward.
+and commit hashes all stand as originally written. See [[Sprint plan]] for Sprint 4 onward.
 
 ---
 
@@ -575,5 +575,35 @@ The boss's lorry and the boss's private car are **two cards, correctly** (differ
 phones/payers) — routing by responsible-contact, never legal-ownership; v2 claim machinery
 reunites the views if ever needed. **Vehicle reassignment** ("park cars under a company")
 defers to Sprint 6 with its changed-hands sibling.
+
+---
+
+## Sprint 3 · Blockers ✅ *(built 2026-07-24 — three coding plans A/B/C, all green)*
+**Goal:** the overlay axis — see [[Blocker]]. **Exit (met):** raise/clear blockers per role; a job shows its (possibly several) active blockers.
+Design deep-dive settled three deltas before build: the **`blocks` stage-guard** resolving the
+Hold-For-Payment vs `→ done` collision (HFP guards `delivered`); the **crew-aware** raise/resolve
+guard; and raise refused past the guarded stage. 89 unit + 9 system green.
+
+- [x] **S3.1** Migration + model **Blocker** (catalog): `workshop_id, label, raised_by_role,
+      cleared_by_role, blocks`. *(2026-07-24, `f47a4f6`.)* Built with a **`blocks` stage-guard**
+      column (DB `CHECK` to `in_progress`/`done`/`delivered`) — not in the original spec, it's what
+      resolved the HFP collision. **Four seeds** at `create_with_owner!`, not just HFP (Subcon /
+      Parts / Technical → `done`; **Hold for payment → `delivered`**) — see [[Blocker]].
+- [x] **S3.2** Migrations + models **`JobBlocker`** (item) + **`JobBlockerTransition`** (events).
+      *(2026-07-24, `f47a4f6`.)* Respecified per the ⚠ note: **three records**, events carry
+      `job_blocker_id` (not a direct `blocker_id`), `action` includes **`noted`**, and
+      `created_by`/`acknowledged_by` → `WorkshopStaff` composite FK (ADR-010).
+- [x] **S3.3** Extend `JobActions`: `raise_blocker!` / `resolve_blocker!` / `note_blocker!` + the
+      stage veto. *(2026-07-24, `9fe5156`.)* Role check is **crew-aware** (a `technician` side needs
+      *this job's* crew; manager/owner override); the veto lives once in `transition!`.
+- [x] **S3.4** `Job#active_blockers` scope: items with no `resolved` event (a query, [[Design laws]] #3). *(2026-07-24, `4009792` — also spliced blocker events into `Job#timeline`.)*
+- [x] **S3.5** Controller + views: the Blockers card — raise from catalog + note, resolve, add-note,
+      show active blockers; tech raise flow mobile-friendly. *(2026-07-24, `0ae84c2` wiring +
+      `eb377d0` views + `7273db9` system tests.)*
+- [x] **S3.6** Blocker-catalog admin — owner/manager adds + edits types (no delete: append-only
+      catalog). *(2026-07-24, `8a27e1d` + `4686bfb` tests.)* Built now rather than slipped.
+- [x] **S3.7** Tests: raise/resolve/note · crew-aware role checks · multiple active items · manager
+      override · the veto both directions · composite-FK actor integrity. *(Model/door units in
+      `job_actions_test.rb` 9–15 + `blocker_*_test.rb`; two system flows.)*
 
 ---

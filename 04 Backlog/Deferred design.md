@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-07-17 (Session 23 — S2.5 lands lookup half; match-confirm stays S6)
+updated: 2026-07-28 (ADR-011 reshaped to stored receiver; "Got it" button parked; B2/multi-tech/opening-hours rewordings)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -146,6 +146,26 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   device-posture decision). When dark mode comes, the dark theme's surfaces derive from the brand
   steel blue (~`#22456B` family) — chosen because the navy app-bar sample read as "dark mode" and
   was liked exactly for that. Keep status colors (gray/blue/red/amber/green) identical in both modes.
+
+## 2026-07-24
+- **Staff off-boarding — one sign-off path + does `workshop_staff` need its own `ended_at`?** Decide whether to add a single `WorkshopStaff#retire!`-style helper that ends **all** of a person's active roles atomically, so the only way to sign someone off is the one door (today roles are ended one at a time via `WorkshopStaffRolesController#destroy`, so a multi-role staffer can be left half-off-boarded — the "left the company but a role still active" contradiction). Second half of the decision: whether a **company-level `ended_at` on `workshop_staff`** is ever warranted, or whether employment periods stay wholly on the append-only role rows (leaning **no for v1** — access = holding an active role, so "here but roleless" isn't a real state; a single `ended_at` can't survive a rehire; multiple staff rows would revert [[ADR-010 WorkshopStaff supersedes the edge split]] into two nested period tables. Revisit only for owner-lifecycle or v2 tenure/rehire-eligibility). **The sign-off is a tenant-policed write — it MUST set RLS context** (`SET app.workshop_id` inside its transaction, same pattern as `Workshop.create_with_owner!` / `Invitation#accept!`/`#decline!`/`#release!`), or the role-ending updates are denied by `tenant_isolation`.
+
+- **Directed blocker notes (B2)** *(deferred out of Sprint 4; was S4.8)*. Decide whether a `noted`
+  (or `raised`) blocker event can carry a **stored `receiver_id` pinned to a specific person** — a
+  parts advisor's "arrived, please verify" showing as *"waiting on"* that technician on the board —
+  rather than pinning nobody as B1/Sprint-4 shipped. The hard part, and why it keeps sliding: **the
+  receiver can flip mid-thread**, so it isn't one fixed role per item. Purely additive whenever it
+  lands — the `receiver_id` column already exists; `raise`/`note` just start stamping it, old rows
+  reading as neutral, **no rework**. **Trigger:** the base acknowledgement loop (ADR-011) meets a
+  real workshop and the note chain is observed actually needing direction — deliberately not before,
+  so a second traffic generator isn't added on a guess. See [[Blocker]] B1/B2 split.
+- **A universal "Got it" button** *(parked 2026-07-28, ADR-011 reshape)*. A single explicit receipt
+  on a board item, letting someone signal *"seen, not yet actionable"* — a state the two-column
+  schema deliberately can't represent (it measures "has acted", stored as `acknowledged_at`).
+  Deferred as not-important-now; would need a third state (seen ≠ acted). **Trigger:** a real
+  workshop wanting to distinguish "I saw it" from "I did it".
+- **Multi-technician crew vs a single receiver** *(chipped 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]])*. Decide how the receiver stamping survives a crew of two: `assign_technician!` / `send_back!` / `mark_done!` each pin **one** `receiver_id`, which currently rests on `assign_technician!` refusing a job that already has crew (`app/services/job_actions.rb:44`). Two shapes on the table: **per-member receipts** (each crew member gets their own `joined` row and receiver; any/all confirm — decide which) or ride the **already-deferred `lead` flag** (the lead is the receiver, helpers aren't). Naming for the flag is already settled (`lead`, not `primary`) in the crew-helpers entry above. **Trigger:** the first real two-technician job.
+- **Workshop opening hours** *(chipped 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]])*. Decide whether ageing should pause outside business hours. The Sprint-5 waiting-pin colour (S5.7) will colour on raw elapsed time, so a handoff made at 6pm goes amber by 9am next morning purely from the shop being shut — a known accepted wart, not a bug. Fixing it needs opening hours per workshop, which is outside [[ADR-002 V1 scope]] and would also feed Sprint 5's aging highlight (Product-gap #2) and any future ETA maths. **Trigger:** a real workshop complaining that overnight jobs look late.
 
 ## Related
 - [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]]

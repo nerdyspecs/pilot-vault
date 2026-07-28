@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-07-06
+updated: 2026-07-28 (waiting-pin ageing bands — ADR-011; ships muted in S4, colour deferred to S5.7; no new colours)
 ---
 # Visual theme
 Locked 2026-07-06 (worked out interactively — samples compared, choices deliberate).
@@ -42,6 +42,26 @@ of the same family. **Identical in every view** — workshop, owner page, future
 Known quirk to watch: "In progress" blue vs Action blue coexist (pale badge vs solid button) —
 keep that contrast.
 
+### The waiting pin — ageing *(spec 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]]; deferred to S5.7)*
+A job with an unacknowledged handoff shows a muted *"Waiting on &lt;name&gt;"* line on the board.
+**Sprint 4 ships it un-coloured** (neutral text only); the ageing colour below is **S5.7**, a styling
+pass after real use. Uses the existing palette — **no new colour is introduced**:
+
+| Age of the unacknowledged handoff | Colour |
+|---|---|
+| under 1h | **Registered / neutral** — age printed in plain text, nothing shouts (UI law #1) |
+| 1h – 1 day | **Waiting / aging** (amber) — already this row's exact meaning |
+| over 1 day | **Blocked / danger** (red) |
+
+- **Red is clarified, not overloaded.** Red's reserved word is **"this job is stuck — act now"**,
+  which has *two* causes: an open blocker, and an unclaimed handoff. **The chip's own text says
+  which** — so red still means one thing to the eye (UI law #2 holds).
+- **Colour the chip, never the whole row** — a red row is indistinguishable from a blocked job.
+- **Green is deliberately not the "fresh" band**: green means Done/success, and would say
+  "finished" about a job nobody has started.
+- Boundaries are one workshop-wide constant and a **tunable styling call** — moving them touches
+  no model.
+
 ## Typography
 - **System stack** (locked): `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica
   Neue", Arial, sans-serif` — 0KB, can't fail, native per device.
@@ -56,7 +76,10 @@ Invariants for every screen, in the spirit of [[Design laws]].
    the eye it must be information (status, aging, pending ack), never decoration. Master rule.
 2. **Status colors are reserved words.** Red/amber/green/blue-badge only ever mean job state.
    No red delete buttons, no green save toasts, no amber accents. If red can mean two things,
-   the board stops being scannable. Neutral/action colors cover those cases.
+   the board stops being scannable. Neutral/action colors cover those cases. *(2026-07-24,
+   [[ADR-011 Acknowledgement as stored visibility]]: red's word is **"stuck — act now"**, and it has two
+   causes — a blocker, and a handoff nobody has claimed for over a day. That is a **clarification,
+   not a second meaning**: the eye still reads one word, and the chip's text names the cause.)*
 3. **One primary action per screen.** Exactly one solid `--action` button — the most likely next
    step for that role there. Everything else outlined or plain. The screen chooses, not the user.
 4. **Pass the glance test.** Every screen answers its core question from arm's length (phone) or
