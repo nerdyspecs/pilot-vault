@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-07-21
+updated: 2026-07-28 (Sprint 4 + Sessions 12–25 archived)
 ---
 # Archive
 Closed material that no longer needs reading each session — moved here to keep the live
@@ -24,5 +24,5 @@ docs focused on what's current. Nothing here is deleted or rewritten; it's reloc
   current shape of the system; they're updated in place, not sprint-scoped history.
 
 ## Index
-- [[Sprint plan (Sprints 0-3, closed)]] — Sprints 0, 1, 2, 2.5, 3 (setup, tenancy spine, job engine, cold-start intake, blockers), moved 2026-07-21 (Sprint 3 added 2026-07-24)
-- [[Worklog (Sessions 1-11)]] — Sessions 1–11 (vault/Rails setup through Sprint 1's close), moved 2026-07-21
+- [[Sprint plan (Sprints 0-4, closed)]] — Sprints 0, 1, 2, 2.5, 3, 4 (setup, tenancy spine, job engine, cold-start intake, blockers, acknowledgement-as-visibility), moved 2026-07-21 (Sprint 3 added 2026-07-24; Sprint 4 added 2026-07-28)
+- [[Worklog (Sessions 1-25)]] — Sessions 1–25 (vault/Rails setup through the tenant-spine collapse, ADR-010), moved 2026-07-21 (Sessions 12–25 added 2026-07-28)

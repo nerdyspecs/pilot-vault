@@ -17,7 +17,7 @@ exists; **needs design** = real thinking still required before/while building.
 | 2   | Tenancy + WorkshopEmployment/WorkshopOwnership edges + role-gated transitions (ONE DOOR) | ✅ **built** (Sprint 2 closed 2026-07-17) |
 | 3   | Live job list & filtering                                     | mostly mechanical        |
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
-| 5   | Acknowledged handoffs, surfaced on the board                  | 🔨 **building** (Sprint 4 — write side + board pin built 982f7e9; colour = S5.7) |
+| 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S5.7) |
 | 6   | Job intake + digitized jobsheet                               | ✅ designed              |
 | 7   | Owner status page (token link)                                | ⚠️ needs design          |
 | 8   | Reporting & attribution                                       | ⚠️ needs design          |

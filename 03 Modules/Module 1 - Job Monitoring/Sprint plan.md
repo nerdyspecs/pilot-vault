@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-28 (Sprint 4 reshaped by ADR-011 stored-receiver; S4.1/S4.3/S4.4/S4.7 built 982f7e9; colour → S5.7)
+updated: 2026-07-28 (Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -40,10 +40,10 @@ that ends in something demoable.
 
 ---
 
-## Sprints 0–3 — closed
-Setup, tenancy spine, the job engine, cold-start intake, and blockers are built, tested, and
-shipped. Full task detail (ticks, dated annotations, commit hashes) moved to
-[[Sprint plan (Sprints 0-3, closed)]] to keep this file focused on current work.
+## Sprints 0–4 — closed
+Setup, tenancy spine, the job engine, cold-start intake, blockers, and acknowledgement-as-
+visibility are built, tested, and shipped. Full task detail (ticks, dated annotations, commit
+hashes) moved to [[Sprint plan (Sprints 0-4, closed)]] to keep this file focused on current work.
 
 ## Tenant-spine collapse — done before Sprint 3 *(2026-07-21)*
 A prerequisite, not a numbered sprint: `WorkshopEmployment` + `WorkshopOwnership` collapsed into
@@ -51,57 +51,6 @@ A prerequisite, not a numbered sprint: `WorkshopEmployment` + `WorkshopOwnership
 every tenant-scoped sprint from here builds on a DB-tenant-checkable actor. Schema squash +
 reseed (no prod data), 72/72 green incl. new composite-FK isolation tests. Sprint 3's blocker
 event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth — no rework.
-
----
-
-## Sprint 4 · Acknowledgement as visibility
-**Goal:** the differentiator — see [[ADR-005 Acknowledged handoffs in V1]] as extended by
-**[[ADR-011 Acknowledgement as stored visibility]]** (Product-gap #5 gate **settled**). **Exit:** every
-active job — including a finished car awaiting delivery — shows *"Waiting on &lt;name&gt;"* on the
-board when a handoff hasn't been picked up; acting on a job clears it.
-
-**The frame (ADR-011):** the receiver is **stored at write time** (`receiver_id`), so "waiting on
-whom" is a plain query, always answerable regardless of adoption. **No inbox, no routing, no confirm
-button** — the answer surfaces on the manager's board and they walk over. The 2026-07-24 *holder*
-model was studied and dropped (ADR-011 Rejected alternatives).
-
-- [x] **S4.1** The acknowledgement writer — `982f7e9`. Rename the dormant `acknowledged_by_id` →
-      **`receiver_id`** on all three event tables (never populated → no data migration). A 4-method
-      **`Acknowledgeable`** concern (`has_receiver?` / `acknowledged?` / `awaiting_from?` /
-      `acknowledge!` + `scope :unacknowledged`) included bare in each transition model. The door
-      stamps receivers: `joined`→technician, `left`→technician, `mark_done`→intake SA, `send_back`→
-      technician, `resolve_blocker`→raiser; `raised` and the terminals pin nobody.
-      **Implicit acknowledgement** via `JobActions.acknowledge_pending!` — `transition!`'s first line
-      plus the three blocker verbs — under `job.with_lock`, so a refused verb rolls its sweep back.
-- [x] **S4.2** ~~Receiver logic~~ **RULED, folded into S4.1** *(reshaped 2026-07-28)*: `left` pins
-      the technician (they should know they're off). Removal is only legal at `assigned` before work
-      starts and already rolls the job back to `registered` (`app/services/job_actions.rb`), which
-      **returns the job to the service advisor by itself** — no orphan, no new columns.
-- [x] **S4.3** **The board read** — `982f7e9`. `Job.pending_acknowledgements_by_job(jobs)` (three
-      flat queries, no N+1) and `WorkshopStaff#pending_acknowledgements`, both a plain
-      `receiver_id IS NOT NULL AND acknowledged_at IS NULL`. **Replaces the old holder derivation and
-      deletes the `.pending_ack` predicate** — the stored NULL check *is* "not a handoff", so no
-      classifier is needed ([[Event log]]).
-- [x] **S4.4** **The board surface (not an inbox)** — `982f7e9` + `8fad8c9` (done pin). A muted
-      *"Waiting on &lt;name&gt;"* line on each board row (`jobs/_waiting_pin`, `jobs/_board_row`), on
-      `workshops#show`. **Done is not terminal:** a **"Done — awaiting delivery"** group surfaces the
-      finished-car pin, since `Job.active` excludes `done` (the founding pain). Mobile-verified at
-      375px. There is no receiver "inbox" and no sender-side view — one board, read by the manager.
-- [ ] **S4.5** ~~Ageing colour~~ — **moved to S5.7** *(deferred 2026-07-28)*. The pin ships muted;
-      amber/red at a threshold, on the chip never the row, is a styling pass after real use. Bands +
-      the overnight-hours wart parked in [[Deferred design]].
-- [x] **S4.6** *(Product-gap #5 — the mechanisms)* satisfied by the above: **stored receiver read**
-      (S4.3) · **board surface** (S4.4) · **acting confirms** (S4.1) · colour deferred (S5.7).
-      **Surviving law: never deleted, never faked** — no auto-ack, no expiry, no purge; a terminal
-      verb writes no closing lie, the open row stays honestly NULL and just leaves the board.
-- [x] **S4.7** Tests — `982f7e9`. 13 new (102 unit + 9 system green): receiver correct per verb ·
-      an unconfirmed pass stays put and acting clears it · a refused verb rolls its sweep back ·
-      **the append-only bug regression** (editing `cleared_by_role` doesn't re-point open handoffs) ·
-      a counter-only workshop generates zero confirmation traffic and still reads correctly (the
-      Product-gap #5 proof, executable).
-- [ ] ~~**S4.8** Directed blocker notes (B2)~~ — **deferred again** (ADR-011). Still additive (one
-      nullable `directed_to_role`, no rework), and `raise` pins nobody precisely so a second traffic
-      generator waits for a real workshop. See [[Blocker]] B1/B2 split · [[Deferred design]].
 
 ---
 
