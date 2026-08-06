@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-07-28 (Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
+updated: 2026-08-03 (Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
@@ -51,6 +51,56 @@ A prerequisite, not a numbered sprint: `WorkshopEmployment` + `WorkshopOwnership
 every tenant-scoped sprint from here builds on a DB-tenant-checkable actor. Schema squash +
 reseed (no prod data), 72/72 green incl. new composite-FK isolation tests. Sprint 3's blocker
 event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth — no rework.
+
+---
+
+## Sprint 4.5 · Intake/Job aggregate morph *(design pass + migration)*
+**Goal:** split the overloaded `Job` into **Intake** (the car's visit) → **Job** (one repair). **Exit:**
+the two-level aggregate is live and green, so the Sprint 5 board is built on the right unit.
+**Why here, not later** — [[ADR-012 Intake-Job two-level aggregate]]: the S5 board groups by the *car*,
+so it must sit on `Intake`; and with **no production data** this is the cheapest the schema change will
+ever be (schema squash + reseed, like the tenant-spine collapse — never a data migration). Building S5
+first would mean rebuilding it.
+
+- [x] **S4.5.1** Design pass — model locked with the builder → [[ADR-012 Intake-Job two-level aggregate]]
+      (aggregate, stored-vs-derived status, receivers across two levels, blocker split, the four
+      sub-decisions). *(2026-08-03)*
+- [ ] **S4.5.2** Migration + model **Intake** (`workshop_id, vehicle_id, customer_id, status`;
+      `has_secure_token :token` and `registered_by` move here from Job) + **IntakeStatusTransition**
+      (append-only, `created_by`, composite `(actor_id, workshop_id)` FK). Busy-vehicle guard lands
+      here as `index_intakes_one_open_per_vehicle` (partial unique, `WHERE status = 0`) — the R5
+      index moves off `jobs` ([[Risk ledger]] R5).
+- [ ] **S4.5.3** **Job** morph: `belongs_to :intake`; enum re-split `registered → unassigned` and
+      **drop `delivered`** (terminals become `done`/`cancelled`); customer/vehicle reached through the
+      intake. Schema **squash + reseed** — `git diff structure.sql` on unchanged tables is the net.
+- [ ] **S4.5.4** **Stored `status` + derived `ready?`** (ADR-012 §2): `status` enum
+      `{open, delivered, cancelled}` written **only** by the door, which reconciles it after every
+      job-terminal move (`reconcile_intake!`); **`Intake#ready?`** stays a pure query — still `open`,
+      all jobs terminal, ≥1 done ([[Design laws]] #3). Unit-tested in isolation.
+- [ ] **S4.5.5** `JobActions` intake verbs (ONE DOOR stays): `register_job!` **opens-or-finds** the
+      vehicle's open intake then creates the Job; new **`deliver!`** (intake) requires every job
+      terminal + ≥1 done and **sweeps `acknowledge_pending!` across all its jobs**; **`cancel_intake!`**
+      cancels the remaining *open* jobs (done survives), terminal then derives. Busy-vehicle guard →
+      **one open intake per vehicle**.
+- [ ] **S4.5.6** **Blocker split by `blocks`**: `blocks: done` stays a `JobBlocker` vetoed in
+      `Job#transition!`; **`blocks: delivered`** becomes an **`IntakeBlocker`** (+ `IntakeBlockerTransition`,
+      note chain, **no ack pair** — non-acknowledgeable, per ADR-012) vetoed in intake `deliver!`. Shared
+      `Blocker` catalog; widen `FORWARD_STAGES` / the DB `CHECK`. Reseed HFP as an intake blocker.
+- [ ] **S4.5.7** Tests: derived status · deliver requires-all-terminal + the delivery sweep closes
+      done-notices · `cancel_intake!` cascade (all-cancelled → cancelled; mixed → ready) · blocker veto
+      on the correct door · composite-FK isolation on the new intake event tables.
+- [ ] **S4.5.8** Concept-note reconciliation: add "read against ADR-012" notes to [[Stage model]],
+      [[Job]], [[Blocker]], [[Event log]], [[M1-F1 Status flow and transitions]], [[Intake flow]],
+      plus **[[Data model]]** and **[[Job visibility]]** — the token moved to `Intake`, so
+      `jobs.token`, the `token_read ON jobs` policy sketch, and "the job's token link" are all stale,
+      and **Sprint 7's RLS design builds directly on them**. (Roadmap slice 6 and [[Risk ledger]] R5
+      annotated 2026-08-03 during the vault sweep — done, not part of this task.) Do not rewrite
+      settled history — annotate, the ADR-010/011 pattern.
+
+> [!note] Downstream sprints read against ADR-012
+> **S5** groups the board by **Intake** (the car), with a *Done — awaiting delivery* group for intakes
+> deriving `ready`. **S6** intake flow creates Customer/Vehicle/**Intake**/Job. **S7**'s token page is
+> now the **intake's** token. These are re-pointings, not rewrites — the aggregate is the only change.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-07-28 (ADR-011 reshaped to stored receiver + retitled; ADR-005 line vocab)
+updated: 2026-08-03 (ADR-012 accepted — Intake/Job two-level aggregate)
 ---
 # Decisions
 Why the product is built the way it is. **One file per decision (ADR).** Once accepted, an
@@ -21,6 +21,7 @@ New structural choice → new ADR with the next number.
 - [[ADR-009 Account deletion is refusal-first]] — **carries the lifetime invariant: a workshop cannot exist without an Ownership.** Deletion refused for accounts with edges/history (derived from that invariant + append-only history); bare accounts delete freely; last owner can never delete while the workshop stands (escape routes parked); PDPA/anonymization deferred with a dated trigger
 - [[ADR-010 WorkshopStaff supersedes the edge split]] — `WorkshopEmployment` + `WorkshopOwnership` collapse into one `WorkshopStaff` record (`owner` boolean, governance) + append-only `WorkshopStaffRole` rows (operations); actors AND holdings point at the tenant-local person via a composite `(actor_id, workshop_id)` FK (DB-enforced actor isolation); supersedes ADR-006 §1 and Data model's "actions → User"
 - [[ADR-011 Acknowledgement as stored visibility]] — **extends ADR-005, does not supersede it**: the receiver is **stored at write time** (`receiver_id`), so "waiting on whom" is a plain, always-answerable query — **no inbox, no confirm button**, just a *"Waiting on &lt;name&gt;"* line on the manager's board, cleared implicitly by acting on the job. Restores ADR-005's original `to_user` and fixes an append-only bug; settles [[Product gaps]] #5 (the Sprint 4 gate). *(Reshaped 2026-07-28 — the 2026-07-24 holder model was studied and dropped.)*
+- [[ADR-012 Intake-Job two-level aggregate]] — **extends ADR-011**: splits the overloaded `Job` into **Intake** (the car's visit) → **Job** (one repair, its own stage/crew/blockers). Intake stores its terminal position (`status` enum, door-written); **`ready` is the derived reading** — all jobs terminal with ≥1 done ([[Design laws]] #3). `deliver!` moves to the Intake; receivers stay **stored at write time** across both levels, and intake `deliver!` sweeps its jobs to close the done-notices. HFP moves to a **non-acknowledgeable** intake blocker (no direction = no ack pair); `blocks` is the single discriminator (`done`→JobBlocker, `delivered`→IntakeBlocker). Sequenced as **Sprint 4.5** (design pass + schema squash) before the S5 board — no prod data = cheapest migration now.
 
 See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 

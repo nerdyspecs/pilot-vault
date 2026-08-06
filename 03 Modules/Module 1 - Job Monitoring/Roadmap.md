@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-07-28 (slice 5 reshaped by ADR-011 — receiver stored at write time, no inbox; board only)
+updated: 2026-08-03 (slice 6's "job grain = per-visit" REVERSED by ADR-012 — Intake/Job split; slice 5.5 added)
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -18,7 +18,8 @@ exists; **needs design** = real thinking still required before/while building.
 | 3   | Live job list & filtering                                     | mostly mechanical        |
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
 | 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S5.7) |
-| 6   | Job intake + digitized jobsheet                               | ✅ designed              |
+| 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | 🔨 **Sprint 4.5** ([[ADR-012 Intake-Job two-level aggregate]]) — design pass done; migration before slice 3's board |
+| 6   | Job intake + digitized jobsheet                               | ✅ designed *(re-points at Intake — ADR-012)* |
 | 7   | Owner status page (token link)                                | ⚠️ needs design          |
 | 8   | Reporting & attribution                                       | ⚠️ needs design          |
 
@@ -28,10 +29,18 @@ don't build those blind.
 
 ### 6 — Job intake + digitized jobsheet
 Designed — see [[Data model]] and [[ADR-003 Digitized jobsheet in V1]]:
-- **Job grain:** ✅ **per-visit** (one job = one visit = one stage flow). Per-work-item is an additive `WorkItem` child if ever needed.
+- **Job grain:** ~~✅ **per-visit** (one job = one visit = one stage flow). Per-work-item is an additive `WorkItem` child if ever needed.~~
+  **⚠ REVERSED 2026-08-03 by [[ADR-012 Intake-Job two-level aggregate]]** — the grain is now
+  **per-repair**: one **Intake** (the visit) owns many **Jobs** (one repair each, with its own stage
+  flow, crew, and blockers). The escape hatch this line predicted was taken, just *inverted* —
+  rather than a `WorkItem` child under Job, the **visit was lifted out above it**, so the unit that
+  already carried stage/crew/blockers/events didn't have to be rebuilt. Why it moved: a car
+  realistically comes in for several services worked by several technicians in parallel, which
+  one-job-per-visit cannot represent. Sequenced as **Sprint 4.5**, before the S5 board (which groups
+  by the car) and while there is still no production data.
 - **Customer / Vehicle model:** ✅ (routing shape, two user populations).
 - **Vehicle key:** ✅ registration = lookup key, VIN = optional identity.
-- **Digitized jobsheet:** ✅ configurable form — `JobSheet` → `JobSheetField` → `JobSheetFieldValue` (fields as rows, owner CRUDs).
+- **Digitized jobsheet:** ✅ configurable form — `JobSheet` → `JobSheetField` → `JobSheetFieldValue` (fields as rows, owner CRUDs). *(2026-08-03, ADR-012: the sheet attaches to the **Intake**, not the Job — it's the car's intake form, one per visit, so `JobSheetFieldValue` keys on `intake_id`.)*
 - Quotation deferred (see [[ADR-002 V1 scope]]) — no entity in V1, only the approval blocker.
 
 Left to build (not design): the actual intake/jobsheet forms + the field-admin screen.
