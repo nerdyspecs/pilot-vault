@@ -1,6 +1,6 @@
 ---
 type: agent-guide
-updated: 2026-08-08 (comment discipline — say what the code can't)
+updated: 2026-08-08 (naming + comment discipline — names land first-read, comments say what the code can't)
 ---
 # Agent Guide
 Instructions for Claude. At the start of every session, pick the reading list that matches the
@@ -39,7 +39,18 @@ If a brand decision would touch the app's UI, [[Visual theme]] is the source of 
 - If my approach has a problem, say so directly before offering an alternative.
 - Flag when a suggestion adds a dependency — let me decide if it's worth it.
 - Match my existing patterns and naming if I share code.
-- Comments carry what the code can't — see [[#Comments]].
+- Names land on the first read — see [[#Naming]]; comments carry what the code can't — see [[#Comments]].
+
+## Naming
+A name should land on the first read, with minimal guesswork. Prefer the concrete domain
+word over the abstract or generic — if a reader has to stop and ask "what does this refer
+to?", it's the wrong name (`AggregateActions` → what aggregate?; a `Door` module → jargon).
+Rename toward the word someone at the workshop would actually say.
+- **Verbs are actions, not CRUD** — `deliver!`, `send_back!`, not `update_status`.
+- **Sigils mean things** — `!` changes state through the door, `?` is a derived query.
+- **Parallel things get parallel names** — qualify (`raise_intake_blocker!`), don't reinvent.
+- **Spend characters to kill guesswork** — a longer explicit name beats a clever short one.
+- Good names are what let a comment stay rare — see [[#Comments]].
 
 ## Comments
 Names and structure carry intent. If a competent reader would understand the line from the
