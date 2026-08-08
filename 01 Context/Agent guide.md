@@ -1,6 +1,6 @@
 ---
 type: agent-guide
-updated: 2026-07-06
+updated: 2026-08-08 (comment discipline — say what the code can't)
 ---
 # Agent Guide
 Instructions for Claude. At the start of every session, pick the reading list that matches the
@@ -39,7 +39,29 @@ If a brand decision would touch the app's UI, [[Visual theme]] is the source of 
 - If my approach has a problem, say so directly before offering an alternative.
 - Flag when a suggestion adds a dependency — let me decide if it's worth it.
 - Match my existing patterns and naming if I share code.
-- Keep comments minimal — the code should explain itself.
+- Comments carry what the code can't — see [[#Comments]].
+
+## Comments
+Names and structure carry intent. If a competent reader would understand the line from the
+code and its names, a comment is noise — delete it. The plain "why" that good naming already
+conveys is **not** a comment.
+
+Write one only when the code *can't* speak for itself — when something is non-local or
+counterintuitive:
+- **Surprise** — reads like a bug but is deliberate (`cancel_intake!` takes no lock: "looks
+  unsafe, it isn't, because job verbs already lock job → intake").
+- **Hidden coupling** — this line leans on, or is leaned on by, something off-screen (a lock
+  order held in another method, a write another class depends on).
+- **Off-screen constraint** — a DB quirk, an ordering requirement, an index that forces the
+  shape (the partial-index reason `Intake#status` is stored, not derived).
+
+The test before writing one: *would a competent reader be surprised or misled without it?*
+If no, cut it.
+
+Keep them short — one or two lines; a class header ~4 lines max (what it is + the one
+invariant it carries). **No vault cross-refs in code** — ADR/sprint/doc names (`ADR-012`,
+`Event log.md`, `M1-F1`) live here in the vault, not in comments. If it needs a paragraph to
+explain, it belongs in an ADR or the module note, not inlined.
 
 ## Hard rules
 - Never suggest a gem without explaining why the Rails built-in isn't enough.
