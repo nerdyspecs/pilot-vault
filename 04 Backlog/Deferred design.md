@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-03 (Intake/Job aggregate morph promoted → ADR-012 / Sprint 4.5)
+updated: 2026-08-14 (B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -159,6 +159,26 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   reading as neutral, **no rework**. **Trigger:** the base acknowledgement loop (ADR-011) meets a
   real workshop and the note chain is observed actually needing direction — deliberately not before,
   so a second traffic generator isn't added on a guess. See [[Blocker]] B1/B2 split.
+
+  > [!note] Two advances from 2026-08-14 (Sprint 4.5 wrap session)
+  > **1. A rule that reframes "flips mid-thread" as expected, not a blocker.** *Address a
+  > **request** by capability, a reply by identity.* Raising/noting outbound ("waiting for
+  > parts") wants *someone who can act* — a role. Resolving/replying wants the specific person
+  > who's been waiting — an identity. That's the pattern the five shipped pins already follow
+  > (assign/remove = the person **is** the subject; `send_back!` = the responsibility rule;
+  > `mark_done!` = context continuity, the registering SA holds the customer's story;
+  > `resolve_blocker!` = reply-to-requester). B2's stalling point — "the receiver can flip" — is
+  > this rule working correctly, not a design flaw: a request is role-addressed, its reply is
+  > person-addressed, by design.
+  > **2. `raise`/`note` may need no schema change at all.** The catalog already stores
+  > `cleared_by_role` on `Blocker` — so *"who should act on this active blocker right now"* is
+  > already derivable, a board **query**, not a stored column. But that collides with ADR-011's
+  > whole point (a stored receiver survives a later catalog edit; a derived one doesn't) — so
+  > the two questions must stay separate: **"who should act now"** (present tense, over *active*
+  > work) is safe to derive from current config; **"who was this addressed to"** (history) must
+  > still be stored, exactly as ADR-011 already established for every other pin. Still messy:
+  > a `note` from a manager/owner override has no clear "other side" to address. Doesn't change
+  > the Trigger above — still waiting on a real workshop, not decided today.
 - **A universal "Got it" button** *(parked 2026-07-28, ADR-011 reshape)*. A single explicit receipt
   on a board item, letting someone signal *"seen, not yet actionable"* — a state the two-column
   schema deliberately can't represent (it measures "has acted", stored as `acknowledged_at`).

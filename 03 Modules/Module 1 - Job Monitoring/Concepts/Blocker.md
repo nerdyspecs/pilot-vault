@@ -1,10 +1,20 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-24 (Sprint 3 built; ADR-011 — resolve echo tapped-never-inferred, B2 deferred past S4)
+updated: 2026-08-14 (split across both levels — ADR-012)
 ---
 # Blocker
-The **overlay axis** — something pausing a job. The job keeps its stage; the blocker sits on top.
+The **overlay axis** — something pausing a job, or the whole visit. The job/intake keeps its
+stage/status; the blocker sits on top.
+
+> [!warning] Split across two levels 2026-08-14 by [[ADR-012 Intake-Job two-level aggregate]]
+> Everything below was written when a blocker only ever sat on `Job`. Since ADR-012, `blocks`
+> is the **single discriminator** for which of two tables a type's items land in, not just
+> which stage it guards: `blocks: done` → `JobBlocker` (unchanged, this page); `blocks:
+> delivered` → **`IntakeBlocker`**, a visit-level hold vetoing intake `deliver!` instead of
+> `Job#transition!`. One shared catalog, no "level" column — `blocks` already implies both the
+> table and the door. See §The `blocks` stage-guard and §Acknowledgement below for what carries
+> over and what's new.
 
 ## Definition (strict)
 A job is blocked only when **both**: (1) work can't progress, and (2) clearing it needs a
@@ -40,6 +50,11 @@ independent* blockers where it has only one stage line.
   at **`WorkshopStaff`** with a composite `(actor_id, workshop_id)` FK (ADR-010); the ack pair is
   dormant until Sprint 4.
 
+**The intake level mirrors this exactly in shape** — `IntakeBlocker` (item) +
+`IntakeBlockerTransition` (events), same catalog, same three-record idea — with one structural
+difference: `IntakeBlockerTransition` carries **no `acknowledged_at` / `receiver_id` at all**
+(not `Acknowledgeable`, columns don't exist). See §Acknowledgement below for why.
+
 ## The `blocks` stage-guard — the resolved HFP collision
 Each catalog type names, in `blocks`, the **one forward stage it vetoes**. The 2026-07-16 ruling
 "open blockers stop `→ done`" is refined to **"stop entry into the guarded stage,"** of which
@@ -48,13 +63,17 @@ Each catalog type names, in `blocks`, the **one forward stage it vetoes**. The 2
 - Work blockers (Subcon, Parts, Technical) guard **`done`** — an unfinished job can't be called done.
 - **Hold for payment guards `delivered`**, not `done` — the car *is* done, you just can't hand it
   over until paid. This is the release hold, and it's what resolved the old collision (HFP as a
-  `done`-guard would have blocked `done` forever).
+  `done`-guard would have blocked `done` forever). *(2026-08-14, ADR-012: this is no longer just a
+  differently-guarded `JobBlocker` — `delivered` isn't a Job stage anymore, so a `blocks: delivered`
+  type is a wholly different table, `IntakeBlocker`, vetoed in intake `deliver!`. Per-car, not
+  per-repair — HFP hanging off one of a car's several repairs would be a lie.)*
 
 `blocks` is constrained to the three forward stages (`in_progress` / `done` / `delivered`) by a DB
-`CHECK` + model validation, so the veto — which lives **once**, in the door's `transition!` — can
-never bite `send_back!` / `cancel!` / `assign` / `remove`. A blocked job therefore stays cancellable.
-"Currently blocked by" = items with no `resolved` event — a **query, not a column** ([[Design laws]]
-#3); `noted` events are ignored. Rows are never deleted; the rows ARE the history.
+`CHECK` + model validation, so the veto — which lives **once per level**, in `Job#transition!` for
+work blockers and intake `deliver!` for HFP — can never bite `send_back!` / `cancel!` / `assign` /
+`remove`. A blocked job therefore stays cancellable. "Currently blocked by" = items with no
+`resolved` event — a **query, not a column** ([[Design laws]] #3); `noted` events are ignored. Rows
+are never deleted; the rows ARE the history.
 
 ## Design B — the long-lived thread *(2026-07-17, built Sprint 3)*
 One item carries a **whole incident**: `raised` once, `resolved` at most once, and any number of
@@ -65,11 +84,14 @@ ack, invisible to `active_blockers`) and **ships in v1** as a first-class action
 (this is **B1**; see the B1/B2 split under Acknowledgement).
 
 ## Permission (built)
-Checked at the door against the catalog, and **crew-aware**: a `technician`-side check requires the
-actor be on *this job's* crew (mirrors `start_work!`/`mark_done!`), not merely hold the technician
-role somewhere; any other role means holding that role; `manager`/`owner` always override. Raising
-also **refuses when the job has already reached the guarded stage** — no raising a `done`-guard
-blocker on an already-done car (the veto only stops *entering* a stage, never pulls a job back).
+Checked against the catalog by `Permissions`, at the controller boundary
+([[ADR-013 The door decomposed]]), and **crew-aware for job blockers**: a `technician`-side check
+requires the actor be on *this job's* crew (mirrors `start_work!`/`mark_done!`), not merely hold the
+technician role somewhere; any other role means holding that role; `manager`/`owner` always
+override. Raising also **refuses when the job has already reached the guarded stage** — no raising a
+`done`-guard blocker on an already-done car (the veto only stops *entering* a stage, never pulls a
+job back). **Intake blockers are role-only** — there's no crew concept at the visit level, so the
+`technician`-crew special case doesn't apply; today's only intake type (HFP) is same-role anyway.
 
 ## The seed catalog (four defaults)
 Planted at `Workshop.create_with_owner!` (a product default, not demo data), editable via the S3.6
@@ -111,5 +133,19 @@ A `resolved` event pins the **raiser** as receiver; the raiser acting on the job
 leave it permanently unacknowledgeable. It sweeps like every other handoff; the verification content
 lives in the `note` column, which carries "I checked the part arrived" better than a tap ever did.
 
+**Intake blockers carry no acknowledgement at all** *(2026-08-14, ADR-012)* — not "raised → nobody"
+like a job blocker (which still *could* pin someone, and chooses not to); `IntakeBlockerTransition`
+has no `receiver_id`/`acknowledged_at` columns, full stop. HFP is the counter holding its own car
+until paid — SA raises, SA clears, nobody is ever waiting on someone else. Carrying inert ack columns
+that are NULL on every row forever would be cosmetic symmetry, not a real mirror; considered and
+rejected in ADR-012's Rejected alternatives. **Directed intake holds are a stated future limit**: a
+workshop *could* configure a cross-role `blocks: delivered` type (e.g. "manager sign-off before
+release") via the S3.6 catalog admin, which would be a genuine directional handoff this schema can't
+surface as "waiting on" anyone yet — purely additive if it's ever needed (two columns + `include
+Acknowledgeable`, no prod data cost).
+
 ## Related
-- [[Job]] · [[Stage model]] · [[Event log]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-010 WorkshopStaff supersedes the edge split]] · [[ADR-011 Acknowledgement as stored visibility]]
+- [[Job]] · [[Intake]] · [[Stage model]] · [[Event log]] · [[Design laws]] ·
+  [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-010 WorkshopStaff supersedes the edge split]] ·
+  [[ADR-011 Acknowledgement as stored visibility]] · [[ADR-012 Intake-Job two-level aggregate]] ·
+  [[ADR-013 The door decomposed]]

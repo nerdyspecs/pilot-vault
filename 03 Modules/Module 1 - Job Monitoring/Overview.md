@@ -1,7 +1,7 @@
 ---
 type: module-overview
 module: M1
-updated: 2026-07-04
+updated: 2026-08-14 (re-pointed at Intake as the tying entity — ADR-012)
 ---
 # Module 1 — Job Monitoring
 
@@ -13,11 +13,14 @@ Job progress is unclear; front desk loses track; managers walk the floor; owners
 updates. See [[Main problem list]].
 
 ## The model (concepts)
-A job's situation is two axes plus a history:
-- [[Job]] — the entity that ties them together
-- [[Stage model]] — how far along (progress axis)
-- [[Blocker]] — what's pausing it, and whose court (overlay axis)
-- [[Event log]] — the timestamped trail that powers the time analytics
+A visit's situation is a car, its repairs, and a history:
+- [[Intake]] — one car's visit; the entity that ties a car, its customer, and its repairs
+  together *(2026-08-14: this used to be [[Job]] — ADR-012 lifted the visit out above the
+  repair. [[Job]] is now one repair under an Intake, not the anchor.)*
+- [[Job]] — one repair on that visit, its own stage/crew/blockers
+- [[Stage model]] — how far along a repair is (progress axis)
+- [[Blocker]] — what's pausing a repair or the whole visit, and whose court (overlay axis)
+- [[Event log]] — the timestamped trail that powers the time analytics, per level
 - [[Data model]] — customers, vehicles, jobsheets (who owns it / who we talk to)
 
 ## Roles

@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-08-03 (slice 6's "job grain = per-visit" REVERSED by ADR-012 — Intake/Job split; slice 5.5 added)
+updated: 2026-08-14 (slice 5.5 built; slice 7 re-pointed at Intake's token — ADR-012, ADR-013)
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -18,9 +18,9 @@ exists; **needs design** = real thinking still required before/while building.
 | 3   | Live job list & filtering                                     | mostly mechanical        |
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
 | 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S5.7) |
-| 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | 🔨 **Sprint 4.5** ([[ADR-012 Intake-Job two-level aggregate]]) — design pass done; migration before slice 3's board |
-| 6   | Job intake + digitized jobsheet                               | ✅ designed *(re-points at Intake — ADR-012)* |
-| 7   | Owner status page (token link)                                | ⚠️ needs design          |
+| 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | ✅ **built** (Sprint 4.5 closed 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]] + [[ADR-013 The door decomposed]]) |
+| 6   | Job intake + digitized jobsheet                               | ✅ designed *(re-points at Intake — ADR-012; UI not yet built — see [[Sprint plan]])* |
+| 7   | Owner status page (token link)                                | ⚠️ needs design *(token now on Intake, not Job — ADR-012, see §7 below)* |
 | 8   | Reporting & attribution                                       | ⚠️ needs design          |
 
 ## Slice notes (design status per slice)
@@ -62,8 +62,13 @@ Left to build (not design): the actual intake/jobsheet forms + the field-admin s
   WhatsApp / email automation is parked in [[Open questions]] — decide during the intake feature.
 
 ### 7 — Owner status page
+- **⚠ 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]]: the token moved to Intake.** The
+  owner's page is the car's **visit**, `GET /intakes/:token` — not a single job's token — since a
+  visit can now own several repairs. Design pass still needed for what follows below; see
+  [[Job visibility]] for the RLS policy shape this builds on (already re-anchored to Intake).
 - Token lifecycle: how it's generated, whether it expires, can it be revoked.
-- What the owner actually sees (stage only? ETA? are blockers hidden?).
+- What the owner actually sees (stage only? ETA? are blockers hidden? — and now, whether they see
+  one merged status or a breakdown per repair).
 - Mobile-first, no login.
 
 ### 8 — Reporting & attribution

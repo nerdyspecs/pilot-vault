@@ -1,7 +1,7 @@
 ---
 type: open-questions
 module: M1
-updated: 2026-07-17
+updated: 2026-08-14 (R5 + blocker taxonomy re-pointed at the Intake/Job split — ADR-012)
 ---
 # Module 1 — Open questions
 Feature-level questions to resolve during feature design. These are **not** architecture
@@ -16,15 +16,20 @@ decisions — they're details of how a feature behaves.
   (not `primary` — naming settled to avoid re-litigation). See [[Deferred design]] (crew entry) +
   [[M1-F1 Status flow and transitions]] Settled 2026-07-16.
 - **One active job per vehicle** — ✅ resolved 2026-07-15 ([[Risk ledger]] R5, commit `2c5ca91`),
-  **the other way from the old leaning**: active = per-visit — the shipped partial unique index is
-  `jobs(vehicle_id) WHERE stage IN (0,1,2)` (registered/assigned/in_progress), so a **Done or
-  Delivered job does NOT block a new job**. A follow-up job after Done is legal (proven by a
-  passing test) and [[Intake flow]] step 1c depends on it. *(Stale leaning corrected 2026-07-17 —
-  the old text described `WHERE stage NOT IN (delivered, cancelled)`, the opposite of what shipped.)*
+  **the other way from the old leaning**: active = per-visit — the *original* shipped partial
+  unique index was `jobs(vehicle_id) WHERE stage IN (0,1,2)` (registered/assigned/in_progress),
+  so a Done or Delivered job did not block a new job. A follow-up job after Done was legal.
+  *(⚠ 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]]: the guard **moved and inverted**.
+  It now lives on `intakes` — `index_intakes_one_open_per_vehicle WHERE status = 0` — and the
+  ruling itself flipped meaning: a second **job** (repair) on a vehicle is now *legal and
+  expected* — that's the split's whole point, parallel repairs on one visit — while a second
+  **open intake** is the violation. See [[Risk ledger]] R5, [[Intake]].)*
 - **Full attribute audit trail (e.g. paper_trail gem)** — leaning **later**; `JobStageTransition` + the jobsheet cover v1.
 - **Blocker taxonomy** — ✅ resolved: no fixed taxonomy. `Blocker` is a **workshop-owned catalog**
   (`label`, `raised_by_role`, `cleared_by_role`); seed **"Hold For Payment"**. The workshop defines
-  its own list rather than us guessing one.
+  its own list rather than us guessing one. *(⚠ 2026-08-14, ADR-012: the catalog now also decides
+  the **table** — `blocks: done` types are `JobBlocker`s, `blocks: delivered` types are
+  `IntakeBlocker`s (a visit-level hold). Hold For Payment reseeds as the latter. See [[Blocker]].)*
 - **Bootstrap onboarding** — ✅ superseded twice since this was written: signup creates the
   *person only*; "create workshop" is a post-signup act creating `Workshop` + `Ownership`
   ([[ADR-006 Ownership separate from Employment]]); crew joins via a fired invitation the

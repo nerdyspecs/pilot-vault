@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-24 (top ADR-010 pointer added; §Resolved note dated 2026-07-21, body preserved)
+updated: 2026-08-14 (entity map re-drawn for the Intake/Job split — ADR-012)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -16,6 +16,14 @@ live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is th
 > **`WorkshopStaffRole`** rows, and every actor/holder column points at `WorkshopStaff`. The old
 > shape is kept for its reasoning; the reconciliation is the `[!note]` under §Resolved and ADR-010.
 
+> [!warning] The entity map also predates [[ADR-012 Intake-Job two-level aggregate]] (2026-08-03)
+> **`Job` no longer sits directly under `Vehicle`.** An **`Intake`** (one car's visit) now sits
+> between them and carries the triple-stamp + jobsheet + token this note used to put on `Job`;
+> a `Job` (one repair) `belongs_to :intake` and reaches vehicle/customer through it. The diagram
+> below is redrawn to the current shape; §Resolved's "Job stamps its customer" reasoning is kept
+> — it now applies to **Intake**, not Job (a visit is stamped once at intake; a job never was
+> the thing that should have carried it). See [[Intake]] for the full note.
+
 ## Entities (v1)
 ```
 User (thin login) ─*─ WorkshopEmployment ─*─ Workshop (tenant)
@@ -24,9 +32,14 @@ User (thin login) ─*─ WorkshopOwnership ─*─ Workshop   (governance — A
 
 Workshop ─*─ Customer (person | company; name, phone, email)
 Workshop ─*─ Vehicle ── belongs_to Customer (required)
-Vehicle  ─*─ Job     ── triple-stamped: workshop_id + vehicle_id + customer_id
-Job      ─*─ JobSheetFieldValue
+Vehicle  ─*─ Intake  ── triple-stamped: workshop_id + vehicle_id + customer_id; has_secure_token
+Intake   ─*─ Job     ── belongs_to :intake only; reaches vehicle/customer through it
+Intake   ─*─ JobSheetFieldValue                 (the car's intake form — keys on intake_id)
 Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
+
+Intake   ─*─ IntakeStatusTransition             (open→delivered / open→cancelled; NOT ack'able)
+Intake   ─*─ IntakeBlocker ─*─ IntakeBlockerTransition (visit-level hold, e.g. Hold for payment;
+              └ belongs_to Blocker                     NOT ack'able — no direction to pin)
 
 Job      ─*─ JobStageTransition                 (stage events + ack)
 Job      ─*─ JobTechnician                      (crew membership NOW — deleted on remove)
@@ -35,7 +48,7 @@ Job      ─*─ JobTechnicianTransition            (joined/left history — sel
               carries job_id + workshop_employment_id directly; no FK to membership)
 Job      ─*─ JobBlocker ─*─ JobBlockerTransition (blocker items + events — Sprint 3)
               └ belongs_to Blocker
-Workshop ─*─ Blocker                            (workshop's blocker catalog)
+Workshop ─*─ Blocker                            (workshop's blocker catalog — shared by both levels)
 ```
 *(2026-07-17, Session 21: edges renamed `Employment`→`WorkshopEmployment`,
 `Ownership`→`WorkshopOwnership` — organisation-prefixed, mirroring v2's
@@ -54,8 +67,10 @@ list above was also dropped, removed by ADR-006 long before.)*
 - **Vehicle** — tenant-scoped; `belongs_to :customer` (required). **`registration_number`**
   (renamed from "plate" 2026-07-15 — verbose JPJ term), canonicalized (ALL whitespace
   collapsed + upcased); `unique(workshop_id, registration_number)`. VIN = optional identity.
-- **Job** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
-  registration — see Resolved below). The tracked unit ([[Job]]). Per-visit.
+- **Intake** — tenant-scoped, `belongs_to :vehicle` **and `belongs_to :customer`** (stamped at
+  intake — see Resolved below). One car's visit; owns one or more Jobs ([[Intake]]).
+- **Job** — tenant-scoped, `belongs_to :intake` only; reaches vehicle/customer through it. One
+  repair on a visit ([[Job]]). Per-repair, not per-visit — a visit can own several.
 - **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).
 - **Trackers** *(restructured 2026-07-16; crew re-restructured to Design B 2026-07-17)*:
   `JobTechnician` (present-tense membership, deleted on remove) + `JobTechnicianTransition`
@@ -72,25 +87,42 @@ at runtime, no migration.
 
 - **JobSheet** — the **blank form**. **One per workshop** (`belongs_to :workshop`), owner-configured.
 - **JobSheetField** — a field: `label` + `kind` (checkbox | text).
-- **JobSheetFieldValue** — one car's **answer** (`belongs_to :job, :job_sheet_field`).
+- **JobSheetFieldValue** — one visit's **answer** (`belongs_to :intake, :job_sheet_field`) —
+  keyed on `intake_id`, not `job_id`: it's the car's intake form (complaints, vehicle
+  condition), filled once per visit, not once per repair
+  ([[ADR-012 Intake-Job two-level aggregate]] §Consequences). *(2026-08-14: was `job_id` when
+  this note predated the split — per-repair jobsheet fields would be a v2 additive if ever
+  needed.)*
 
-**JobSheet = the workshop's blank form; a car's filled sheet = its JobSheetFieldValues.**
-"Car ABC's jobsheet" = `job.job_sheet_field_values` read against the fields — a *view*. Complaints
-& mileage are fields; vehicle info is referenced from Vehicle, never copied. Flat fields only.
+**JobSheet = the workshop's blank form; a visit's filled sheet = its JobSheetFieldValues.**
+"This car's intake jobsheet" = `intake.job_sheet_field_values` read against the fields — a
+*view*. Complaints & mileage are fields; vehicle info is referenced from Vehicle, never copied.
+Flat fields only.
 
 The form is a **record, not something churned per job** — v1 supports **adding** fields but has
 **no destructive delete** (removing a field would orphan past answers). And once a job is **Done,
 its answers are frozen** — corrections open a new job ([[Design laws]] #8). Per-answer snapshots
 are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 
+> [!question] Freeze condition needs re-deciding, not yet done (2026-08-14)
+> "Once a job is Done" doesn't parse now that the answers live on **Intake**, not Job — a visit
+> with several repairs has no single Done moment. Candidates: freeze when the *intake* reaches a
+> terminal (`delivered`/`cancelled`), or when its `ready?`. Not decided; this note predates the
+> split and Sprint 6 (where JobSheet is actually built) hasn't reached it yet.
+
 ## A Job's two responsibility sides
-- **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via ONE DOOR ([[M1-F1 Status flow and transitions]]).
-- **External** — who we notify. v1: the Customer's own `phone`/`email` + the job's token link.
+- **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via a
+  door, per level ([[M1-F1 Status flow and transitions]], [[ADR-013 The door decomposed]]).
+- **External** — who we notify. v1: the Customer's own `phone`/`email` + the **intake's** token
+  link (moved from Job — [[ADR-012 Intake-Job two-level aggregate]]).
 
 ## Resolved
 - **Vehicle key:** registration = lookup key; VIN = optional identity. `make/model/year/origin` loose → seed v2 `VehicleModel`.
 - **Job stamps its customer** *(2026-07-14, builder — raise again at S2 Phase 1 kickoff,
-  alongside R5)*. Vehicles change owners: if a job's customer is only reachable through
+  alongside R5)*. **⚠ 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]]: the stamp moved
+  up a level — `intakes.customer_id`, not `jobs.customer_id`. The reasoning below is unchanged,
+  read "the intake" wherever it says "the job" — a visit is stamped once at intake; a job
+  reaches its customer through its intake, never directly.** Vehicles change owners: if a job's customer is only reachable through
   `job.vehicle.customer`, selling the car retroactively rewrites who every past job was for —
   history derived through a **mutable pointer** violates the same append-only principle behind
   [[Design laws]] #8 (frozen answers) and ADR-009's leaning. So `jobs.customer_id` is written
@@ -167,4 +199,6 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 - **Global vehicle identity** (plate/VIN) → cross-shop history, owner-side read only.
 
 ## Related
-- [[Job]] · [[Job visibility]] · [[Intake flow]] · [[Overview]] · [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]]
+- [[Job]] · [[Intake]] · [[Job visibility]] · [[Intake flow]] · [[Overview]] ·
+  [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]] ·
+  [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]

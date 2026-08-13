@@ -1,11 +1,13 @@
 ---
 type: concept
 module: M1
-updated: 2026-07-28 (ADR-011 reshaped — receiver stored at write time, read-time classifier deleted; ADR-010 pointer)
+updated: 2026-08-14 (intake event tables added — ADR-012; per-level door — ADR-013)
 ---
 # Event log
 The immutable, timestamped history that powers all the time math. **Append-only — never edited.**
-Written **only via ONE DOOR** ([[Design laws]] #7) — nothing changes a job's state without also logging it.
+Written **only via a door** ([[Design laws]] #7) — nothing changes a job's or an intake's state
+without also logging it. One door per level since [[ADR-013 The door decomposed]]: `JobActions`
+for a repair's events, `IntakeActions` for the visit's.
 
 > [!warning] The "In Rails" column names below predate [[ADR-010 WorkshopStaff supersedes the edge split]] (2026-07-21)
 > Wherever this doc says `workshop_employment_id` (the holder) or "actor columns stay User",
@@ -49,14 +51,29 @@ Three axes:
   Sprint 3; see [[Blocker]] (items are independent — two subcons on one car — each with its
   own raise/resolve cycle).
 
+**Since [[ADR-012 Intake-Job two-level aggregate]], the visit has its own two axes**, one
+level up from the job's:
+- **Intake status changes** — `Intake` (the entity) + `IntakeStatusTransition` (`open →
+  delivered` / `open → cancelled`).
+- **Intake blocker raise/resolve** — the same catalog + `IntakeBlocker` items +
+  `IntakeBlockerTransition` events, mirroring the job blocker shape (see [[Blocker]]). The one
+  structural difference: an intake event is **never `Acknowledgeable`** — no `receiver_id`, no
+  `acknowledged_at`, because a visit-level hold (Hold for payment) has no direction to pin.
+
 There is **no single grand events table** — that would be event-sourcing, more than this needs.
-A job's *timeline* = the event tables, merged by timestamp at read time.
+A job's *timeline* = its event tables, merged by timestamp at read time; the same idea applies
+one level up for an intake.
 
 **In code this read is `Job#timeline`** *(named 2026-07-12 — builder's call: "event log" is
 programmer vocabulary, fine for this doc, wrong for code a workshop person reads; `history`
 rejected because Sprint 6's vehicle history would overload the word)*. Arrives in layers:
 Sprint 2 merges stage + crew events (ack columns dormant), Sprint 3 splices in blocker events,
 Sprint 4 lights up acknowledgement — the method and view never change shape, they gain rows.
+
+**`Intake#timeline` and `Intake#timeline_with_jobs` are designed, not yet built** — the visit's
+own two-leg merge, and a deeper trace that also pulls in every one of its jobs' events (five
+queries flat regardless of job count, the same batching idiom as
+`Job.pending_acknowledgements_by_job`). See [[Intake]] §Timeline and Sprint plan S4.5.10.
 
 ## Acknowledgement — the framings (settled 2026-07-15/16)
 - **The ack pair belongs to a direction, not a table.** All event rows carry the same dormant
@@ -143,6 +160,18 @@ Sprint 4 lights up acknowledgement — the method and view never change shape, t
 > use to mean "who this event is for", stamped at write time. The composite FK is unchanged.)* Operational roles live on append-only
 > `WorkshopStaffRole` rows; `owner` is a governance boolean on `WorkshopStaff`, not a role.
 
+> [!note] Added 2026-08-14 by [[ADR-012 Intake-Job two-level aggregate]] — the intake's own tables
+> - `IntakeStatusTransition`: `workshop_id, intake_id, from_status` (null only on the birth row),
+>   `to_status, created_by, created_at`. **No `receiver_id`, no `acknowledged_at` — not
+>   `Acknowledgeable`.** An intake status change has no direction to pin.
+> - `IntakeBlocker` + `IntakeBlockerTransition` — mirrors `JobBlocker`/`JobBlockerTransition`
+>   exactly in shape (catalog + item + events, a note chain), but the transition table is **also
+>   not `Acknowledgeable`**, for the same reason: today's only intake blocker type (Hold for
+>   payment) is a same-role hold — SA raises, SA clears, nobody is ever waiting on someone else.
+>   Column detail in [[Blocker]].
+> - `Intake#timeline` and `Intake#timeline_with_jobs`, the reads over these tables, are
+>   **designed but not built** — see [[Intake]] §Timeline.
+
 The **"waiting on whom" board read** = one query across the event tables:
 `receiver_id IS NOT NULL AND acknowledged_at IS NULL`, grouped by job
 (`Job.pending_acknowledgements_by_job`) or filtered to a person
@@ -155,4 +184,6 @@ structurally: `receiver_id IS NULL` **is** "never was a handoff", so the two-col
 with no classification. Everything is still ONE shared read so board and per-person agree.)*
 
 ## Related
-- [[Job]] · [[Stage model]] · [[Blocker]] · [[Design laws]] · [[ADR-005 Acknowledged handoffs in V1]]
+- [[Job]] · [[Intake]] · [[Stage model]] · [[Blocker]] · [[Design laws]] ·
+  [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-012 Intake-Job two-level aggregate]] ·
+  [[ADR-013 The door decomposed]]

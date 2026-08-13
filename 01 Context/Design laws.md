@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-08-03 (law #6 restated for the Intake/Job split — ADR-012)
+updated: 2026-08-14 (law #7 restated, law #9 footnoted — ADR-013, the door decomposed)
 ---
 # Design laws
 Invariants — never violate. Adopted from the 2026-07-03 foundation session.
@@ -17,8 +17,13 @@ ADRs record *choices*; these are the *rules* every choice must obey.
    Intake** (with its own Jobs). *(2026-08-03, [[ADR-012 Intake-Job two-level aggregate]]: "new visit
    = new Job row" was the one-job-per-visit wording; the visit is now the **Intake**, a repair is a
    **Job** under it. A returning delivered car is a fresh Intake, never a mutated old one.)*
-7. **ONE DOOR.** All job state changes (stage, blockers, assignment) go through one service object.
-   No scattered updates.
+7. **ONE DOOR — per level.** All state changes for an aggregate go through its door: `JobActions`
+   for a repair, `IntakeActions` for the visit. No scattered updates: nothing outside a door
+   writes a stage, an intake status, a blocker, or a crew row. *(2026-08-14,
+   [[ADR-013 The door decomposed]]: was "one service object" total — reversed once building it
+   showed the two levels have genuinely different verb shapes. A door owns **moves only** now —
+   creation is authoring ([[ADR-013 The door decomposed|CreateIntake/CreateJob]]), and
+   authorization is checked at the controller boundary (`Permissions`), not inside the door.)*
 8. **A Done job is immutable.** History is append-only — you never edit a finished job; corrections
    open a **new** job. Vehicle owners are read-only everywhere.
 9. **Calculations live in the model layer.** Business logic and derived values belong on models
@@ -30,6 +35,9 @@ ADRs record *choices*; these are the *rules* every choice must obey.
    orchestration, shared permission rules, and a mandatory audit log co-occur (e.g.
    `JobActions`); single-aggregate commands stay on the model as bang methods. A `WorkshopActions`
    layer was considered and rejected — see worklog Session 13.)*
+   *(2026-08-14, [[ADR-013 The door decomposed]]: "shared permission rules" no longer justifies a
+   door — that moved to `Permissions`. What still uniquely justifies one is cross-model
+   orchestration plus the mandatory audit log.)*
 
 ## Related
 - [[Decisions]] · [[Rejected alternatives]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-005 Acknowledged handoffs in V1]]
