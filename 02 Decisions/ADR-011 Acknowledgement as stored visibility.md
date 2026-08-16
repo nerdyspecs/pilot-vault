@@ -9,6 +9,12 @@ superseded_by:
 ---
 # ADR-011 — Acknowledgement as stored visibility
 
+> [!note] Sprint numbering — this ADR predates the Sprint 5 ↔ 6 swap *(2026-08-17)*
+> Where the body says **Sprint 5 / S5.7** (the live board, the ageing-pin colour) read **Sprint 6 /
+> S6.7**; where it says **Sprint 6** (the intake vertical) read **Sprint 5**. The two were renumbered
+> so the intake/jobsheet vertical runs first. The body keeps its original numbers — ADRs aren't
+> edited. See [[Sprint plan]].
+
 Settles **[[Product gaps]] #5 — "the ack model assumes full adoption"**, the explicit gate on
 Sprint 4. Arrived at over two sessions: a 2026-07-24 chip-out that taught the acknowledgement
 model and first answered the gap with a *holder* framing, and a 2026-07-28 study of the proposed

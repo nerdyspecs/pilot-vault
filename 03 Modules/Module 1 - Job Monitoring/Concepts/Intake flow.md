@@ -5,7 +5,7 @@ updated: 2026-07-15
 ---
 # Intake flow — the SA's decision tree
 Designed 2026-07-15 (worklog Session 16) from real-world cases; **build target: Phase 4 /
-Sprint 6 intake UI**. Schema-complete as of Phase 1 — nothing here needs columns beyond the
+Sprint 5 intake UI**. Schema-complete as of Phase 1 — nothing here needs columns beyond the
 spine. The compiled shape: **two lookup keys** (registration number → vehicles, phone →
 people), **one script question** ("whose file should this be under?"), and the **two-branch
 mismatch confirm** ([[Deferred design]]). Everything else is find-or-create.

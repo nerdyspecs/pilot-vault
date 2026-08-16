@@ -108,7 +108,7 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 > "Once a job is Done" doesn't parse now that the answers live on **Intake**, not Job — a visit
 > with several repairs has no single Done moment. Candidates: freeze when the *intake* reaches a
 > terminal (`delivered`/`cancelled`), or when its `ready?`. Not decided; this note predates the
-> split and Sprint 6 (where JobSheet is actually built) hasn't reached it yet.
+> split and Sprint 5 (where JobSheet is actually built) hasn't reached it yet.
 
 ## A Job's two responsibility sides
 - **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via a

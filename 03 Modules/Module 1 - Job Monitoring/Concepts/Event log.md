@@ -66,7 +66,7 @@ one level up for an intake.
 
 **In code this read is `Job#timeline`** *(named 2026-07-12 — builder's call: "event log" is
 programmer vocabulary, fine for this doc, wrong for code a workshop person reads; `history`
-rejected because Sprint 6's vehicle history would overload the word)*. Arrives in layers:
+rejected because Sprint 5's vehicle history would overload the word)*. Arrives in layers:
 Sprint 2 merges stage + crew events (ack columns dormant), Sprint 3 splices in blocker events,
 Sprint 4 lights up acknowledgement — the method and view never change shape, they gain rows.
 

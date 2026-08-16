@@ -60,7 +60,7 @@ is the product/brand. Nothing internal needs renaming.)*
    ADR-008. Two different acts; don't let "handshake" mean both in copy.)*
 4. **Kicker:** your customers watch their own car's progress — **the one thing no whiteboard
    can ever do.** The calls stop. *(Build dependency: "the calls stop" needs the ETA field
-   staying in V1 — [[Product gaps]] #1, Sprint task S6.6 — or the owner still calls to ask "when".)*
+   staying in V1 — [[Product gaps]] #1, Sprint task S5.6 — or the owner still calls to ask "when".)*
 
 ## Pricing posture (number deferred)
 Flat **per workshop, never per user** — per-seat pricing punishes crew adoption, and crew

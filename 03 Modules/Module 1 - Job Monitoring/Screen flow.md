@@ -46,7 +46,7 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
   blocker routes to four levels while letting the URL carry an `intake_id` that can disagree with
   the job's real parent. The security boundary here is the **workshop** scope, not the intake, so
   nesting adds no safety.
-- **The front door is the S6 hole — and it's provable from the route side.** A route-orphan check
+- **The front door is the S5 hole — and it's provable from the route side.** A route-orphan check
   (`bin/route-orphans`) shows **exactly two endpoints in the whole app with no UI caller**:
   `POST /intakes` (`intakes#create`) and `POST /intakes/:intake_id/jobs` (`jobs#create`). Both
   creates are implemented and tested; nothing in the view layer can reach them. Every other

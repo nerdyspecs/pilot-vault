@@ -17,7 +17,7 @@ exists; **needs design** = real thinking still required before/while building.
 | 2   | Tenancy + WorkshopEmployment/WorkshopOwnership edges + role-gated transitions (ONE DOOR) | ✅ **built** (Sprint 2 closed 2026-07-17) |
 | 3   | Live job list & filtering                                     | mostly mechanical        |
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
-| 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S5.7) |
+| 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S6.7) |
 | 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | ✅ **built** (Sprint 4.5 closed 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]] + [[ADR-013 The door decomposed]]) |
 | 6   | Job intake + digitized jobsheet                               | ✅ designed *(re-points at Intake — ADR-012; UI not yet built — see [[Sprint plan]])* |
 | 7   | Owner status page (token link)                                | ⚠️ needs design *(token now on Intake, not Job — ADR-012, see §7 below)* |
@@ -36,7 +36,7 @@ Designed — see [[Data model]] and [[ADR-003 Digitized jobsheet in V1]]:
   rather than a `WorkItem` child under Job, the **visit was lifted out above it**, so the unit that
   already carried stage/crew/blockers/events didn't have to be rebuilt. Why it moved: a car
   realistically comes in for several services worked by several technicians in parallel, which
-  one-job-per-visit cannot represent. Sequenced as **Sprint 4.5**, before the S5 board (which groups
+  one-job-per-visit cannot represent. Sequenced as **Sprint 4.5**, before the S6 board (which groups
   by the car) and while there is still no production data.
 - **Customer / Vehicle model:** ✅ (routing shape, two user populations).
 - **Vehicle key:** ✅ registration = lookup key, VIN = optional identity.
@@ -57,7 +57,7 @@ Left to build (not design): the actual intake/jobsheet forms + the field-admin s
   only existed because it was removed, and fixes an append-only bug (editing a blocker type's
   `cleared_by_role` re-points open handoffs). Acknowledgement is implicit — acting on a job clears
   what you owe. The 2026-07-24 holder model was studied and dropped; see ADR-011's Rejected
-  alternatives. Ageing colour is deferred to S5.7.)*
+  alternatives. Ageing colour is deferred to S6.7.)*
 - **Owner-facing delivery:** v1 = a copy-paste message the service advisor sends manually.
   WhatsApp / email automation is parked in [[Open questions]] — decide during the intake feature.
 

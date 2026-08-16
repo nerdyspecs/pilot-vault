@@ -47,7 +47,7 @@ its first workshop on **#1 (no ETA)** and **#5 (partial-adoption)** — those de
 *(**Updated 2026-07-28:** **#5 is no longer an open survival risk** — settled by
 [[ADR-011 Acknowledgement as stored visibility]], which makes "waiting on whom" a stored, always-answerable
 query with no inbox to flood. **#1 (no ETA) remains the open survival item**, still parked at Sprint
-task S6.6.)*
+task S5.6.)*
 
 Suggested cut when we act on this: pull **#1, #2, #5** (and cheap **#9**) into V1; make explicit
 *decisions* to defer **#3, #4, #7, #8** so they're parked on purpose, not by omission.

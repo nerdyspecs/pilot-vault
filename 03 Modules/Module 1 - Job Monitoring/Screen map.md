@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-17 (Session 32 — board §3 regroup deferred to S5, ADR-012 citation)
+updated: 2026-08-17 (Session 32 — board §3 regroup deferred to S6, ADR-012 citation)
 ---
 # Screen map
 
@@ -116,7 +116,7 @@ via the visit), plus unacknowledged handoffs per repair.
 
 > *Partial:* the board is still grouped by individual repair. ADR-012 reshapes it to group by
 > **Intake** (the car), with the done-awaiting-delivery group keyed on `intake.ready?`. That
-> regroup is **deferred (S5)** — the current repair-grouping stands until then.
+> regroup is **deferred (S6)** — the current repair-grouping stands until then.
 
 ---
 
@@ -352,7 +352,7 @@ POST endpoints exist and work, but nothing renders a form to reach them:
 
 | Intended screen | Would feed | Status | Notes |
 |---|---|---|---|
-| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow (S6 territory). Target of the board's "New job". |
+| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow (S5 territory). Target of the board's "New job". |
 | **Add a repair to an intake** (`GET /intakes/:intake_id/jobs/new`) | `POST /intakes/:intake_id/jobs` | **not-built** | No way in the UI to add a second repair to an open intake yet; the intake page even notes the gap. *(2026-08-16: create nested under its intake — `ed2595c`.)* |
 | **Customer status page** (public, by token) | — read-only — | **not-built** | Each visit carries a share token for an owner-facing "how's my car?" page. No route yet. |
 

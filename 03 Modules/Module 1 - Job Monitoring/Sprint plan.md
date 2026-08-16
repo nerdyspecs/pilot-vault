@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-17 (Session 32 — build order swapped: intake vertical/jobsheet next, board (S5) deferred; annotate-not-renumber; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-17 (Session 32 — Sprint 5 ↔ 6 renumbered: intake vertical/jobsheet is now Sprint 5 (next), board is now Sprint 6 (deferred); ADR-011/012 keep old numbers with a forward-pointer footnote; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -55,14 +55,15 @@ that ends in something demoable.
 
 ---
 
-> [!note] Build order — execution ≠ numbering *(2026-08-17, Session 32)*
-> Sprint numbers are stable references (commits, [[Screen flow]], [[Features overview]] point at
-> them), not a strict queue. **Current build order: 4.5 (closing) → 6 (next) → 5 (deferred) → 7 → 8.**
-> The **board (Sprint 5) is deferred** — it's query-over-existing-tables plus heavy UI, best built
-> once real intakes flow and the designer has [[Screen map]] / [[Screen flow]]. The **intake vertical
-> (Sprint 6) goes next, led by the jobsheet**: it's the create-path the whole app is missing
+> [!note] Build order *(2026-08-17, Session 32)*
+> **Build order: 4.5 (closing) → 5 (next) → 6 (deferred) → 7 → 8.** The **intake vertical
+> (Sprint 5) goes next, led by the jobsheet** — it's the create-path the whole app is missing
 > (`bin/route-orphans` finds two orphan endpoints, both intake creates) and it's genuine model work.
-> Reorder is by annotation, not renumber — the `4.5` precedent. See [[worklog]] Session 32.
+> The **board (Sprint 6) is deferred** — query-over-existing-tables plus heavy UI, best built once
+> real intakes flow and the designer has [[Screen map]] / [[Screen flow]].
+> *(Sprint 5 ↔ 6 hard-swapped 2026-08-17: the intake vertical was Sprint 6, the board Sprint 5.
+> Neither is built, so no commit ids broke; ADR-011/012 keep their original numbers with a
+> forward-pointer footnote. See [[worklog]] Session 32.)*
 
 ## Sprints 0–4 — closed
 Setup, tenancy spine, the job engine, cold-start intake, blockers, and acknowledgement-as-
@@ -80,10 +81,10 @@ event tables adopt `created_by`/`acknowledged_by → workshop_staff` from birth 
 
 ## Sprint 4.5 · Intake/Job aggregate morph *(design pass + migration)*
 **Goal:** split the overloaded `Job` into **Intake** (the car's visit) → **Job** (one repair). **Exit:**
-the two-level aggregate is live and green, so the Sprint 5 board is built on the right unit.
-**Why here, not later** — [[ADR-012 Intake-Job two-level aggregate]]: the S5 board groups by the *car*,
+the two-level aggregate is live and green, so the Sprint 6 board is built on the right unit.
+**Why here, not later** — [[ADR-012 Intake-Job two-level aggregate]]: the S6 board groups by the *car*,
 so it must sit on `Intake`; and with **no production data** this is the cheapest the schema change will
-ever be (schema squash + reseed, like the tenant-spine collapse — never a data migration). Building S5
+ever be (schema squash + reseed, like the tenant-spine collapse — never a data migration). Building S6
 first would mean rebuilding it.
 
 - [x] **S4.5.1** Design pass — model locked with the builder → [[ADR-012 Intake-Job two-level aggregate]]
@@ -146,55 +147,17 @@ first would mean rebuilding it.
       `Acknowledgeable`. Designed, not built — see [[Intake]] §Timeline. *(This is what the
       builder originally asked for when this reconciliation pass started; parked mid-session
       for the Permissions/ADR-013 work and the vault catch-up — the one open S4.5 task; it completes the
-      aggregate's own read surface but does **not** block Sprint 6, so land it when convenient.)*
+      aggregate's own read surface but does **not** block Sprint 5, so land it when convenient.)*
 
 > [!note] Downstream sprints read against ADR-012 + ADR-013
-> **S5** groups the board by **Intake** (the car), with a *Done — awaiting delivery* group for intakes
-> deriving `ready`. **S6** intake flow creates Customer/Vehicle/**Intake**/Job (via `CreateIntake`, not
+> **S6** groups the board by **Intake** (the car), with a *Done — awaiting delivery* group for intakes
+> deriving `ready`. **S5** intake flow creates Customer/Vehicle/**Intake**/Job (via `CreateIntake`, not
 > `Job.create!`). **S7**'s token page is now the **intake's** token — `GET /intakes/:token`, not
 > `/jobs/:token`. See the task-level notes in each sprint below for what specifically needs re-pointing.
 
 ---
 
-## Sprint 5 · Live job list
-**Goal:** answer "where is every job right now?" **Exit:** a filterable board of active jobs.
-
-> [!warning] ⏸ Deferred *(2026-08-17, Session 32)* — board pushed back behind the intake vertical (S6)
-> Built after Sprint 6. When picked up it's mostly UI over **new** queries not yet written (batched
-> `Intake.ready` scope, aging clocks, two-level blocker/pin roll-up, filter scopes) — decompose it
-> then, against real intakes + the designer's work off [[Screen map]] / [[Screen flow]]. **S5.2a is
-> stale** (a car has no single stage post-ADR-012; it overlaps S5.1a — fold its "sitting time" into
-> S5.1a at build time). Do the aging-clock / two-level-display design pass at pick-up, not now.
-
-- [ ] **S5.1** Jobs index: active jobs for `Current.workshop` (`Job.active` — `unassigned`/
-      `assigned`/`in_progress`; **`delivered` is no longer a Job stage to exclude**, ADR-012), showing
-      stage, crew, active blockers.
-- [ ] **S5.1a** *(re-pointed 2026-08-14, ADR-012 — not in the original plan)* **Group the index by
-      Intake**, not a flat job list — the whiteboard's row was always the car, and a car can now have
-      several jobs. A **"Done — awaiting delivery"** group for intakes where `ready?` (every job
-      terminal, ≥1 done) — the founding-pain surface, now car-level. See [[Intake]].
-- [ ] **S5.2** Filters: by stage, by technician (crew), by blocker.
-- [ ] **S5.2a** *(added 2026-07-24, ADR-011)* **Per-job grouping — whiteboard parity**: the car,
-      its stage, and how long it has been sitting. The board a workshop already draws, made live.
-- [ ] **S5.2b** *(added 2026-07-24, ADR-011)* **Per-technician grouping**: load, long-running
-      `in_progress` jobs, last activity. ⚠ **Frame it as the manager's diagnostic on stuck jobs,
-      never a scoreboard** — the builder's "saucy one". What keeps it honest is ADR-011's
-      **symmetry**: the counter is measured identically (an unconfirmed `done` ages exactly like an
-      unconfirmed assignment), so this is not a lens aimed at the floor. Stays inside the
-      positioning invariant because it aggregates **jobs**, never real-time technician activity.
-- [ ] **S5.3** *(Product-gap #2)* aging highlight: flag jobs sitting in a stage beyond N days.
-- [ ] **S5.4** *(optional)* Turbo Streams for near-live updates — a plain refresh is fine first.
-- [ ] **S5.5** PC layout primary; a clean "my jobs" view readable on a technician's phone.
-- [ ] **S5.6** Tests: tenant scoping of the index · filters · aging flag.
-- [ ] **S5.7** *(carried from Sprint 4)* **Ageing colour on the waiting pin** — under 1h neutral ·
-      1h–1d amber (the palette's existing *Waiting / aging*) · over 1d red ("stuck, act now", whose
-      two causes are a blocker and an unclaimed handoff — the chip text says which). **Colour the
-      chip, never the row.** One workshop-wide constant, one place. Bands + the overnight-hours wart:
-      [[Deferred design]].
-
----
-
-## Sprint 6 · Intake + digitized jobsheet
+## Sprint 5 · Intake + digitized jobsheet
 **Goal:** register a car end-to-end — see [[ADR-003 Digitized jobsheet in V1]], [[Data model]].
 **Exit:** full intake creates Customer/Vehicle/**Intake** (+ its first Job) + jobsheet answers in
 one flow. *(⚠ 2026-08-14, ADR-012: was "…+ Job" — the visit is the thing created; a Job is its
@@ -202,34 +165,72 @@ first repair, via `CreateIntake`.)* This is also where **UI work resumes** — s
 top-of-file warning: the current app has no working intake-creation UI at all.
 
 > [!note] ▶ Next *(2026-08-17, Session 32)* — start with the jobsheet, backend-first
-> Build order **within** S6: **`JobSheet` + `JobSheetField` template models + a seeded default
+> Build order **within** S5: **`JobSheet` + `JobSheetField` template models + a seeded default
 > template first** (view-blind, unit-testable; ADR-003 shape is locked) → **defer the owner
-> field-admin UI (S6.4)** → then `JobSheetFieldValue` + the front-door form (S6.5) that fills it;
-> **S6.5 closes the create-path hole**. Two fill-layer decisions parked until we build the values:
+> field-admin UI (S5.4)** → then `JobSheetFieldValue` + the front-door form (S5.5) that fills it;
+> **S5.5 closes the create-path hole**. Two fill-layer decisions parked until we build the values:
 > **(a)** the freeze condition — [[Data model]]'s open `[!question]` ("freeze when Done" no longer
 > parses; freeze on intake terminal, or on `ready?`); **(b)** jobsheet *in* the intake form vs a
 > later step (where values get written). See [[worklog]] Session 32.
 
-- [ ] **S6.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).
-- [ ] **S6.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
+- [ ] **S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).
+- [ ] **S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
       position`).
-- [ ] **S6.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).
+- [ ] **S5.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).
       *(⚠ 2026-08-14, ADR-012: was `job_id` — the jobsheet is the car's intake form, filled once
       per visit, not once per repair. See [[Data model]], [[Intake]].)*
-- [ ] **S6.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete** — [[Data model]]).
-- [ ] **S6.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
+- [ ] **S5.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete** — [[Data model]]).
+- [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
       registration number) → **`CreateIntake`** (opens the visit + its first repair) → fill jobsheet
       field values + complaints. One screen/flow. *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" —
       creation goes through `CreateIntake`, not a bare `Job.create!` or a door verb.)* **Spec:
       [[Intake flow]]** (full SA decision tree, both lookup keys, two-branch mismatch confirm —
       designed 2026-07-15; unaffected by the backend split, still the UI spec to build against).
-- [ ] **S6.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
+- [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
-- [ ] **S6.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
+- [ ] **S5.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
       prior **intakes**.
-- [ ] **S6.8** Plate normalization + existing-vehicle lookup.
-- [ ] **S6.9** Tests: intake creates the full graph · jobsheet values saved · ETA persists · history shows.
+- [ ] **S5.8** Plate normalization + existing-vehicle lookup.
+- [ ] **S5.9** Tests: intake creates the full graph · jobsheet values saved · ETA persists · history shows.
+
+---
+
+## Sprint 6 · Live job list
+**Goal:** answer "where is every job right now?" **Exit:** a filterable board of active jobs.
+
+> [!warning] ⏸ Deferred *(2026-08-17, Session 32)* — board pushed back behind the intake vertical (S5)
+> Built after Sprint 5. When picked up it's mostly UI over **new** queries not yet written (batched
+> `Intake.ready` scope, aging clocks, two-level blocker/pin roll-up, filter scopes) — decompose it
+> then, against real intakes + the designer's work off [[Screen map]] / [[Screen flow]]. **S6.2a is
+> stale** (a car has no single stage post-ADR-012; it overlaps S6.1a — fold its "sitting time" into
+> S6.1a at build time). Do the aging-clock / two-level-display design pass at pick-up, not now.
+
+- [ ] **S6.1** Jobs index: active jobs for `Current.workshop` (`Job.active` — `unassigned`/
+      `assigned`/`in_progress`; **`delivered` is no longer a Job stage to exclude**, ADR-012), showing
+      stage, crew, active blockers.
+- [ ] **S6.1a** *(re-pointed 2026-08-14, ADR-012 — not in the original plan)* **Group the index by
+      Intake**, not a flat job list — the whiteboard's row was always the car, and a car can now have
+      several jobs. A **"Done — awaiting delivery"** group for intakes where `ready?` (every job
+      terminal, ≥1 done) — the founding-pain surface, now car-level. See [[Intake]].
+- [ ] **S6.2** Filters: by stage, by technician (crew), by blocker.
+- [ ] **S6.2a** *(added 2026-07-24, ADR-011)* **Per-job grouping — whiteboard parity**: the car,
+      its stage, and how long it has been sitting. The board a workshop already draws, made live.
+- [ ] **S6.2b** *(added 2026-07-24, ADR-011)* **Per-technician grouping**: load, long-running
+      `in_progress` jobs, last activity. ⚠ **Frame it as the manager's diagnostic on stuck jobs,
+      never a scoreboard** — the builder's "saucy one". What keeps it honest is ADR-011's
+      **symmetry**: the counter is measured identically (an unconfirmed `done` ages exactly like an
+      unconfirmed assignment), so this is not a lens aimed at the floor. Stays inside the
+      positioning invariant because it aggregates **jobs**, never real-time technician activity.
+- [ ] **S6.3** *(Product-gap #2)* aging highlight: flag jobs sitting in a stage beyond N days.
+- [ ] **S6.4** *(optional)* Turbo Streams for near-live updates — a plain refresh is fine first.
+- [ ] **S6.5** PC layout primary; a clean "my jobs" view readable on a technician's phone.
+- [ ] **S6.6** Tests: tenant scoping of the index · filters · aging flag.
+- [ ] **S6.7** *(carried from Sprint 4)* **Ageing colour on the waiting pin** — under 1h neutral ·
+      1h–1d amber (the palette's existing *Waiting / aging*) · over 1d red ("stuck, act now", whose
+      two causes are a blocker and an unclaimed handoff — the chip text says which). **Colour the
+      chip, never the row.** One workshop-wide constant, one place. Bands + the overnight-hours wart:
+      [[Deferred design]].
 
 ---
 

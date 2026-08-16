@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-07-28 (waiting-pin ageing bands — ADR-011; ships muted in S4, colour deferred to S5.7; no new colours)
+updated: 2026-07-28 (waiting-pin ageing bands — ADR-011; ships muted in S4, colour deferred to S6.7; no new colours)
 ---
 # Visual theme
 Locked 2026-07-06 (worked out interactively — samples compared, choices deliberate).
@@ -42,9 +42,9 @@ of the same family. **Identical in every view** — workshop, owner page, future
 Known quirk to watch: "In progress" blue vs Action blue coexist (pale badge vs solid button) —
 keep that contrast.
 
-### The waiting pin — ageing *(spec 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]]; deferred to S5.7)*
+### The waiting pin — ageing *(spec 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]]; deferred to S6.7)*
 A job with an unacknowledged handoff shows a muted *"Waiting on &lt;name&gt;"* line on the board.
-**Sprint 4 ships it un-coloured** (neutral text only); the ageing colour below is **S5.7**, a styling
+**Sprint 4 ships it un-coloured** (neutral text only); the ageing colour below is **S6.7**, a styling
 pass after real use. Uses the existing palette — **no new colour is introduced**:
 
 | Age of the unacknowledged handoff | Colour |

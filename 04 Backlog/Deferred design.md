@@ -54,7 +54,7 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   hard block at intake with the car on the lift is workflow poison. **The stamp itself
   stands** (gate 2, [[Data model]] §Resolved) — the door still *copies* the vehicle's
   customer by default; what's parked is only the law forbidding an explicit different
-  choice. Circle back when the intake UI exists (Phase 4 / Sprint 6). **Recorded leaning
+  choice. Circle back when the intake UI exists (Phase 4 / Sprint 5). **Recorded leaning
   (2026-07-15, designed with the builder): a two-branch SA-facing confirm, not a generic
   warning.** Happy path: registration number → vehicle → customer auto-fills (the door's
   default-copy), no warning ever. On mismatch: "vehicle filed under Lim, billing Tan" with
@@ -73,16 +73,16 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   job is visible to the payer, not the vehicle's owner — person-inward being consistent;
   note it in the v2 design pass. See [[Job visibility]].
   **⚠ 2026-07-17 (Session 23) — Sprint 2.5 lands the LOOKUP half, this confirm stays parked
-  to Sprint 6.** The new Sprint 2.5 intake ([[Sprint plan]]) builds customer/vehicle *create*
+  to Sprint 5.** The new Sprint 2.5 intake ([[Sprint plan]]) builds customer/vehicle *create*
   + plate-first lookup, but deliberately has **no "who's paying?" override**: the stamp
   defaults silently (`vehicle.customer` on a plate hit, the just-created customer on a miss),
   so `job.customer == vehicle.customer` at birth in both branches — a mismatch is
   **structurally unrepresentable** in 2.5, which is exactly what keeps this two-branch confirm
   cleanly deferred (nothing in 2.5 can produce the state it resolves). It circles back with
-  the **plate-first override** at Sprint 6, alongside the phone-first dedup tree. Accepted 2.5
+  the **plate-first override** at Sprint 5, alongside the phone-first dedup tree. Accepted 2.5
   gap in the meantime: **weaker dedup** (no phone-first dedup) — mitigated cheaply by
   plate-first screening + a name/phone-searchable customer index (S2.5.2), the full tree
-  still S6.
+  still S5.
 - **Crew: helpers + the `lead` flag (2026-07-16, builder ruling).** v1 crews are a single
   responsible mechanic; S2.6 ships `job_mechanics` **without** any lead/primary flag — all
   v1 technicians on a job are treated the same. When helpers arrive, the flag lands as
@@ -133,7 +133,7 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   already the data-driven case). Rails-built-in rule applies at revisit: show first why
   plain guard methods + shared predicates aren't enough. **Trigger:** permission checks
   spreading across controllers/views faster than the guard-method pattern keeps tidy —
-  likely visible at S2.11 or Sprint 5's role-shaped screens. Adds a dependency — builder
+  likely visible at S2.11 or Sprint 6's role-shaped screens. Adds a dependency — builder
   decides at trigger time.
 - **JSON responses for door mutations (2026-07-17, builder ruling at S2.11: HTML first).**
   [[ADR-001 Core stack]] commits to "every mutation available as JSON", but S2.11's
@@ -186,17 +186,17 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   Deferred as not-important-now; would need a third state (seen ≠ acted). **Trigger:** a real
   workshop wanting to distinguish "I saw it" from "I did it".
 - **Multi-technician crew vs a single receiver** *(chipped 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]])*. Decide how the receiver stamping survives a crew of two: `assign_technician!` / `send_back!` / `mark_done!` each pin **one** `receiver_id`, which currently rests on `assign_technician!` refusing a job that already has crew (`app/services/job_actions.rb:44`). Two shapes on the table: **per-member receipts** (each crew member gets their own `joined` row and receiver; any/all confirm — decide which) or ride the **already-deferred `lead` flag** (the lead is the receiver, helpers aren't). Naming for the flag is already settled (`lead`, not `primary`) in the crew-helpers entry above. **Trigger:** the first real two-technician job.
-- **Workshop opening hours** *(chipped 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]])*. Decide whether ageing should pause outside business hours. The Sprint-5 waiting-pin colour (S5.7) will colour on raw elapsed time, so a handoff made at 6pm goes amber by 9am next morning purely from the shop being shut — a known accepted wart, not a bug. Fixing it needs opening hours per workshop, which is outside [[ADR-002 V1 scope]] and would also feed Sprint 5's aging highlight (Product-gap #2) and any future ETA maths. **Trigger:** a real workshop complaining that overnight jobs look late.
+- **Workshop opening hours** *(chipped 2026-07-24, [[ADR-011 Acknowledgement as stored visibility]])*. Decide whether ageing should pause outside business hours. The Sprint-6 waiting-pin colour (S6.7) will colour on raw elapsed time, so a handoff made at 6pm goes amber by 9am next morning purely from the shop being shut — a known accepted wart, not a bug. Fixing it needs opening hours per workshop, which is outside [[ADR-002 V1 scope]] and would also feed Sprint 6's aging highlight (Product-gap #2) and any future ETA maths. **Trigger:** a real workshop complaining that overnight jobs look late.
 
 ## 2026-08-03
 - **✅ PROMOTED 2026-08-03 → [[ADR-012 Intake-Job two-level aggregate]]** (sequenced as **Sprint 4.5**,
-  before S5). All four open sub-decisions settled with the builder: (1) all-cancelled car → derives
+  before S6). All four open sub-decisions settled with the builder: (1) all-cancelled car → derives
   `cancelled` (no deliver path); (2) cancel-cascade cancels remaining *open* jobs, outcome derives,
   confirm names both sides; (3) `mark_done!` keeps the registering SA as receiver (stored at write
   time), and intake `deliver!` sweeps its jobs to close the done-notices; (4) HFP → a **non-acknowledgeable**
   intake blocker (no direction = no ack pair), `blocks` is the single discriminator. Vocabulary locked:
   **intake = the visit, job = a repair.** The original chip is kept below for the reasoning trail.
-- **Intake/Job aggregate morph — split the single `Job` into `Intake` (the visit) + `Job` (one repair)** *(chipped from the routing/screen-map session)*. Decide whether to break today's overloaded `Job` (car + visit + one repair + one stage + one technician) into a two-level aggregate: **Intake** = one car's visit (Customer → Vehicle → **Intake** → Job), **Job** = one repair carrying its own stage machine, its own `job_technicians`, and its own blockers. Motivation: a car realistically comes in for several services worked by several technicians in parallel, which the one-job-per-visit model can't represent. **Needs its own ADR and a real design pass (weight of the tenant collapse), and Sprint-plan edits to sequence it BEFORE the board/dashboard build** — no production data means this is the cheapest the migration will ever be, and the S5 screens would otherwise be built on the wrong aggregate. Working model already reasoned with the builder (not yet locked): stages split — old `registered` splits into intake `open` + job `unassigned`; `assigned`/`in_progress`/`done`/`send_back` stay on Job; `delivered` is the one stored intake fact; intake **status is derived** from its jobs (ready = all terminal w/ ≥1 done; cancelled = all cancelled), never stored (Design law #3). Deliver requires every job terminal (done|cancelled); "defer" = cancel-now + rebook as new job/new intake (laws #6/#8). Cancel-the-car = cancel all *remaining open* jobs (done work survives), terminal then derives itself. Every backward move lives on Job; Intake only steps forward to a boundary. **Open sub-decisions:** (1) all-jobs-cancelled car that leaves — delivered or cancelled? (builder lean: cancelled); (2) cancel cascade confirm UX; (3) the ADR-011 handoffs (register/assign/ready/deliver) now span two levels — receiver still **stored at write time, never derived** even though status is derived; (4) blocker `blocks` guard now spans two models (work-blockers veto job `done`, HFP vetoes intake `delivered`). **Alternative to rule out first:** if shops actually run one tech + a task checklist, the Sprint-6 jobsheet already covers multi-item-per-visit for less — the split only earns its keep if repairs need independent technicians AND independent blockers. Vocabulary to lock before any code: "intake" = the car's visit, "job" = a repair (avoid a repeat of the JobActions/JobService confusion). See [[M1-F1 Status flow and transitions]] · [[Job]] · [[ADR-011 Acknowledgement as stored visibility]] · [[Sprint plan]].
+- **Intake/Job aggregate morph — split the single `Job` into `Intake` (the visit) + `Job` (one repair)** *(chipped from the routing/screen-map session)*. Decide whether to break today's overloaded `Job` (car + visit + one repair + one stage + one technician) into a two-level aggregate: **Intake** = one car's visit (Customer → Vehicle → **Intake** → Job), **Job** = one repair carrying its own stage machine, its own `job_technicians`, and its own blockers. Motivation: a car realistically comes in for several services worked by several technicians in parallel, which the one-job-per-visit model can't represent. **Needs its own ADR and a real design pass (weight of the tenant collapse), and Sprint-plan edits to sequence it BEFORE the board/dashboard build** — no production data means this is the cheapest the migration will ever be, and the S6 screens would otherwise be built on the wrong aggregate. Working model already reasoned with the builder (not yet locked): stages split — old `registered` splits into intake `open` + job `unassigned`; `assigned`/`in_progress`/`done`/`send_back` stay on Job; `delivered` is the one stored intake fact; intake **status is derived** from its jobs (ready = all terminal w/ ≥1 done; cancelled = all cancelled), never stored (Design law #3). Deliver requires every job terminal (done|cancelled); "defer" = cancel-now + rebook as new job/new intake (laws #6/#8). Cancel-the-car = cancel all *remaining open* jobs (done work survives), terminal then derives itself. Every backward move lives on Job; Intake only steps forward to a boundary. **Open sub-decisions:** (1) all-jobs-cancelled car that leaves — delivered or cancelled? (builder lean: cancelled); (2) cancel cascade confirm UX; (3) the ADR-011 handoffs (register/assign/ready/deliver) now span two levels — receiver still **stored at write time, never derived** even though status is derived; (4) blocker `blocks` guard now spans two models (work-blockers veto job `done`, HFP vetoes intake `delivered`). **Alternative to rule out first:** if shops actually run one tech + a task checklist, the Sprint-5 jobsheet already covers multi-item-per-visit for less — the split only earns its keep if repairs need independent technicians AND independent blockers. Vocabulary to lock before any code: "intake" = the car's visit, "job" = a repair (avoid a repeat of the JobActions/JobService confusion). See [[M1-F1 Status flow and transitions]] · [[Job]] · [[ADR-011 Acknowledgement as stored visibility]] · [[Sprint plan]].
 
 ## Related
 - [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]]

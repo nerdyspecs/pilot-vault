@@ -62,7 +62,7 @@ always read off its jobs.
 - `#ready?` — the one derived query (above)
 - `#active_blockers` — items with no resolved event, a query not a column
 - `#registered_by` — reads the birth transition (`from_status: nil`)
-- `has_many :job_sheet_field_values` *(Sprint 6, not yet built)* — the jobsheet is the car's
+- `has_many :job_sheet_field_values` *(Sprint 5, not yet built)* — the jobsheet is the car's
   intake form (customer complaints + vehicle condition), one per visit, so it keys on
   `intake_id`, not `job_id` — [[ADR-012 Intake-Job two-level aggregate]] §Consequences
 

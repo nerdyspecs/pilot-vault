@@ -9,6 +9,12 @@ superseded_by:
 ---
 # ADR-012 — Intake/Job two-level aggregate
 
+> [!note] Sprint numbering — this ADR predates the Sprint 5 ↔ 6 swap *(2026-08-17)*
+> Where the body says **Sprint 5 / S5** (the live board) read **Sprint 6**; where it says **Sprint 6
+> / S6.1–S6.3** (the intake + jobsheet vertical) read **Sprint 5**. The two were renumbered so the
+> intake/jobsheet vertical runs first. The body keeps its original numbers — ADRs aren't edited.
+> See [[Sprint plan]].
+
 From the 2026-08-03 routing/screen-map session. Today's `Job` row carries five things at once — a
 car, a visit, one repair, one stage, one technician. A real car arrives for **several repairs**,
 worked by **several technicians in parallel**, each with **its own blockers** — which one-job-per-visit

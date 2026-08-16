@@ -44,7 +44,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 ## Settled 2026-07-12 (pre-Sprint-2 design session, builder decisions)
 - **Job creation goes through the door too** — `JobActions` owns it. Creation is already a
   multi-record motion (Job + the `nil → registered` transition) and will grow (jobsheet
-  values in Sprint 6; a possible parts list later). No `Job.create!` from controllers.
+  values in Sprint 5; a possible parts list later). No `Job.create!` from controllers.
   *(⚠ 2026-08-14, [[ADR-013 The door decomposed]]: this ruling **reversed**. Creation is
   authoring, not a door move — `CreateIntake`/`CreateJob` own it now, outside `JobActions`
   entirely. The underlying point stands, just relocated: no `Job.create!`/`Intake.create!`
@@ -148,7 +148,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   `delivered`). Softened with a confirm dialog in S2.11.
 - **Positioning invariant (pinned):** Knot tracks **job statuses**, never real-time tech
   activity. Many `in_progress` jobs per tech is normal; no pause/resume ever joins the stage
-  axis. Per-tech workload is a query feeding S5.2 — zero Phase 3 work. *(2026-07-17,
+  axis. Per-tech workload is a query feeding S6.2 — zero Phase 3 work. *(2026-07-17,
   Design B: even simpler — `joins :job_technicians`; membership IS the current crew,
   no `.current` merge needed.)*
 
