@@ -1,11 +1,108 @@
 ---
 type: log
-updated: 2026-08-14 (Session 30 — Sprint 4.5 built, decomposed further into ADR-013, and reconciled with the vault)
+updated: 2026-08-16 (Session 31 — UI surface mapped screen-first, feature model named, routes made consistent; front door is next)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-16 · Session 31 — the UI surface mapped, the feature model named, routes made consistent
+
+**Summary.** A mapping session, not a building one. Wrote [[Screen map]] (every screen, its
+components/actions, role-gates verified against `Permissions` and the controllers' `before_action`
+tables, each carrying a build status) — which immediately paid for itself by exposing **two dead
+buttons that were 500ing their pages**: the S4.5 aggregate split deleted `new_job_path` and the
+nested `customer_jobs` routes without updating their callers, so `/workshop` raised for counter
+staff and `/customers/:id` raised for everyone who could reach it. Cleaned those up and folded them
+into the S4.5 commit before merging. Then named the **feature model** ([[Features overview]], F1–F8)
+and the **flow model** ([[Screen flow]], 11 flows across Setup → Records → Daily loop), explored the
+whole thing in FigJam, concluded the vault should stay the source of truth, and finished with a
+routes consistency pass: job create now nests under its intake (`ed2595c`), plus a reusable
+route-orphan check. Merged S4.5 to `main` and pushed (`6e0434c`); deleted 11 stale branches and 3
+leftover worktrees.
+
+**The mapping caught what the tests couldn't.** The two 500s shipped silently because Session 30
+deleted the whole `test/system` suite in the same commit that removed the routes — and the model/
+service suite never renders a view, so it stayed green through a broken UI. Worth stating plainly:
+**this suite's green bar says nothing about whether a page renders.** The system tests that would
+have caught it were themselves dropped as "stale UI"; only `cold_start_intake_test.rb` was genuinely
+tied to a reworking surface, while `job_lifecycle`/`blocker_lifecycle`/`crew_management`/
+`blocker_catalog_admin` covered screens that are staying. A thin request-level smoke layer (does
+each surviving page render for a counter user?) would fence off exactly this regression class — not
+built, flagged here deliberately.
+
+**Per-record time analytics are not reporting.** The builder corrected the first draft of the
+feature model: time-in-stage and blocked-by-department are *this car's story*, so they belong on
+**Intake show / Job show / the intake timeline** (F2), not in F8. F8 shrank to **aggregate numbers
+across visits** — sums and averages — and *which* reports earn their place is still undefined.
+Both read the same source: the [[Event log]] renders per-record as a timeline, aggregated as
+reports. That also promoted the timeline from "infrastructure" to a named surface.
+
+**The V1 fence, restated.** Asked what [[ADR-002 V1 scope]] actually means, and correcting a wrong
+claim made earlier in the session: there is **no line running through F1–F8**. ADR-002 is a fence
+around *all of Module 1* — **F1–F7 are all V1, the owner status page included** (ADR-002 lists it
+explicitly). Only **F8 aggregate reporting** is the fuzzy edge. What sits *outside* the fence isn't
+a slice of these features but whole other domains: parts/warehouse → V2, technician skills → V3,
+money (pricing/quotes/invoicing) → deferred, with "awaiting customer approval" handled as a blocker
+type.
+
+**Vocabulary: "visit" is retired, it's an intake.** The models, controllers, and routes all say
+`Intake`; "visit" was a translation layer sitting on top of the code and the source of the same
+job/visit/intake tangle that ADR-012 already had to untie. Docs now say **intake**. ("Deliver"
+stays — you deliver the *car*.)
+
+**FigJam explored, then deliberately demoted.** Mapped features → screens → flows on a board, plus
+a per-screen card grid in a `Screen name / (C) components / (A) actions` format with role-gates on
+every action. Useful for *exploring*; wrong as a home. It's disconnected from the code (goes stale
+the moment routes change, which is the exact drift [[Screen map]] exists to prevent), and the Figma
+MCP bridge hit its Starter-plan cap mid-session, which settled the argument. **The vault is
+canonical; any diagram is a disposable projection** regenerated on demand. Figma stays for pixel
+mockups later, where it's genuinely the right tool.
+
+**Routes: one real inconsistency fixed, one rename declined.** Job create was the odd child —
+flat `POST /jobs` with `intake_id` smuggled through the request body while every sibling
+(intake blockers, job blockers, job technician) takes its parent from the path. Now
+`POST /intakes/:intake_id/jobs`; member verbs stay flat at `/jobs/:id/...`, since once a job exists
+its own id addresses it, deeper nesting would push blocker routes to four levels, and the URL could
+otherwise carry an `intake_id` that disagrees with the job's real parent. **The security boundary
+here is the workshop scope, not the intake** — so nesting adds path noise, not safety.
+*Declined:* renaming the blocker-type catalog from `/blockers` to `/blocker_types`. Tried, then
+reverted on the builder's challenge — the nested controllers already disambiguate catalog from
+applied, this codebase already accepts label≠route (the crew page is "Crew" at `/staff`), and
+renaming the route without the `Blocker` model trades one asymmetry for another. Do the full model
+rename or nothing. *(Also declined: Rails' `shallow: true`, which would express the same URLs more
+concisely — rejected because it isn't obvious to read, and routes should be legible at a glance.)*
+
+**A route-first check, and what it proved.** Every inventory we keep is screen-first, so none can
+answer "does anything actually *trigger* this endpoint?" Added **`bin/route-orphans`**, and it
+found exactly two orphans in the whole app: **`POST /intakes`** and **`POST /intakes/:intake_id/jobs`**.
+Both creates are implemented, tested, green — and **nothing in the view layer can reach either**.
+Every other endpoint has a caller. That's the create-path hole proven from the route side rather
+than asserted, and it's now a standing per-sprint check (exits non-zero when orphans exist).
+
+**Housekeeping.** Merged `s4.5-intake-job-aggregate` → `main` fast-forward and pushed
+(`8fad8c9..6e0434c`). Deleted 11 local branches (8 fully merged; 3 pre-squash duplicates whose only
+unique files were the orphan templates and system tests we'd deliberately removed) and 3 stale
+worktrees under `.claude/worktrees/`. Routes audited clean in both directions — no controller action
+without a route, no route without an action, no broken path helper in any view. 129 runs, 0 failures.
+
+**Next session — the front door (S6).** The whole daily loop is built from *assign technician*
+onward; what's missing is the way in. Three screens, in dependency order:
+1. **New intake** (`GET /intakes/new`) — the plate-first entry: registration number → find-or-create
+   vehicle → find-or-create customer → open the intake. The one create gateway, reached from both
+   the Intake board and a Customer. This unblocks everything else.
+2. **Add repair** — a form on Intake show posting to `intake_jobs_path`; today an open intake can
+   never gain a second repair through the UI.
+3. **Add vehicle** — currently a vehicle only comes into being as a side effect of typing an unknown
+   plate during intake; it has no screen of its own.
+Design questions still open going in: what the plate-miss branch does (customer-first vs
+vehicle-first), whether the jobsheet ([[ADR-003 Digitized jobsheet in V1]]) is part of the intake
+form or a later step, and whether Add vehicle is its own page or an inline affordance on Customer
+show. Orientation for that session: [[Screen flow]] (flows 6–8), [[Screen map]] (the not-built
+table), [[Features overview]] (F2, F6).
 
 ---
 

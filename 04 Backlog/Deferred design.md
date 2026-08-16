@@ -137,9 +137,10 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   decides at trigger time.
 - **JSON responses for door mutations (2026-07-17, builder ruling at S2.11: HTML first).**
   [[ADR-001 Core stack]] commits to "every mutation available as JSON", but S2.11's
-  controllers ship HTML-only — `rescue_from JobActions::Refused` renders flash, success
+  controllers ship HTML-only — `rescue_from ActionRefused` *(2026-08-14: was
+  `JobActions::Refused`, [[ADR-013 The door decomposed]])* renders flash, success
   redirects. Consciously deferred, not dropped: no non-browser consumer exists yet, and all
-  business logic lives in `JobActions`, so adding JSON later is ~2 lines per action
+  business logic lives in the doors, so adding JSON later is ~2 lines per action
   (`respond_to` + a status payload) with zero logic movement. **Trigger to revisit:** the
   first non-browser consumer — a mobile app or a React front-end.
 - **Dark mode = steel-blue chrome (2026-07-05).** v1 ships light mode only (high-contrast, per

@@ -134,9 +134,9 @@ first would mean rebuilding it.
       `has_many :intake_blocker_transitions` on Intake first — the table has a direct, indexed
       `intake_id` but no association exposes it yet. A `handoff_state(event)` presentation helper
       (history / waiting / picked-up) for the merged feed, since intake events are never
-      `Acknowledgeable`. Designed, not built — see [[Intake]] §Timeline. *(This is what the user
-      originally asked for when this reconciliation pass started; parked mid-session for the
-      Permissions/ADR-013 work and the vault catch-up — pick up here next.)*
+      `Acknowledgeable`. Designed, not built — see [[Intake]] §Timeline. *(This is what the
+      builder originally asked for when this reconciliation pass started; parked mid-session
+      for the Permissions/ADR-013 work and the vault catch-up — pick up here next.)*
 
 > [!note] Downstream sprints read against ADR-012 + ADR-013
 > **S5** groups the board by **Intake** (the car), with a *Done — awaiting delivery* group for intakes

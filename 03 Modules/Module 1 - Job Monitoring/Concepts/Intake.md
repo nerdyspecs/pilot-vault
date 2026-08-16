@@ -55,9 +55,10 @@ always read off its jobs.
 - `enum :status, { open: 0, delivered: 1, cancelled: 2 }` — stored, door-written only
 - `has_many :jobs`
 - `has_many :intake_status_transitions` — append-only, `created_by` — see [[Event log]]
-- `has_many :intake_blockers` (+ `intake_blocker_transitions`) — **not** `Acknowledgeable`;
-  an intake blocker has no direction (SA raises, SA clears — nobody is ever waiting on
-  someone else), so there's no receiver to pin. See [[Blocker]].
+- `has_many :intake_blockers` — items only; the transitions association is missing (see
+  §Timeline below). Neither table is `Acknowledgeable` — an intake blocker has no direction
+  (SA raises, SA clears — nobody is ever waiting on someone else), so there's no receiver to
+  pin. See [[Blocker]].
 - `#ready?` — the one derived query (above)
 - `#active_blockers` — items with no resolved event, a query not a column
 - `#registered_by` — reads the birth transition (`from_status: nil`)

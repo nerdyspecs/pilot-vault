@@ -32,9 +32,12 @@ workshop_manager/owner are explicit god-mode. Full matrix in
 predated ADR-006; edge names updated in the same pass.)*
 
 ## Features
+- [[Features overview]] — the capability-cluster view (F1–F8), how features map to slices + screens, the V1 fence
 - [[M1-F1 Status flow and transitions]] — role-gated stage transitions + acknowledged handoffs *(first build)*
 
 See [[Roadmap]] for the full slice plan + which slices still need design.
+See [[Screen map]] for the screen-by-screen UI inventory (built + intended surface, per-sprint drift check).
+See [[Screen flow]] for the flows (task journeys Setup→Records→Daily loop, with screen · API · components · actions · triggers + build status).
 
 ## Scope
 V1 = monitoring only. Parts → V2, technician → V3, pricing deferred. See [[ADR-002 V1 scope]].
