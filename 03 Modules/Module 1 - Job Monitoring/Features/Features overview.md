@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-14
+updated: 2026-08-17 (Session 32 — F1 board regroup deferred, F6 jobsheet marked not-built, ADR-012 citation)
 ---
 # Features overview
 
@@ -17,12 +17,12 @@ Screens per feature are the ones inventoried in [[Screen map]].
 
 | Feature | What it does | Slice(s) | Serving screens | Status |
 | --- | --- | --- | --- | --- |
-| **F1 · Live board** | "Where is every car right now" — active work, aging, done-awaiting-delivery, needs-your-attention | 3 + 5.5 | Dashboard, Intake board, All-intakes | built; reshaping to group by car ([[ADR-013 The door decomposed]]) |
+| **F1 · Live board** | "Where is every car right now" — active work, aging, done-awaiting-delivery, needs-your-attention | 3 + 5.5 | Dashboard, Intake board, All-intakes | built (repair-grouped); **regroup by car deferred (S5)** — [[ADR-012 Intake-Job two-level aggregate]] |
 | **F2 · Intake→repair lifecycle & timeline** | The two-level engine (open visit, add repairs, floor moves, deliver/cancel) **and** the per-visit timeline that records it | 1 + 2 + 5.5 | Intake show, Job show, **Intake timeline**, Open visit | engine built; **create-path UI is the S6 hole**; timeline built |
 | **F3 · Blockers & holds** | Overlay axis: raise/resolve/note; job blocks *done*, intake blocks *delivery*; role-gated + catalog | 4 | Blocker show, Workshop setup, forms on Intake/Job | built |
 | **F4 · Acknowledged handoffs** | Nothing stalls silently — "waiting on «name»", pending acks surfaced on the board | 5 | *(cross-cuts board + Intake/Job)* | built (aging colour deferred, S5.7) |
 | **F5 · Crew, roles & access** | Bilateral invite, roles, gating, tenancy | 2 | Workshop setup, Staff show/create, Landing | built |
-| **F6 · Customers, vehicles & jobsheet** | The records intakes attach to, plus the digitized intake form | 6 | Customers, Customer show, Vehicle show, *(jobsheet)* | models built; **forms + field-admin not built** |
+| **F6 · Customers, vehicles & jobsheet** | The records intakes attach to, plus the digitized intake form | 6 | Customers, Customer show, Vehicle show, *(jobsheet)* | customer/vehicle built; **jobsheet not built** (models + forms + field-admin — S6, next) |
 | **F7 · Customer status page** | Public "how's my car?" token link on the visit | 7 | Status page | needs design; not built |
 | **F8 · Reporting (aggregate)** | Workshop-wide numbers — sums/averages across visits | 8 | *(feeds Dashboard health)* | needs design; **which reports still TBD** |
 

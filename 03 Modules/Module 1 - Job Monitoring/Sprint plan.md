@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-14 (Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-17 (Session 32 — build order swapped: intake vertical/jobsheet next, board (S5) deferred; annotate-not-renumber; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -54,6 +54,15 @@ that ends in something demoable.
 > as fact so it isn't mistaken for a regression to chase down.
 
 ---
+
+> [!note] Build order — execution ≠ numbering *(2026-08-17, Session 32)*
+> Sprint numbers are stable references (commits, [[Screen flow]], [[Features overview]] point at
+> them), not a strict queue. **Current build order: 4.5 (closing) → 6 (next) → 5 (deferred) → 7 → 8.**
+> The **board (Sprint 5) is deferred** — it's query-over-existing-tables plus heavy UI, best built
+> once real intakes flow and the designer has [[Screen map]] / [[Screen flow]]. The **intake vertical
+> (Sprint 6) goes next, led by the jobsheet**: it's the create-path the whole app is missing
+> (`bin/route-orphans` finds two orphan endpoints, both intake creates) and it's genuine model work.
+> Reorder is by annotation, not renumber — the `4.5` precedent. See [[worklog]] Session 32.
 
 ## Sprints 0–4 — closed
 Setup, tenancy spine, the job engine, cold-start intake, blockers, and acknowledgement-as-
@@ -136,7 +145,8 @@ first would mean rebuilding it.
       (history / waiting / picked-up) for the merged feed, since intake events are never
       `Acknowledgeable`. Designed, not built — see [[Intake]] §Timeline. *(This is what the
       builder originally asked for when this reconciliation pass started; parked mid-session
-      for the Permissions/ADR-013 work and the vault catch-up — pick up here next.)*
+      for the Permissions/ADR-013 work and the vault catch-up — the one open S4.5 task; it completes the
+      aggregate's own read surface but does **not** block Sprint 6, so land it when convenient.)*
 
 > [!note] Downstream sprints read against ADR-012 + ADR-013
 > **S5** groups the board by **Intake** (the car), with a *Done — awaiting delivery* group for intakes
@@ -148,6 +158,13 @@ first would mean rebuilding it.
 
 ## Sprint 5 · Live job list
 **Goal:** answer "where is every job right now?" **Exit:** a filterable board of active jobs.
+
+> [!warning] ⏸ Deferred *(2026-08-17, Session 32)* — board pushed back behind the intake vertical (S6)
+> Built after Sprint 6. When picked up it's mostly UI over **new** queries not yet written (batched
+> `Intake.ready` scope, aging clocks, two-level blocker/pin roll-up, filter scopes) — decompose it
+> then, against real intakes + the designer's work off [[Screen map]] / [[Screen flow]]. **S5.2a is
+> stale** (a car has no single stage post-ADR-012; it overlaps S5.1a — fold its "sitting time" into
+> S5.1a at build time). Do the aging-clock / two-level-display design pass at pick-up, not now.
 
 - [ ] **S5.1** Jobs index: active jobs for `Current.workshop` (`Job.active` — `unassigned`/
       `assigned`/`in_progress`; **`delivered` is no longer a Job stage to exclude**, ADR-012), showing
@@ -183,6 +200,15 @@ first would mean rebuilding it.
 one flow. *(⚠ 2026-08-14, ADR-012: was "…+ Job" — the visit is the thing created; a Job is its
 first repair, via `CreateIntake`.)* This is also where **UI work resumes** — see the Sprint plan's
 top-of-file warning: the current app has no working intake-creation UI at all.
+
+> [!note] ▶ Next *(2026-08-17, Session 32)* — start with the jobsheet, backend-first
+> Build order **within** S6: **`JobSheet` + `JobSheetField` template models + a seeded default
+> template first** (view-blind, unit-testable; ADR-003 shape is locked) → **defer the owner
+> field-admin UI (S6.4)** → then `JobSheetFieldValue` + the front-door form (S6.5) that fills it;
+> **S6.5 closes the create-path hole**. Two fill-layer decisions parked until we build the values:
+> **(a)** the freeze condition — [[Data model]]'s open `[!question]` ("freeze when Done" no longer
+> parses; freeze on intake terminal, or on `ready?`); **(b)** jobsheet *in* the intake form vs a
+> later step (where values get written). See [[worklog]] Session 32.
 
 - [ ] **S6.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).
 - [ ] **S6.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),

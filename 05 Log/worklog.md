@@ -1,11 +1,60 @@
 ---
 type: log
-updated: 2026-08-16 (Session 31 — UI surface mapped screen-first, feature model named, routes made consistent; front door is next)
+updated: 2026-08-17 (Session 32 — build order swapped: intake vertical/jobsheet next, board (S5) deferred; prior: 2026-08-16 Session 31 — UI surface mapped, feature model named, routes made consistent)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-17 · Session 32 — build order swapped: intake vertical (jobsheet) before the board
+
+**Summary.** A planning-and-reconciliation session spread across several parallel sessions (owned,
+and folded back together here). The **board (Sprint 5) is deferred**; the **intake vertical
+(Sprint 6) goes next, led by the jobsheet**. Recorded the swap in [[Sprint plan]] (annotation, not
+renumber), and fixed three lines Session 31's fresh notes carried that our swap made stale. No app
+code this session.
+
+**Why swap.** The board is query-over-existing-tables plus heavy UI — best built once real intakes
+flow and the designer has [[Screen map]] / [[Screen flow]] to work from. The intake vertical is the
+**create-path the whole app is missing** (`bin/route-orphans`: exactly two orphan endpoints, both
+intake creates) *and* it's genuine model/controller work — so it fits building backend-first, which
+the board never did. Build order is now **4.5 (closing) → 6 → 5 → 7 → 8**.
+
+**Jobsheet first, and why the template models are the clean start.** [[ADR-003 Digitized jobsheet in V1]]
+locks the shape (one form per workshop; flat fields `label` + `checkbox`/`text`; values keyed on
+`intake_id`; add-only, no destructive delete). The **template models** (`JobSheet` +
+`JobSheetField`) are view-blind, seedable, unit-testable, and depend on none of the open fill-layer
+questions — so they're the first slice. Plan: build them + **seed a default template**, **defer the
+owner field-admin UI (S6.4)**; `JobSheetFieldValue` + the front-door form (S6.5) that fills it come
+after, and S6.5 closes the create-path hole.
+
+**Two fill-layer decisions parked, not forgotten.** (1) **Freeze condition** — [[Data model]]'s own
+`[!question]`: "answers freeze once the job is Done" no longer parses (a visit has several repairs,
+no single Done moment); freeze on the *intake* going terminal, or on `ready?` — undecided.
+(2) **Jobsheet in the intake form vs a later step** — where the values get written. Both bite only
+at the value layer, so deferred until we build `JobSheetFieldValue`.
+
+**Annotate, don't renumber.** Sprint ids stay put — commits, [[Screen flow]], and [[Features
+overview]] all reference them; build order lives in a callout instead. The `4.5` precedent set this
+(inserting before Sprint 5 didn't cascade-renumber 5→6). A single build-order line carries the
+at-a-glance order.
+
+**Coherence fixes (Session 31's notes were right as written; the swap made three lines stale).**
+(1) [[Features overview]] F6 said "models built" — split it: customer/vehicle built, **jobsheet not
+built** (its models are exactly our next task). (2) The board's "reshaping to group by car" read as
+in-flight; with the board parked it now says **deferred (S5)** in F1 and [[Screen map]] §3. (3) The
+group-by-car board reshape is **ADR-012** (the aggregate), not ADR-013 (the door) — citation fixed
+in both notes.
+
+**Housekeeping.** Committed Session 31's vault work as its own commit first (`b4505ec`) so the two
+sessions' authorship stays clean; the stray `Untitled.canvas` (a FigJam export, not a note) was
+left out. **Open, flagged not chased:** [[Screen map]] still marks the two create-buttons *dead* /
+500-ing, while Session 31's own log says they were cleaned up pre-merge — a vault-vs-code check to
+run once we're on the merged `main` app tree, separate from this swap. **Next:** spec the `JobSheet`
++ `JobSheetField` migration + models.
 
 ---
 

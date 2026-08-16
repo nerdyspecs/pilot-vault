@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-14
+updated: 2026-08-17 (Session 32 — board §3 regroup deferred to S5, ADR-012 citation)
 ---
 # Screen map
 
@@ -114,9 +114,9 @@ can carry an *aging / waiting* pin. Aging thresholds and pin colours per [[Visua
 **Data shown** — Active repairs and done-awaiting-delivery repairs (with their car + customer
 via the visit), plus unacknowledged handoffs per repair.
 
-> *Partial:* the board is still grouped by individual repair. ADR-013 reshapes it to group by
-> **Intake** (the car), with the done-awaiting-delivery group keyed on `intake.ready?`. Treat
-> the current grouping as in-flight.
+> *Partial:* the board is still grouped by individual repair. ADR-012 reshapes it to group by
+> **Intake** (the car), with the done-awaiting-delivery group keyed on `intake.ready?`. That
+> regroup is **deferred (S5)** — the current repair-grouping stands until then.
 
 ---
 
