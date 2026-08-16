@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-07-17
+updated: 2026-08-17 (stage refreshed: through Sprint 4.5, next = Sprint 5 jobsheet)
 ---
 # Product Overview
 Use alongside [[Builder identity]] at the start of every Claude session.
@@ -32,5 +32,5 @@ Owners are kept completely in the dark. They don't know what stage their car is 
 - Not a complex enterprise product — must stay simple enough for a small workshop to adopt without training
 
 ## Stage
-- Early — mid-Sprint 2: tenancy spine live (Sprint 1), job engine door (`JobActions`) built; job UI + remaining slices ahead *(status refreshed 2026-07-17)*
+- Early — Sprint 4.5 closed: tenancy spine, the job engine, blockers, acknowledgement-as-visibility, and the **Intake/Job two-level aggregate** (ADR-012) — with the door decomposed into `JobActions`/`IntakeActions`/`Permissions` (ADR-013) — are built and green. **Next: Sprint 5 — the digitized jobsheet + intake front door.** The live board (Sprint 6) is deferred behind it. *(status refreshed 2026-08-17)*
 - Stack: Ruby on Rails

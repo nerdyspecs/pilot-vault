@@ -9,7 +9,7 @@ Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story
 
 ---
 
-## 2026-08-17 · Session 32 — build order swapped: intake vertical (jobsheet) before the board
+## 2026-08-17 · Session 32 — Sprint 5 ↔ 6 renumbered: intake vertical (jobsheet) runs first
 
 **Summary.** A planning-and-reconciliation session spread across several parallel sessions (owned,
 and folded back together here). The **board is deferred**; the **intake vertical, led by the
@@ -236,7 +236,7 @@ the single-door shape ADR-013 reversed. Wrote a new [[Intake]] concept note (mir
 corrected the "In Rails" fact-lists in [[Job]], [[Data model]], [[Stage model]], [[Event log]],
 [[Blocker]] (zero intake awareness before this pass despite ADR-012 §6 splitting blockers across
 both levels), [[Job visibility]] (re-anchored from `jobs.token`/`customer_id` to `intakes` — this is
-Sprint 7's design input, corrected before that sprint starts rather than after), [[M1-F1]], plus
+Sprint 7's design input, corrected before that sprint starts rather than after), [[M1-F1 Status flow and transitions]], plus
 [[Overview]] and [[Open questions]] — stale, but missing from S4.5.8's own reconciliation list.
 Ticked S4.5.2–S4.5.7, rewrote S4.5.5 (its `register_job!`-opens-or-finds framing was overtaken by
 ADR-013), added S4.5.9 (retro, the Permissions split) and S4.5.10 (the timeline goal), re-pointed
@@ -249,78 +249,9 @@ back to.
 
 ---
 
-## 2026-08-03 · Session 29 — the Intake/Job aggregate morph: design pass + Sprint 4.5
-
-**Summary.** Took the routing/screen-map session's chip — split today's overloaded `Job` (car +
-visit + one repair + one stage + one technician) into a two-level aggregate — through a full design
-pass with the builder, wrote **[[ADR-012 Intake-Job two-level aggregate]]**, and sequenced it as
-**Sprint 4.5** *before* the S5 board. Then built it: 4 new tables, the door grown to two levels,
-130 green (122 unit/service + 8 system). **Not committed yet** — codebase sweep pending.
-
-**Why it goes before Sprint 5, not after.** Two reasons that compound: the S5 board groups by the
-**car**, so it has to sit on `Intake` or be rebuilt; and there is **no production data**, so this is
-the cheapest the migration will ever be — a schema squash + reseed, the ADR-010 play, never a data
-migration. Building S5 first would have meant building it twice.
-
-**The lighter alternatives were ruled out first, and the premise recorded.** The Sprint-6 jobsheet
-already covers multi-item-per-visit — but a checklist has no per-item stage, crew, blocker, or
-acknowledgement, so a car with a blocked brake job and a done aircon job reads as one lie. Bare
-many-jobs-per-vehicle (no `Intake`) gives independent repairs but loses the **visit**: delivery
-smears across N jobs, HFP has no honest home, and the board has nothing to group by. The split's
-load-bearing premise is written into the ADR rather than assumed: *it earns its keep only because
-repairs need independent technicians **and** independent blockers.*
-
-**The four sub-decisions, settled with the builder.** (1) An all-cancelled car that leaves derives
-**`cancelled`**, never `delivered` — delivery means "a car with real work done was collected".
-(2) Cancel-the-car cancels the remaining **open** jobs only; done work survives (law #8), and the
-terminal falls out rather than being chosen — 0 done → cancelled, ≥1 done → still collectible.
-(3) **`mark_done!` keeps pinning the registering SA** — the builder pushed back on dropping it, and
-was right: the gap wasn't the pin, it was that `deliver!` moving to the intake left the pin with no
-closing action. Fix is one line — **intake `deliver!` sweeps `acknowledge_pending!` across all its
-jobs**, clearing only what's addressed to the actor delivering (a technician's open pin stays
-honestly open — stamping it would be the append-only lie ADR-011 forbids). (4) **HFP moves to the
-Intake** as an intake blocker: payment is a per-visit hold, and hanging it on an arbitrary one of
-the car's repairs would be a domain lie.
-
-**Intake blockers are three records but NOT acknowledgeable — the builder's catch.** The first pass
-gave them the full mirror "for symmetry". The builder pushed: *"i dn think intake blockers are
-acknowledgeable"* — correct, and [[Event log]] already says why: **the ack pair belongs to a
-direction**. HFP is the counter holding its own car until paid (SA raises, SA clears); nobody is
-ever waiting on anyone. So they keep catalog + item + events (the **note chain** is real — payment
-back-and-forth) but carry **no `receiver_id`/`acknowledged_at` at all**. Identical-but-dead columns
-would have been cosmetic symmetry that misleads the next reader. Recorded trigger: a cross-role
-`blocks: delivered` type (e.g. manager sign-off) would be directional — additive when it lands.
-
-**A refinement the schema forced: intake `status` is stored, not fully derived.** ADR-012 §2 first
-stored only `delivered_at` and derived `cancelled`. That broke against **R5**: a Postgres partial
-unique index can only key on a stored column of its own table, so a derived `cancelled` left the
-busy-vehicle guard unable to tell a live-open visit from a dead-cancelled one — a fully-cancelled
-car would block its vehicle's next visit. Ruled with the builder: store the terminal **position**
-(`status` enum, exactly like `Job.stage`), keep **`ready?`** derived — that's the genuine
-about-the-children question. The door is the only writer (`reconcile_intake!` after every
-job-terminal move), so `status` is a door-owned memoized derivation, not a second source of truth.
-Law #3 intact; the guard stays DB-enforced. **R5 is now moved *and inverted*** ([[Risk ledger]]): a
-second **job** per vehicle is legal and expected, a second **open intake** is the violation.
-
-**Also settled:** the **jobsheet attaches to the Intake** (builder ruling — it's the car's intake
-form, one per visit), and ETA follows it there; vocabulary locked before any code (**intake** = the
-visit, **job** = a repair) to avoid a repeat of the `JobService`→`JobActions` confusion.
-
-**One scare worth logging.** Mid-verification, Bash/`git status` stopped seeing this session's
-edits — `git status` read "working tree clean" while the files were plainly there via the editor,
-minutes after `bin/rails test` had run green against them. Stopped and flagged rather than running
-any git recovery; it resolved itself on its own and all 40 files were intact. **Lesson: a
-`git status` that contradicts work you just verified is a reason to pause, not to "fix" the tree.**
-
-**Next:** codebase sweep, then commit. S4.5.8 (concept-note reconciliation) still open — and now
-also covers [[Data model]] + [[Job visibility]], since the token moved to `Intake` and Sprint 7's
-RLS design reads those.
-
----
-
-## Sessions 1–28 — archived
-Vault/Rails setup through Sprint 2.5, the job engine and blockers groundwork, the tenant-spine
-collapse (ADR-010), Sprint 3 (blockers), and Sprint 4 (acknowledgement as stored visibility) —
-Sessions 1–28. Moved to [[Worklog (Sessions 1-28)]] to keep this file focused on the Sprint 4.5
-arc (Sessions 29–30).
+## Sessions 1–29 — archived
+Vault/Rails setup through Sprint 4 (acknowledgement as stored visibility) and the Sprint 4.5
+aggregate design pass (ADR-012) — Sessions 1–29. Moved to [[Worklog (Sessions 1-29)]] to keep this
+file focused on the current arc: Session 30 onward (Sprint 4.5 built, the UI-surface map, the
+Sprint 5/6 reorientation).
 

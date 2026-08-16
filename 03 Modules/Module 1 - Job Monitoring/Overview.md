@@ -1,7 +1,7 @@
 ---
 type: module-overview
 module: M1
-updated: 2026-08-14 (re-pointed at Intake as the tying entity — ADR-012)
+updated: 2026-08-17 (roles re-pointed to WorkshopStaff — ADR-010; prior 2026-08-14: re-pointed at Intake — ADR-012)
 ---
 # Module 1 — Job Monitoring
 
@@ -24,12 +24,14 @@ A visit's situation is a car, its repairs, and a history:
 - [[Data model]] — customers, vehicles, jobsheets (who owns it / who we talk to)
 
 ## Roles
-Four roles, on **WorkshopEmployment** (not on User): technician, service_advisor,
-parts_advisor, workshop_manager. The **owner** is not a role — it's the separate
-**WorkshopOwnership** governance edge (ADR-006; a working owner holds both).
-workshop_manager/owner are explicit god-mode. Full matrix in
-[[M1-F1 Status flow and transitions]]. *(2026-07-17: stale "five roles incl. owner" fixed —
-predated ADR-006; edge names updated in the same pass.)*
+Four operational roles, held as append-only **`WorkshopStaffRole`** rows on a person's single
+**`WorkshopStaff`** record: technician, service_advisor, parts_advisor, workshop_manager. The
+**owner** is not a role — it's an `owner` **boolean** on that same `WorkshopStaff` (governance,
+grants operational power); a working owner both owns and holds roles. workshop_manager/owner are
+explicit god-mode. Full matrix in [[M1-F1 Status flow and transitions]].
+*(2026-08-17: re-pointed to `WorkshopStaff` — [[ADR-010 WorkshopStaff supersedes the edge split]]
+collapsed the old `WorkshopEmployment`/`WorkshopOwnership` edges into one record. Prior 2026-07-17:
+stale "five roles incl. owner" fixed, predated ADR-006.)*
 
 ## Features
 - [[Features overview]] — the capability-cluster view (F1–F8), how features map to slices + screens, the V1 fence
