@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-08-14 (slice 5.5 built; slice 7 re-pointed at Intake's token — ADR-012, ADR-013)
+updated: 2026-08-19 (slice 6 jobsheet re-pointed at ADR-014, fixed/product-defined, storage chipped out; prior: 2026-08-14 slice 5.5 built; slice 7 re-pointed at Intake's token — ADR-012, ADR-013)
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -19,7 +19,7 @@ exists; **needs design** = real thinking still required before/while building.
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
 | 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S6.7) |
 | 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | ✅ **built** (Sprint 4.5 closed 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]] + [[ADR-013 The door decomposed]]) |
-| 6   | Job intake + digitized jobsheet                               | ✅ designed *(re-points at Intake — ADR-012; UI not yet built — see [[Sprint plan]])* |
+| 6   | Job intake + fixed inspection jobsheet                        | ⚠️ storage structure not decided *(reversed to fixed/product-defined — ADR-014; chipped out to [[Inspection jobsheet — design brief]]; UI not yet built — see [[Sprint plan]])* |
 | 7   | Owner status page (token link)                                | ⚠️ needs design *(token now on Intake, not Job — ADR-012, see §7 below)* |
 | 8   | Reporting & attribution                                       | ⚠️ needs design          |
 
@@ -27,8 +27,11 @@ exists; **needs design** = real thinking still required before/while building.
 Slices 5–6 are **designed** (notes kept for the reasoning); 7–8 still need their design pass —
 don't build those blind.
 
-### 6 — Job intake + digitized jobsheet
-Designed — see [[Data model]] and [[ADR-003 Digitized jobsheet in V1]]:
+### 6 — Job intake + fixed inspection jobsheet
+The intake half is designed; the jobsheet's storage structure is **not** — see [[Data model]],
+[[ADR-014 Jobsheet is a fixed product-defined inspection]] (supersedes
+[[ADR-003 Digitized jobsheet in V1]]'s owner-configurable core), and
+[[Inspection jobsheet — design brief]] for what's left to decide:
 - **Job grain:** ~~✅ **per-visit** (one job = one visit = one stage flow). Per-work-item is an additive `WorkItem` child if ever needed.~~
   **⚠ REVERSED 2026-08-03 by [[ADR-012 Intake-Job two-level aggregate]]** — the grain is now
   **per-repair**: one **Intake** (the visit) owns many **Jobs** (one repair each, with its own stage
@@ -40,10 +43,17 @@ Designed — see [[Data model]] and [[ADR-003 Digitized jobsheet in V1]]:
   by the car) and while there is still no production data.
 - **Customer / Vehicle model:** ✅ (routing shape, two user populations).
 - **Vehicle key:** ✅ registration = lookup key, VIN = optional identity.
-- **Digitized jobsheet:** ✅ configurable form — `JobSheet` → `JobSheetField` → `JobSheetFieldValue` (fields as rows, owner CRUDs). *(2026-08-03, ADR-012: the sheet attaches to the **Intake**, not the Job — it's the car's intake form, one per visit, so `JobSheetFieldValue` keys on `intake_id`.)*
+- **Inspection jobsheet:** ⚠️ **not designed** — fixed, product-defined form (fields set by the
+  product, versioned in code, no owner CRUD). *(2026-08-19, [[ADR-014 Jobsheet is a fixed product-defined inspection]]:
+  reverses the owner-configurable `JobSheet`/`JobSheetField`/`JobSheetFieldValue` EAV model this
+  line used to describe — that build was discarded. The per-visit anchor is unchanged: one
+  inspection per **Intake**, keyed on `intake_id`. Storage structure — how the fixed fields and
+  answers are actually stored — is undecided; see [[Inspection jobsheet — design brief]] for the
+  39-item field list, the mixed-type problem, and the trade table.)*
 - Quotation deferred (see [[ADR-002 V1 scope]]) — no entity in V1, only the approval blocker.
 
-Left to build (not design): the actual intake/jobsheet forms + the field-admin screen.
+Left to build: the storage structure design pass (chipped out), then the model + the actual
+intake/jobsheet forms. No field-admin screen — there's nothing left for an owner to administer.
 
 ### 5 — Acknowledged handoffs, surfaced on the board *(no inbox)*
 - **Acknowledgement is in v1** — see [[ADR-005 Acknowledged handoffs in V1]] and

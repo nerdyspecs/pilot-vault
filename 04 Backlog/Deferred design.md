@@ -1,13 +1,16 @@
 ---
 type: reference
-updated: 2026-08-14 (B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-08-19 (jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
 
-- **Jobsheet per-answer snapshot (level-3)** — freeze `label`/`kind` onto each `JobSheetFieldValue`
-  at fill time, so even a field *rename* can't change how an old sheet reads. v1 relies on
-  lock-on-Done + add-only fields instead. Add if a compliance/dispute need appears.
+- ~~**Jobsheet per-answer snapshot (level-3)** — freeze `label`/`kind` onto each
+  `JobSheetFieldValue` at fill time, so even a field *rename* can't change how an old sheet
+  reads.~~ **Moot, 2026-08-19** — [[ADR-014 Jobsheet is a fixed product-defined inspection]]
+  drops the EAV model this depended on (there is no owner-editable `label`/`kind` to snapshot
+  against once fields are fixed and code-defined; a product release can't retroactively change
+  what an old answer meant). Not carried into [[Inspection jobsheet — design brief]].
 - **`lock_version` (optimistic locking on Job)** — guards against silent lost-updates when two staff
   edit the same job's free-text at once. Deferred: audit trail covers stage; concurrent free-text
   edits are rare in a small trusted team. Add the column + a "stale, reload" handler if it bites.

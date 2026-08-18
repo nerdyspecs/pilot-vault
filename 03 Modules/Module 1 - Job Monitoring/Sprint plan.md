@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-17 (Session 32 — Sprint 5 ↔ 6 renumbered: intake vertical/jobsheet is now Sprint 5 (next), board is now Sprint 6 (deferred); ADR-011/012 keep old numbers with a forward-pointer footnote; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-19 (Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -157,29 +157,40 @@ first would mean rebuilding it.
 
 ---
 
-## Sprint 5 · Intake + digitized jobsheet
-**Goal:** register a car end-to-end — see [[ADR-003 Digitized jobsheet in V1]], [[Data model]].
+## Sprint 5 · Intake + fixed inspection jobsheet
+**Goal:** register a car end-to-end — see [[ADR-014 Jobsheet is a fixed product-defined inspection]]
+(supersedes [[ADR-003 Digitized jobsheet in V1]]'s owner-configurable core), [[Data model]].
 **Exit:** full intake creates Customer/Vehicle/**Intake** (+ its first Job) + jobsheet answers in
 one flow. *(⚠ 2026-08-14, ADR-012: was "…+ Job" — the visit is the thing created; a Job is its
 first repair, via `CreateIntake`.)* This is also where **UI work resumes** — see the Sprint plan's
 top-of-file warning: the current app has no working intake-creation UI at all.
 
-> [!note] ▶ Next *(2026-08-17, Session 32)* — start with the jobsheet, backend-first
-> Build order **within** S5: **`JobSheet` + `JobSheetField` template models + a seeded default
-> template first** (view-blind, unit-testable; ADR-003 shape is locked) → **defer the owner
-> field-admin UI (S5.4)** → then `JobSheetFieldValue` + the front-door form (S5.5) that fills it;
-> **S5.5 closes the create-path hole**. Two fill-layer decisions parked until we build the values:
-> **(a)** the freeze condition — [[Data model]]'s open `[!question]` ("freeze when Done" no longer
-> parses; freeze on intake terminal, or on `ready?`); **(b)** jobsheet *in* the intake form vs a
-> later step (where values get written). See [[worklog]] Session 32.
+> [!note] ▶ Next *(2026-08-19)* — jobsheet reversed to fixed/product-defined; storage chipped out
+> [[ADR-014 Jobsheet is a fixed product-defined inspection]] reverses ADR-003's owner-configurable
+> core: the jobsheet's fields are set by the product (versioned in code), not owner-CRUD at
+> runtime. The EAV build (`JobSheet`/`JobSheetField` template models, branch
+> `s5-jobsheet-models`, 4 commits) is **discarded** — see old S5.1–S5.4 below, all struck. A
+> concrete 39-item field list (5 sections, mixed answer types) surfaced and reopens the storage
+> question (wide typed table vs. code-defined catalog + answer rows vs. jsonb) — **not decided
+> here**, chipped out to [[Inspection jobsheet — design brief]] for a future session to design and
+> build from scratch off `main`. Two fill-layer decisions from Session 32 are folded into that
+> brief rather than parked separately: the freeze condition, and jobsheet-in-the-intake-form vs. a
+> later step. See [[worklog]] Session 33.
 
-- [ ] **S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).
-- [ ] **S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
-      position`).
-- [ ] **S5.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).
-      *(⚠ 2026-08-14, ADR-012: was `job_id` — the jobsheet is the car's intake form, filled once
-      per visit, not once per repair. See [[Data model]], [[Intake]].)*
-- [ ] **S5.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete** — [[Data model]]).
+- ~~**S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).~~
+- ~~**S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
+      position`).~~
+- ~~**S5.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).~~
+- ~~**S5.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete**).~~
+
+  **Dropped 2026-08-19, [[ADR-014 Jobsheet is a fixed product-defined inspection]].** S5.1/S5.2
+  were built (branch `s5-jobsheet-models`, discarded) then reversed once configurability was
+  judged the source of the print-control/versioning/drift problems; S5.3 (EAV values) and S5.4
+  (owner field-admin) never applied to begin with once the fields aren't owner-CRUD. Replaced by:
+
+- [ ] **S5.1 (rev)** — fixed inspection jobsheet: design storage structure + build model/migration/
+      tests (see [[Inspection jobsheet — design brief]]). Supersedes old S5.1–S5.4 per
+      [[ADR-014 Jobsheet is a fixed product-defined inspection]].
 - [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
       registration number) → **`CreateIntake`** (opens the visit + its first repair) → fill jobsheet
       field values + complaints. One screen/flow. *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" —
@@ -264,4 +275,5 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 ## Related
 - [[Roadmap]] · [[M1-F1 Status flow and transitions]] · [[Data model]] · [[Intake]] ·
   [[Design laws]] · [[Product gaps]] · [[ADR-012 Intake-Job two-level aggregate]] ·
-  [[ADR-013 The door decomposed]]
+  [[ADR-013 The door decomposed]] · [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
+  [[Inspection jobsheet — design brief]]

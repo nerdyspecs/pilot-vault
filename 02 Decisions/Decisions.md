@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-08-14 (ADR-013 accepted — the door decomposed)
+updated: 2026-08-19 (ADR-014 accepted — jobsheet reversed to fixed/product-defined, supersedes ADR-003's owner-configurable core)
 ---
 # Decisions
 Why the product is built the way it is. **One file per decision (ADR).** Once accepted, an
@@ -12,7 +12,7 @@ New structural choice → new ADR with the next number.
 ## Accepted
 - [[ADR-001 Core stack]] — Rails monolith + Hotwire + Postgres, Devise auth, PaaS hosting (the founding technical decision)
 - [[ADR-002 V1 scope]] — V1 = job monitoring only; parts → V2, technician → V3; pricing deferred
-- [[ADR-003 Digitized jobsheet in V1]] — V1 also includes an owner-configurable jobsheet (the adoption wedge)
+- [[ADR-003 Digitized jobsheet in V1]] — V1 also includes an owner-configurable jobsheet (the adoption wedge) — **superseded by [[ADR-014 Jobsheet is a fixed product-defined inspection]]** (2026-08-19; the owner-configurable core is dropped, the per-visit anchor stands)
 - [[ADR-004 Multi-tenant foundation]] — Workshop tenant, thin User, Employment edges, session re-verification
 - [[ADR-005 Acknowledged handoffs in V1]] — every ownership handoff (stage / blocker / technician) is acknowledged; the ack lives on the event record
 - [[ADR-006 Ownership separate from Employment]] — Ownership edge (governance) split from Employment (operations); signup creates the person, workshop creation is a post-signup act; access resolved through one door
@@ -23,6 +23,7 @@ New structural choice → new ADR with the next number.
 - [[ADR-011 Acknowledgement as stored visibility]] — **extends ADR-005, does not supersede it**: the receiver is **stored at write time** (`receiver_id`), so "waiting on whom" is a plain, always-answerable query — **no inbox, no confirm button**, just a *"Waiting on &lt;name&gt;"* line on the manager's board, cleared implicitly by acting on the job. Restores ADR-005's original `to_user` and fixes an append-only bug; settles [[Product gaps]] #5 (the Sprint 4 gate). *(Reshaped 2026-07-28 — the 2026-07-24 holder model was studied and dropped.)*
 - [[ADR-012 Intake-Job two-level aggregate]] — **extends ADR-011**: splits the overloaded `Job` into **Intake** (the car's visit) → **Job** (one repair, its own stage/crew/blockers). Intake stores its terminal position (`status` enum, door-written); **`ready` is the derived reading** — all jobs terminal with ≥1 done ([[Design laws]] #3). `deliver!` moves to the Intake; receivers stay **stored at write time** across both levels, and intake `deliver!` sweeps its jobs to close the done-notices. HFP moves to a **non-acknowledgeable** intake blocker (no direction = no ack pair); `blocks` is the single discriminator (`done`→JobBlocker, `delivered`→IntakeBlocker). Sequenced as **Sprint 4.5** (design pass + schema squash) before the S6 board — no prod data = cheapest migration now.
 - [[ADR-013 The door decomposed]] — **extends ADR-012**, reverses its "single service object" ruling. A door owns state moves only: creation left for `CreateIntake`/`CreateJob` (a birth isn't a transition), authorization left for a new `Permissions` class (checked at the controller boundary, returning the `WorkshopStaff` to stamp), and the door split by level — `JobActions` (repair) + `IntakeActions` (visit), one shared `ActionRefused`. Standing invariant recorded: a door verb is reached only from a gated controller or another door.
+- [[ADR-014 Jobsheet is a fixed product-defined inspection]] — **supersedes ADR-003's owner-configurable core**: the jobsheet's fields are set by the product and versioned in code, not owner-CRUD at runtime — reverses the S5.1/S5.2 EAV build (discarded, branch `s5-jobsheet-models`). Reason: configurability was the sole source of lost print control plus template-versioning/drift complexity; a fixed sheet deletes both. The filled sheet stays per-visit (ADR-012, unchanged). Storage structure for the drafted 39-item mixed-type field list is undecided, deferred to [[Inspection jobsheet — design brief]] along with two noted-not-designed expansions (multiple inspection types; an exterior damage diagram). S5.4 (owner field-admin UI) is dropped.
 
 See also [[Design laws]] (invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 

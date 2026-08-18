@@ -1,7 +1,7 @@
 ---
 type: module-overview
 module: M1
-updated: 2026-08-17 (roles re-pointed to WorkshopStaff — ADR-010; prior 2026-08-14: re-pointed at Intake — ADR-012)
+updated: 2026-08-19 (Data model link note the jobsheet is now fixed/product-defined — ADR-014; prior 2026-08-17: roles re-pointed to WorkshopStaff — ADR-010; prior 2026-08-14: re-pointed at Intake — ADR-012)
 ---
 # Module 1 — Job Monitoring
 
@@ -21,7 +21,8 @@ A visit's situation is a car, its repairs, and a history:
 - [[Stage model]] — how far along a repair is (progress axis)
 - [[Blocker]] — what's pausing a repair or the whole visit, and whose court (overlay axis)
 - [[Event log]] — the timestamped trail that powers the time analytics, per level
-- [[Data model]] — customers, vehicles, jobsheets (who owns it / who we talk to)
+- [[Data model]] — customers, vehicles, the inspection jobsheet (who owns it / who we talk to;
+  jobsheet is now fixed/product-defined — [[ADR-014 Jobsheet is a fixed product-defined inspection]])
 
 ## Roles
 Four operational roles, held as append-only **`WorkshopStaffRole`** rows on a person's single

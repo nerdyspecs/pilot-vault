@@ -40,3 +40,10 @@ breadcrumbs (inspection findings, job type).
 
 ## Related
 - [[ADR-002 V1 scope]] · [[Data model]] · [[Roadmap]]
+
+---
+**Footnote 2026-08-19 — superseded by [[ADR-014 Jobsheet is a fixed product-defined inspection]].**
+The owner-configurable core (this ADR's Decision + Model) is replaced: the jobsheet is a
+**fixed, product-defined** inspection form, not an owner-CRUD field list. The adoption-wedge
+reasoning under Why is a named, consciously accepted trade-off there, not a refutation — see
+ADR-014 for the full reasoning and what's deferred to design next.

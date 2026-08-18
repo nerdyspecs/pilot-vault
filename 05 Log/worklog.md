@@ -1,11 +1,67 @@
 ---
 type: log
-updated: 2026-08-17 (Session 32 — Sprint 5 ↔ 6 swapped: intake vertical/jobsheet is now Sprint 5 (next), board is now Sprint 6 (deferred); prior: 2026-08-16 Session 31 — UI surface mapped, feature model named, routes made consistent)
+updated: 2026-08-19 (Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-19 · Session 33 — jobsheet reversed: fixed, product-defined, not owner-configurable
+
+**Summary.** Picked up exactly where Session 32 left off — "spec the `JobSheet` + `JobSheetField`
+migration + models (S5.1–S5.2)" — and built them on branch `s5-jobsheet-models` (migrations,
+models, a seeded default template, model tests; 4 commits). Then, discussing the design with the
+builder, the core assumption underneath it came apart: an **owner-configurable** jobsheet
+([[ADR-003 Digitized jobsheet in V1]]) means the product can never guarantee what a printed
+sheet looks like, and it was the single upstream cause of every hard question downstream —
+template versioning, per-answer label snapshots, drift once an owner edits/renames a field a old
+answer already used. The resolution: **the jobsheet is a fixed, product-defined inspection form**
+— fields set by the product, versioned in code, never owner-CRUD at runtime — recorded as
+[[ADR-014 Jobsheet is a fixed product-defined inspection]], superseding ADR-003's core. The
+per-visit anchor from [[ADR-012 Intake-Job two-level aggregate]] (one inspection per Intake) is
+unchanged; only *who defines the fields* moved.
+
+**The field list surfaced, and reopened a real question.** The builder drafted a concrete
+39-item list — 5 sections (EXTERIOR, TYRES, ENGINE BAY, BRAKES, INTERIOR), tentative, not
+finalized — and its answer types are **not uniform**: ratings (ok/attention/damage + note),
+numeric measurements (tread depth mm, tyre pressure psi, pad thickness mm — wanted queryable/
+trendable across a vehicle's visit history), and booleans. That mix means "one wide boolean
+table" is the wrong shape, and reopens the storage-structure question the EAV model had
+answered by construction (fields are rows). This is **deliberately not decided now** — a wide
+typed table, a code-defined catalog + narrow answer rows (lead candidate), and jsonb are all
+live options with real trade-offs, and deciding needs its own session.
+
+**Two forward ideas, noted not designed.** Still "thinking, not committed": (a) **multiple
+inspection types** — Pre-Delivery Inspection, Used-Car Inspection, later Lorry / Passenger-car
+variants, which likely reshapes the model into a small catalog of product-defined inspection
+types rather than one universal sheet; (b) an **exterior damage diagram** — a base vehicle image
+the technician "dots" for cracks/nicks, with optional photo upload per mark, which implies a
+coordinate/annotation + attachment model just for the EXTERIOR section, separate from the other
+four. Both are recorded as design inputs for the chip, not designs.
+
+**The EAV branch discarded.** `s5-jobsheet-models` (migrations for `job_sheets` +
+`job_sheet_fields`, the models, the seed, the tests) modelled the abandoned design and would
+mislead if kept as "current." Rolled its two migrations back while the files still existed (dev
+DB drops cleanly), discarded `db/structure.sql`'s rewrite, checked out `main`, deleted the
+branch. `main` is unaffected — the branch was never merged — so this is a clean discard, not a
+revert.
+
+**Chipped out.** Rather than decide the storage structure in this session, the work is handed to
+a future session via a self-contained design+build brief:
+[[Inspection jobsheet — design brief]]. It carries the decision already made (ADR-014), the
+verbatim 39-item list, the mixed-type problem, the storage-structure trade table, both forward
+ideas, and the required first steps (decide structure → migration → model → seed → tests,
+four-layer like the discarded S5.1/S5.2 were, RLS + `workshop_id` + `WorkshopScoped` per house
+pattern, keyed on `intake_id`).
+
+**Housekeeping.** [[Decisions]], [[Data model]], [[Sprint plan]] reconciled to stop describing
+the EAV design as current/upcoming; old S5.1–S5.4 struck and replaced with a single
+S5.1 (rev) task pointing at the chip. A stale-reference sweep caught [[Features overview]] (F6),
+[[Roadmap]] (slice 6), [[Deferred design]] (the now-moot per-answer-snapshot note), and
+[[Open questions]] — reconciled or footnoted, not left describing the abandoned model as live.
 
 ---
 

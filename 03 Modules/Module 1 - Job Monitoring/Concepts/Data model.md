@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-14 (entity map re-drawn for the Intake/Job split — ADR-012)
+updated: 2026-08-19 (jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -24,6 +24,14 @@ live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is th
 > — it now applies to **Intake**, not Job (a visit is stamped once at intake; a job never was
 > the thing that should have carried it). See [[Intake]] for the full note.
 
+> [!warning] The jobsheet section predates [[ADR-014 Jobsheet is a fixed product-defined inspection]] (2026-08-19)
+> The `JobSheet` / `JobSheetField` / `JobSheetFieldValue` EAV model described below **no longer
+> exists** — that build (branch `s5-jobsheet-models`) was discarded. The jobsheet is now a
+> **fixed, product-defined** inspection form; owners no longer CRUD fields. The per-visit anchor
+> (keyed on `intake_id`) is unchanged. §The jobsheet below is rewritten to the new shape; the
+> storage structure (how the fixed fields + answers are actually stored) is **not yet decided**
+> — see [[Inspection jobsheet — design brief]].
+
 ## Entities (v1)
 ```
 User (thin login) ─*─ WorkshopEmployment ─*─ Workshop (tenant)
@@ -34,8 +42,8 @@ Workshop ─*─ Customer (person | company; name, phone, email)
 Workshop ─*─ Vehicle ── belongs_to Customer (required)
 Vehicle  ─*─ Intake  ── triple-stamped: workshop_id + vehicle_id + customer_id; has_secure_token
 Intake   ─*─ Job     ── belongs_to :intake only; reaches vehicle/customer through it
-Intake   ─*─ JobSheetFieldValue                 (the car's intake form — keys on intake_id)
-Workshop ─1─ JobSheet ─*─ JobSheetField ─*─ JobSheetFieldValue
+Intake   ─1─ (fixed inspection, structure TBD — see Inspection jobsheet — design brief)
+              fields are product-defined (code, versioned), not owner-CRUD; keys on intake_id
 
 Intake   ─*─ IntakeStatusTransition             (open→delivered / open→cancelled; NOT ack'able)
 Intake   ─*─ IntakeBlocker ─*─ IntakeBlockerTransition (visit-level hold, e.g. Hold for payment;
@@ -71,7 +79,8 @@ list above was also dropped, removed by ADR-006 long before.)*
   intake — see Resolved below). One car's visit; owns one or more Jobs ([[Intake]]).
 - **Job** — tenant-scoped, `belongs_to :intake` only; reaches vehicle/customer through it. One
   repair on a visit ([[Job]]). Per-repair, not per-visit — a visit can own several.
-- **JobSheet / JobSheetField / JobSheetFieldValue** — configurable inspection form (below).
+- **Inspection jobsheet** — fixed, product-defined inspection form, one per Intake; storage
+  structure not yet decided (below).
 - **Trackers** *(restructured 2026-07-16; crew re-restructured to Design B 2026-07-17)*:
   `JobTechnician` (present-tense membership, deleted on remove) + `JobTechnicianTransition`
   (self-contained joined/left history); `JobBlocker` (item, written once) +
@@ -80,35 +89,33 @@ list above was also dropped, removed by ADR-006 long before.)*
   [[ADR-005 Acknowledged handoffs in V1]]).
 - **Blocker** — the workshop's catalog of blocker types, each with `raised_by_role`/`cleared_by_role` (seed "Hold For Payment"); all state lives in `JobBlockerTransition` ([[Blocker]]).
 
-## The jobsheet — a configurable inspection form
-The paper jobsheet, digitized — the adoption wedge ([[ADR-003 Digitized jobsheet in V1]]). Fill
-the sheet, status tracking is a byproduct. Fields are **rows, not columns** → the owner adds them
-at runtime, no migration.
+## The jobsheet — a fixed, product-defined inspection
+The jobsheet is no longer a per-workshop configurable form — [[ADR-014 Jobsheet is a fixed product-defined inspection]]
+reversed [[ADR-003 Digitized jobsheet in V1]]'s owner-CRUD core. **The fields are set by the
+product, versioned in code** — an owner never adds, edits, or removes one. One inspection is
+filled **per Intake** (the car's visit), unchanged from ADR-012.
 
-- **JobSheet** — the **blank form**. **One per workshop** (`belongs_to :workshop`), owner-configured.
-- **JobSheetField** — a field: `label` + `kind` (checkbox | text).
-- **JobSheetFieldValue** — one visit's **answer** (`belongs_to :intake, :job_sheet_field`) —
-  keyed on `intake_id`, not `job_id`: it's the car's intake form (complaints, vehicle
-  condition), filled once per visit, not once per repair
-  ([[ADR-012 Intake-Job two-level aggregate]] §Consequences). *(2026-08-14: was `job_id` when
-  this note predated the split — per-repair jobsheet fields would be a v2 additive if ever
-  needed.)*
+**The storage structure itself is not decided here.** A drafted 39-item field list (5 sections,
+mixed answer types — ratings, numeric measurements like tread depth/tyre pressure, booleans)
+reopens the question of *how* a fixed form's fields and answers are stored: a wide typed table,
+a code-defined catalog + narrow answer rows, or jsonb are all live options, each with different
+trade-offs once numeric measurements need to stay queryable over a vehicle's visit history. See
+[[Inspection jobsheet — design brief]] for the full trade table, the verbatim field list, and
+what a future session needs to decide before building the model.
 
-**JobSheet = the workshop's blank form; a visit's filled sheet = its JobSheetFieldValues.**
-"This car's intake jobsheet" = `intake.job_sheet_field_values` read against the fields — a
-*view*. Complaints & mileage are fields; vehicle info is referenced from Vehicle, never copied.
-Flat fields only.
+**What's settled, not deferred:**
+- One filled inspection per Intake, keyed on `intake_id` — the per-visit anchor from
+  [[ADR-012 Intake-Job two-level aggregate]] stands unchanged.
+- The field *set* changes only by a product release, never by a workshop.
+- S5.4 (owner field-admin UI) is dropped — there is nothing left to administer.
 
-The form is a **record, not something churned per job** — v1 supports **adding** fields but has
-**no destructive delete** (removing a field would orphan past answers). And once a job is **Done,
-its answers are frozen** — corrections open a new job ([[Design laws]] #8). Per-answer snapshots
-are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
-
-> [!question] Freeze condition needs re-deciding, not yet done (2026-08-14)
-> "Once a job is Done" doesn't parse now that the answers live on **Intake**, not Job — a visit
-> with several repairs has no single Done moment. Candidates: freeze when the *intake* reaches a
-> terminal (`delivered`/`cancelled`), or when its `ready?`. Not decided; this note predates the
-> split and Sprint 5 (where JobSheet is actually built) hasn't reached it yet.
+The freeze rule still applies once the structure lands: a filled sheet becomes **read-only once
+its Intake reaches a terminal state** (`delivered`/`cancelled`), or once it's `ready?` — the
+same open question [[Data model]] previously raised against the EAV shape, restated here because
+it's a door guard on the record, not something that depended on the abandoned template/value
+split. There is no template drift to worry about now (a fixed form doesn't rename or delete
+fields under an old answer), so the freeze question is only *when*, not *how to keep history
+honest against a moving form* — that half of the old problem is gone entirely.
 
 ## A Job's two responsibility sides
 - **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via a
@@ -201,4 +208,6 @@ are deferred ([[Deferred design]]). Lighter build alt: two `jsonb` columns.
 ## Related
 - [[Job]] · [[Intake]] · [[Job visibility]] · [[Intake flow]] · [[Overview]] ·
   [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]] ·
-  [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]
+  [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
+  [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
+  [[Inspection jobsheet — design brief]]
