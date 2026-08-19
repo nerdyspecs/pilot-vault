@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-14 (R5 register_job! reference corrected — ADR-013)
+updated: 2026-08-19 (Session 34 — R11 added, jobsheet item_key handshake — ADR-015; prior: 2026-08-14 R5 register_job! reference corrected — ADR-013)
 ---
 # Risk ledger
 Engineering risks and known sharp edges, numbered. Promoted out of worklog narrative
@@ -23,6 +23,8 @@ Severity: **high** = wrong data / broken invariant possible · **med** = ugly fa
 | R8 | **Role-swap under an open Accept card** — admin re-fires with a different role while the invitee's card is on screen; invitee accepts a role they never saw | low | accepted for v1 | complaints, or an invitation-details page |
 | R9 | **Accept vs concurrent destroy** — admin removes the invitation as the invitee clicks Accept → `RecordNotFound` 404 | low | accepted for v1 | error-page pass (with R4) |
 | R10 | **Account-enumeration oracle in the invite flow** — the two flash messages ("awaiting their acceptance" vs "no account yet") let any workshop manager probe whether an email has a Knot account. Manager-gated; `users` is thin (ADR-006) so the leak is existence only. Devise stock flows have cousins (password-reset messaging) | low | accepted for v1 | pre-launch security pass; align wording with whatever Devise enumeration hardening is chosen |
+| R11 | **Jobsheet `item_key` is an unenforced code↔data handshake** — [[ADR-015 Jobsheet answers are rows against a frozen question set]]'s catalog keys live in a Ruby constant with no FK behind them; nothing in the database stops a key being renamed or deleted out from under existing `jobsheet_answers` rows. Held only by discipline (retire, never rename/delete) plus each jobsheet's own frozen `item_keys` snapshot, not by a DB constraint | med | accepted for v1 | a key is renamed/deleted by mistake, or templates start changing often enough that the discipline stops being reliable |
 
 ## Related
-- [[Decisions]] · [[Deferred design]] (parked *design*, vs parked *risk* here) · worklog Sessions 14–15 (origin stories for R1–R10)
+- [[Decisions]] · [[Deferred design]] (parked *design*, vs parked *risk* here) · worklog Sessions 14–15 (origin stories for R1–R10) ·
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] (R11)

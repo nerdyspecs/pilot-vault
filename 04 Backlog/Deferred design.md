@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-19 (jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-08-19 (Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -11,6 +11,37 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   drops the EAV model this depended on (there is no owner-editable `label`/`kind` to snapshot
   against once fields are fixed and code-defined; a product release can't retroactively change
   what an old answer meant). Not carried into [[Inspection jobsheet — design brief]].
+  **Re-examined and re-rejected on new grounds, Session 34** — the idea resurfaced independently
+  once the concrete answer-row shape existed (freeze `label`/`section`/`unit` onto each
+  `JobsheetAnswer`). Rejected again: a usable printed line needs label *and* section *and*
+  position *and* unit, so one snapshot column grows to four or five, duplicated across ~39 rows ×
+  every intake × every workshop, forever — the exact per-answer-snapshot cost ADR-014 already
+  priced. [[ADR-015 Jobsheet answers are rows against a frozen question set]] gets the same
+  fidelity for one array column (`item_keys`, frozen per jobsheet) plus an append-only catalog —
+  git already preserves label history for free.
+- **Jobsheet photos** *(design-for, not built — [[ADR-015 Jobsheet answers are rows against a
+  frozen question set]])* — Active Storage, `has_many_attached :photos` on `JobsheetAnswer`, so a
+  photo anchors to the specific finding ("rear bumper → attention") rather than the whole sheet or
+  the whole visit. Deferred because attachments are their own topic; the model is shaped to not
+  preclude it — the payoff (a per-item photo organizer, not a binder pile) only exists because
+  answers are real rows to attach to. **Trigger:** when photo evidence at collection/delivery
+  becomes a real ask — see [[Product gaps]] #7.
+- **Jobsheet answer edit activity log** — who changed which field, from what value to what, at
+  when. Deferred: answers are mutable by design (a later inspector may correct an earlier one),
+  and v1 doesn't yet need the trail. **Not free to defer indefinitely** — unlike most entries
+  here, an unlogged edit is unrecoverable after the fact; there's no migration that reconstructs
+  "what did this used to say." Decide before it's needed if a dispute/audit case makes "who
+  changed the tread reading" matter.
+- **Multiple inspection types** (PDI, lorry, passenger-car variants) — [[ADR-015 Jobsheet answers
+  are rows against a frozen question set]] builds the *mechanism* now (per-template Ruby files +
+  `inspection_type` on the jobsheet header) but ships only `car_routine`'s content. Adding a
+  second template is a new file + seed, no migration. **Trigger:** an actual PDI or lorry-service
+  workshop customer.
+- **Exterior damage diagram** — a base vehicle image, dot-annotated for cracks/nicks, with an
+  optional photo per mark. Carried forward from [[Inspection jobsheet — design brief]] §5,
+  untouched by ADR-015 — still its own design pass (a coordinate/annotation model plus
+  attachments, not a per-item rating). **Trigger:** the storage/build work above lands and a
+  concrete workshop asks for it.
 - **`lock_version` (optimistic locking on Job)** — guards against silent lost-updates when two staff
   edit the same job's free-text at once. Deferred: audit trail covers stage; concurrent free-text
   edits are rare in a small trusted team. Add the column + a "stale, reload" handler if it bites.
@@ -202,4 +233,5 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
 - **Intake/Job aggregate morph — split the single `Job` into `Intake` (the visit) + `Job` (one repair)** *(chipped from the routing/screen-map session)*. Decide whether to break today's overloaded `Job` (car + visit + one repair + one stage + one technician) into a two-level aggregate: **Intake** = one car's visit (Customer → Vehicle → **Intake** → Job), **Job** = one repair carrying its own stage machine, its own `job_technicians`, and its own blockers. Motivation: a car realistically comes in for several services worked by several technicians in parallel, which the one-job-per-visit model can't represent. **Needs its own ADR and a real design pass (weight of the tenant collapse), and Sprint-plan edits to sequence it BEFORE the board/dashboard build** — no production data means this is the cheapest the migration will ever be, and the S6 screens would otherwise be built on the wrong aggregate. Working model already reasoned with the builder (not yet locked): stages split — old `registered` splits into intake `open` + job `unassigned`; `assigned`/`in_progress`/`done`/`send_back` stay on Job; `delivered` is the one stored intake fact; intake **status is derived** from its jobs (ready = all terminal w/ ≥1 done; cancelled = all cancelled), never stored (Design law #3). Deliver requires every job terminal (done|cancelled); "defer" = cancel-now + rebook as new job/new intake (laws #6/#8). Cancel-the-car = cancel all *remaining open* jobs (done work survives), terminal then derives itself. Every backward move lives on Job; Intake only steps forward to a boundary. **Open sub-decisions:** (1) all-jobs-cancelled car that leaves — delivered or cancelled? (builder lean: cancelled); (2) cancel cascade confirm UX; (3) the ADR-011 handoffs (register/assign/ready/deliver) now span two levels — receiver still **stored at write time, never derived** even though status is derived; (4) blocker `blocks` guard now spans two models (work-blockers veto job `done`, HFP vetoes intake `delivered`). **Alternative to rule out first:** if shops actually run one tech + a task checklist, the Sprint-5 jobsheet already covers multi-item-per-visit for less — the split only earns its keep if repairs need independent technicians AND independent blockers. Vocabulary to lock before any code: "intake" = the car's visit, "job" = a repair (avoid a repeat of the JobActions/JobService confusion). See [[M1-F1 Status flow and transitions]] · [[Job]] · [[ADR-011 Acknowledgement as stored visibility]] · [[Sprint plan]].
 
 ## Related
-- [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]]
+- [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]] ·
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]]

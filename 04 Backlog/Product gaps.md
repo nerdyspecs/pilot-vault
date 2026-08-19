@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-07-04
-updated: 2026-07-28 (#5 decided — ADR-011 reshaped to stored receiver; verdict amended)
+updated: 2026-08-19 (Session 34 — #7 annotated, stale EAV description corrected, photos now have a designed home — ADR-015; prior: 2026-07-28 #5 decided — ADR-011 reshaped to stored receiver; verdict amended)
 ---
 # Product gaps — V1 design review
 > **Reviewed: 2026-07-04** (Session 3). Snapshot of the vault as of this date — re-check how much
@@ -28,7 +28,7 @@ already wrote down?
 |---|---|---|---|
 | 5 | **Ack model assumes full adoption** | Our constraint says "partial use must still provide value." But ack is receiver-must-act: non-adopting techs → flooded inbox + screaming limbo → "system doesn't work." Need a graceful-degradation story (SA ack *on behalf of*, logged? snooze/threshold on limbo?). | ✅ **Decided 2026-07-28** — [[ADR-011 Acknowledgement as stored visibility]]: the receiver is **stored at write time**, so "waiting on whom" is a plain query that is always answerable regardless of who adopts. There is **no inbox** to flood — the answer surfaces on the manager's board, and the manager (an adopter by definition) reads it and walks over. Acknowledgement is **implicit**: acting on a job clears what you owe, so a counter-only shop generates zero confirmation traffic and still reads correctly. Ack-on-behalf, snooze, and the 2026-07-24 holder model were all **rejected** (see the ADR). |
 | 6 | **Floor device & login reality** | Techs auth via Devise/accounts/email — many floor techs have no email, won't do passwords on a shared greasy phone. Shared tablet per bay? PIN fast-switch? This decides whether acknowledgement *physically happens* — i.e. whether the key feature works at all. | ✅ **Decided 2026-07-04** — standard web login on phone; technician screens absolutely mobile-friendly; SA/owner PC-primary + owner mobile health view; special floor-device/PIN revisited later → [[Tech stack]] |
-| 7 | **No photos** | Jobsheet is checkbox\|text only. Real intake needs damage photos (liability at collection) + repair evidence. One place digital beats paper → strengthens the adoption wedge. "Photos attach to the job" is enough. | Decide (V1 or V2) |
+| 7 | **No photos** | *(Description predates [[ADR-014 Jobsheet is a fixed product-defined inspection]]/[[ADR-015 Jobsheet answers are rows against a frozen question set]] — "checkbox\|text only" describes the discarded EAV model, not the current jobsheet.)* Real intake needs damage photos (liability at collection) + repair evidence. One place digital beats paper → strengthens the adoption wedge. | ✅ **Has a designed home, not yet built** — ADR-015 design-fors photos anchored to `JobsheetAnswer` (per finding, not a flat pile) — see [[Deferred design]]. Still **decide V1 vs V2** timing. |
 | 8 | **Customer approval has no record** | Quotation deferred (fine), but the *approval moment* still happens (SA calls, customer says go). No trace → dispute risk ("I never approved this!"). Could be a disciplined blocker-resolve note. | Decide (small, V1-friendly) |
 | 9 | **Vehicle history at intake** | Model supports it (`vehicle has_many :jobs`) but no screen shows it. "This car was here 2 months ago for the same complaint" = high value, zero model cost. | **Pull into V1** (a screen section) |
 

@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-19 (Session 33 — F6 jobsheet re-pointed at ADR-014, fixed/product-defined; prior: 2026-08-17 Session 32 — F1 board regroup deferred, F6 jobsheet marked not-built, ADR-012 citation)
+updated: 2026-08-19 (Session 34 — F6 jobsheet storage decided, ADR-015; prior: Session 33 — F6 jobsheet re-pointed at ADR-014, fixed/product-defined; prior: 2026-08-17 Session 32 — F1 board regroup deferred, F6 jobsheet marked not-built, ADR-012 citation)
 ---
 # Features overview
 
@@ -22,7 +22,7 @@ Screens per feature are the ones inventoried in [[Screen map]].
 | **F3 · Blockers & holds** | Overlay axis: raise/resolve/note; job blocks *done*, intake blocks *delivery*; role-gated + catalog | 4 | Blocker show, Workshop setup, forms on Intake/Job | built |
 | **F4 · Acknowledged handoffs** | Nothing stalls silently — "waiting on «name»", pending acks surfaced on the board | 5 | *(cross-cuts board + Intake/Job)* | built (aging colour deferred, S6.7) |
 | **F5 · Crew, roles & access** | Bilateral invite, roles, gating, tenancy | 2 | Workshop setup, Staff show/create, Landing | built |
-| **F6 · Customers, vehicles & jobsheet** | The records intakes attach to, plus the fixed inspection form | 6 | Customers, Customer show, Vehicle show, *(jobsheet)* | customer/vehicle built; **jobsheet not built** — reversed to fixed/product-defined 2026-08-19 ([[ADR-014 Jobsheet is a fixed product-defined inspection]]); storage structure chipped out to [[Inspection jobsheet — design brief]], no field-admin (dropped) |
+| **F6 · Customers, vehicles & jobsheet** | The records intakes attach to, plus the fixed inspection form | 6 | Customers, Customer show, Vehicle show, *(jobsheet)* | customer/vehicle built; **jobsheet designed, not built** — fixed/product-defined ([[ADR-014 Jobsheet is a fixed product-defined inspection]]), storage decided ([[ADR-015 Jobsheet answers are rows against a frozen question set]]), no field-admin (dropped) |
 | **F7 · Customer status page** | Public "how's my car?" token link on the visit | 7 | Status page | needs design; not built |
 | **F8 · Reporting (aggregate)** | Workshop-wide numbers — sums/averages across visits | 8 | *(feeds Dashboard health)* | needs design; **which reports still TBD** |
 

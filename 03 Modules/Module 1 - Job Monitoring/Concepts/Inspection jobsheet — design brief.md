@@ -1,13 +1,22 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (created — chipped out from Session 33's jobsheet reversal)
+updated: 2026-08-19 (Session 34 — resolved by ADR-015, annotated not rewritten; prior: created — chipped out from Session 33's jobsheet reversal)
 ---
 # Inspection jobsheet — design + build brief
 
 **Entry point for a future session.** Self-contained: everything needed to decide the storage
 structure and build the fixed inspection jobsheet lives here, without depending on this
 conversation. Start fresh from `main` (see §7).
+
+> [!note] Resolved 2026-08-19 by [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+> §7's steps 1–2 (decide the storage structure; consider whether an ADR is needed) are **done** —
+> see the ADR for the full reasoning, including two things this brief didn't anticipate: the
+> SA/technician **concurrent multi-actor fill flow** (which ruled out per-section state), and the
+> **frozen `item_keys` snapshot** (which closes a drift-on-addition gap this brief's storage fork
+> didn't surface — see §4's annotation). Step 3 (build: migration → model → seed → tests) is what
+> remains, on the builder's call. This note is kept as the reasoning trail, per house pattern —
+> not rewritten.
 
 ## 1. The decision already made
 [[ADR-014 Jobsheet is a fixed product-defined inspection]] settled this much, and it is **not
@@ -112,6 +121,17 @@ numeric fields — which is most of the argument for the catalog + narrow-rows s
 right single answer for everything, ratings included, rather than mixing jsonb for some items
 and columns for others.
 
+> [!note] Decided 2026-08-19 — [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+> **Catalog + narrow answer rows won**, refined past what this table sketched: ratings, booleans,
+> and enums collapse into one `choice` string column (they're all "pick one from a fixed set");
+> only `measurement` (decimal) is split out, because it's the only type anything orders or
+> aggregates on. A thin `jobsheets` header (1:1 per Intake) carries `inspection_type` plus a
+> **frozen `item_keys` snapshot** — not anticipated by this table — which is what actually
+> prevents a template edit from reinterpreting an old sheet (printing reads the sheet's own frozen
+> list, not the live template) and what bounds which keys an answer row may use. See the ADR for
+> the full reasoning and the rejected alternatives, including a DB-driven template hierarchy
+> surfaced mid-session and re-rejected as the discarded EAV shape by another name.
+
 ## 5. Anticipated expansions — design for, don't build
 Both are explicitly **"still thinking," not committed scope**. Don't build either now — but the
 storage decision in §4 must not hard-assume a single universal sheet that would preclude them
@@ -129,6 +149,15 @@ later.
   above — it implies a coordinate/annotation model plus attachments, not just a per-item rating.
   Flag it as a distinct piece of scope; do not fold it into the general answer-row shape without
   a dedicated design pass.
+
+> [!note] Status 2026-08-19 — [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+> **Multiple inspection types**: mechanism built now (per-template Ruby files + `inspection_type`
+> on the jobsheet header), content added later with no schema change — the model doesn't hard-
+> assume a single universal sheet, as this section required. **Exterior damage diagram**: still
+> fully deferred, still its own design pass — not touched by ADR-015, tracked in
+> [[Deferred design]]. One design-for decision made in its favor: photos anchor to `jobsheet_
+> answers` (a finding), not to the jobsheet as a whole — so when the diagram is designed, it has
+> a per-item home to attach to rather than a flat pile.
 
 ## 6. Housekeeping
 The earlier EAV attempt at this (branch `s5-jobsheet-models`, models `JobSheet` +

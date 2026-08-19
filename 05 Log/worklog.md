@@ -1,11 +1,108 @@
 ---
 type: log
-updated: 2026-08-19 (Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-19 (Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-19 · Session 34 — jobsheet storage decided: catalog + narrow answer rows, two value columns, a frozen question set
+
+**Summary.** Picked up [[Inspection jobsheet — design brief]] cold, as designed — the entry point
+Session 33 chipped out. Worked the storage-structure fork (brief §4) to a full decision with the
+builder, recorded as [[ADR-015 Jobsheet answers are rows against a frozen question set]]. Three
+things surfaced along the way that the brief hadn't anticipated: a **concrete SA/technician fill
+flow**, an **externally-sourced design (ChatGPT) worth comparing against**, and a **template-
+evolution case** (adding a field after old sheets exist) that exposed a gap in ADR-014's
+"no drift" claim. All three fed the final shape.
+
+**The six-way survey, narrowed to a real fork.** Every candidate splits into two independent
+axes — *where the form lives* (code vs. owner-editable DB rows) and *how answers are stored*
+(wide columns / narrow rows / jsonb). Axis one was already settled by ADR-014 (code). On axis
+two: wide typed columns die to §5's multiple-inspection-types expansion (a second type forces a
+second wide table or NULL-riddled columns on the first); jsonb dies to the numeric-trending
+requirement (§3 — string comparison misorders numbers, and casting at query time fails
+unpredictably once Postgres reorders a `WHERE` clause). That leaves narrow answer rows as the only
+survivor, matching the brief's own lead candidate.
+
+**An externally-sourced design (ChatGPT) turned out to be the discarded EAV branch, table for
+table.** The builder brought a `InspectionTemplate → Category → Item → Inspection → Result`
+design to compare against. Mapped onto this project's vocabulary, its top three tables are
+exactly `JobSheet`/`JobSheetField`/`JobSheetFieldValue` — the branch ADR-014 already reversed —
+and its own stated design principle ("workshops can add/reorder/disable items") is the owner-
+configurability ADR-014 rejected for print-control and drift reasons. Re-examined on its merits,
+not dismissed on sight; re-rejected for the same reasons. Two pieces were worth keeping: `enum`
+as a genuinely distinct answer type (folded into this ADR's `choice` column, which generalizes
+rating/boolean/enum together), and photos attached to a *finding* rather than the whole sheet
+(adopted as the deferred photo design — [[Deferred design]]).
+
+**The SA/technician fill flow killed per-section state, and simplified the answer shape.** An
+intermediate design gave each *section* its own stateful row (who signed it off, when), reasoning
+the SA owns exterior and the technician owns the rest. The builder's actual flow — the SA walks
+the customer through exterior *only if* they happen to go out with them; otherwise a technician
+covers the whole sheet alone; anyone can be interrupted and someone else picks up the sheet —
+contradicts that. No role owns a section, so nothing section-level earns stored lifecycle state.
+What *does* vary per row is who answered a specific item — which resolved as `inspected_by` on
+each `jobsheet_answer`, a deliberate departure from the house `created_by` convention because the
+actor here is a first-class domain fact, not audit metadata on a log row. This also settled the
+door question: nothing about filling a sheet has an *illegal move* to veto (unlike Job/Intake's
+transition machinery), so the jobsheet stays outside `JobActions`/`IntakeActions`/`Permissions`
+([[ADR-013 The door decomposed]]) entirely — data collection, not a state machine.
+
+**Four value columns collapsed to two.** The brief's answer types (rating/numeric/boolean) plus
+the ChatGPT design's `enum` all reduce to the same shape except numeric: "pick one of a fixed set
+of options" (rating, boolean, enum) vs. "a number you order/aggregate on" (tyre tread, pressure,
+pad thickness). `choice` (string) covers the first three; `measurement` (decimal) is split out
+alone, because it's the only type anything does arithmetic or ordering on — drawn exactly where
+string storage stops working, confirmed by walking a concrete failure: storing "10mm" and "4.5mm"
+as strings sorts the new tyre as more worn than the old one, and casting a mixed column at query
+time (`value::decimal`) errors unpredictably once the query planner reorders which row it casts
+first — a bug invisible in dev, live in production.
+
+**The CO2-tailpipe case exposed a real gap in ADR-014, and `item_keys` is the fix.** ADR-014
+claimed a code-defined form has "no drift to snapshot against." True for removal/rename
+(retirement handles that — keys are permanent, only labels may be corrected in place). Not true
+for *addition*: a template gaining a field after old sheets exist means printing from the live
+template would show a blank line for a question that sheet was never asked — reading as staff
+negligence rather than history. Fix: **`Jobsheet.item_keys` is frozen at creation** (re-snapshotted
+only while the sheet has zero answers), and printing/completion read from that frozen list, never
+the live template. This closes drift from both directions and, as a side effect, makes a template-
+version column unnecessary — versioning would need every historical template kept in code forever
+*and* a human remembering to bump it; the frozen list records itself.
+
+**A proposed label-snapshot design was examined and re-rejected on new grounds.** The builder
+independently proposed freezing `label` (or more) onto each answer row — the classic EAV-adjacent
+fix for drift. Re-examined against the concrete printing requirement: a usable line needs label
+*and* section *and* position *and* unit, so one snapshot column becomes four or five, duplicated
+across ~39 rows × every intake × every workshop, forever — the exact per-answer-snapshot cost
+ADR-014 had already priced as not worth paying. `item_keys` + an append-only catalog gets the same
+fidelity for one array column, because the catalog lives in git, which already preserves label
+history for free. The [[Deferred design]] entry marking this "moot" (2026-08-19, ADR-014) is
+footnoted rather than rewritten — moot for the old reason, re-rejected here for a new one.
+
+**The complaint separated cleanly from the inspection.** Working through what a jobsheet answer
+row actually needs surfaced that "customer complaint" and "staff inspection finding" had been
+informally conflated (visible in [[Intake]]'s stale `has_many :job_sheet_field_values` line,
+glossed as "customer complaints + vehicle condition"). Resolved: the complaint is free-form,
+customer-reported, per-visit text that belongs on **Intake**; the jobsheet is the standardized,
+staff-recorded inspection only, in fixed vocabulary. Folding the complaint into the jobsheet would
+have forced free text into a form built for fixed answer types.
+
+**Recorded as [[ADR-015 Jobsheet answers are rows against a frozen question set]]**, extending
+(not superseding) ADR-014. Vault sweep: [[Decisions]], [[Inspection jobsheet — design brief]]
+(annotated per house pattern, not rewritten), [[Data model]], [[Sprint plan]] (S5.1 (rev) split
+into S5.1a–d, the four-layer build; S5.5 split to separate the complaint from the inspection
+fill), [[Intake]] (stale association + gloss corrected), [[Roadmap]], [[Features overview]],
+[[Overview]], [[Deferred design]] (four new entries: photos, an answer edit activity log, multiple
+inspection types, the damage diagram), [[Risk ledger]] (new R11 — the `item_key` code↔data
+handshake has no FK behind it, held by discipline not the database), and [[Product gaps]] (#7's
+EAV-era description corrected, photos now have a designed home). ADR-014, ADR-012, ADR-003 not
+edited — every reconciliation is a dated footnote or annotation, per the ADR-010/011 pattern.
+**Not built this session** — the build (migration → model → seed → tests, S5.1a–d) is a separate,
+future step, on the builder's call.
 
 ---
 

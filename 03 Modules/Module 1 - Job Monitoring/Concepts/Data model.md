@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
+updated: 2026-08-19 (Session 35 — re-snapshot dropped at build, item_keys/inspection_type attr_readonly (footnote narrowing ADR-015); prior: Session 34 — jobsheet storage decided, ADR-015; entity map + freeze rule filled in; prior: jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -28,9 +28,11 @@ live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is th
 > The `JobSheet` / `JobSheetField` / `JobSheetFieldValue` EAV model described below **no longer
 > exists** — that build (branch `s5-jobsheet-models`) was discarded. The jobsheet is now a
 > **fixed, product-defined** inspection form; owners no longer CRUD fields. The per-visit anchor
-> (keyed on `intake_id`) is unchanged. §The jobsheet below is rewritten to the new shape; the
-> storage structure (how the fixed fields + answers are actually stored) is **not yet decided**
-> — see [[Inspection jobsheet — design brief]].
+> (keyed on `intake_id`) is unchanged. §The jobsheet below is rewritten to the new shape.
+
+> [!note] Storage decided — [[ADR-015 Jobsheet answers are rows against a frozen question set]] (2026-08-19)
+> The structure this warning left open is now settled: templates in code, a thin `Jobsheet`
+> header, field-level `JobsheetAnswer` rows. §The jobsheet below reflects the decided shape.
 
 ## Entities (v1)
 ```
@@ -42,8 +44,8 @@ Workshop ─*─ Customer (person | company; name, phone, email)
 Workshop ─*─ Vehicle ── belongs_to Customer (required)
 Vehicle  ─*─ Intake  ── triple-stamped: workshop_id + vehicle_id + customer_id; has_secure_token
 Intake   ─*─ Job     ── belongs_to :intake only; reaches vehicle/customer through it
-Intake   ─1─ (fixed inspection, structure TBD — see Inspection jobsheet — design brief)
-              fields are product-defined (code, versioned), not owner-CRUD; keys on intake_id
+Intake   ─1─ Jobsheet ─*─ JobsheetAnswer     (ADR-015 — see §The jobsheet below)
+              fields are product-defined (code catalog), not owner-CRUD; keys on intake_id
 
 Intake   ─*─ IntakeStatusTransition             (open→delivered / open→cancelled; NOT ack'able)
 Intake   ─*─ IntakeBlocker ─*─ IntakeBlockerTransition (visit-level hold, e.g. Hold for payment;
@@ -79,8 +81,9 @@ list above was also dropped, removed by ADR-006 long before.)*
   intake — see Resolved below). One car's visit; owns one or more Jobs ([[Intake]]).
 - **Job** — tenant-scoped, `belongs_to :intake` only; reaches vehicle/customer through it. One
   repair on a visit ([[Job]]). Per-repair, not per-visit — a visit can own several.
-- **Inspection jobsheet** — fixed, product-defined inspection form, one per Intake; storage
-  structure not yet decided (below).
+- **Inspection jobsheet** — fixed, product-defined inspection form, one per Intake; `Jobsheet`
+  (thin header) + `JobsheetAnswer` (field-level rows), decided by [[ADR-015 Jobsheet answers are
+  rows against a frozen question set]] (below).
 - **Trackers** *(restructured 2026-07-16; crew re-restructured to Design B 2026-07-17)*:
   `JobTechnician` (present-tense membership, deleted on remove) + `JobTechnicianTransition`
   (self-contained joined/left history); `JobBlocker` (item, written once) +
@@ -95,27 +98,55 @@ reversed [[ADR-003 Digitized jobsheet in V1]]'s owner-CRUD core. **The fields ar
 product, versioned in code** — an owner never adds, edits, or removes one. One inspection is
 filled **per Intake** (the car's visit), unchanged from ADR-012.
 
-**The storage structure itself is not decided here.** A drafted 39-item field list (5 sections,
-mixed answer types — ratings, numeric measurements like tread depth/tyre pressure, booleans)
-reopens the question of *how* a fixed form's fields and answers are stored: a wide typed table,
-a code-defined catalog + narrow answer rows, or jsonb are all live options, each with different
-trade-offs once numeric measurements need to stay queryable over a vehicle's visit history. See
-[[Inspection jobsheet — design brief]] for the full trade table, the verbatim field list, and
-what a future session needs to decide before building the model.
+**Storage, decided by [[ADR-015 Jobsheet answers are rows against a frozen question set]]:**
+three layers. **Templates** live as Ruby constants, one file per inspection type
+(`app/inspections/car_routine.rb`, seeded first; PDI/lorry variants added later as new files, no
+migration) — each item carries `key, section, position, label, answer_type, options, unit,
+required, retired`. **`Jobsheet`** is a thin header, 1:1 with Intake, holding `inspection_type`
+and a **frozen `item_keys` snapshot** taken at creation (re-snapshotted only until the first
+answer lands). *(⚠ 2026-08-19 — re-snapshot dropped at build. ADR-015 allows `item_keys` to be
+re-snapshotted while a sheet has zero answers, so `inspection_type` could be corrected before
+filling. Simplified: both `inspection_type` and `item_keys` are `attr_readonly` — write-once at
+creation, enforced by Rails (`ReadonlyAttributeError` under `load_defaults 8.0`). A sheet created
+with the wrong type is deleted and recreated. The frozen-question-set decision is unchanged; only
+the escape hatch is gone — it cost the design's one genuinely tricky rule for an edge case. The
+ADR is not edited; this is the dated footnote.)* **`JobsheetAnswer`** is the field-level record — one row per answered item, unique
+on `(jobsheet_id, item_key)` — with two value columns rather than one per type: `choice` (string)
+for rating/boolean/enum items, `measurement` (decimal) for numeric ones (tread depth, tyre
+pressure, pad thickness), plus an explicit `not_applicable` boolean and `note`. The split between
+`choice` and `measurement` is drawn exactly where string comparison stops working — everything
+else genuinely reduces to "pick one of a fixed set."
 
-**What's settled, not deferred:**
+**Why two different read paths.** A blank form to fill is generated from the **live template**
+(non-retired items only). A **printed or historical** sheet is generated from the jobsheet's own
+frozen `item_keys`, not the live template — so a field added to the template after a sheet was
+filled never appears retroactively on that sheet's printout, and a field later retired still
+prints correctly on sheets that asked it. Answers are the source of truth for what a given visit
+actually asked; the template is only ever the source of truth for what a *new* visit asks.
+
+**No door, no state machine.** Unlike Job/Intake, nothing about filling a jobsheet has an illegal
+move to veto — any staff member may write any field, concurrently (the SA checking exterior with
+the customer while a technician checks the engine bay is the normal case). Sections are catalog
+grouping and a UI hint, never a role gate. `inspected_by` (not `created_by`, a deliberate
+exception — see ADR-015) stamps each row with who actually recorded that finding. Completion is
+**derived**, never stored — every required, non-`not_applicable` key in `item_keys` has an answer
+— and only meaningful while the intake is `open`.
+
+**What's settled:**
 - One filled inspection per Intake, keyed on `intake_id` — the per-visit anchor from
   [[ADR-012 Intake-Job two-level aggregate]] stands unchanged.
-- The field *set* changes only by a product release, never by a workshop.
+- The field *set* changes only by a product release, never by a workshop; catalog keys are
+  permanent (retire, never rename/delete — a meaning change is a new key).
 - S5.4 (owner field-admin UI) is dropped — there is nothing left to administer.
+- **The complaint is not a jobsheet field.** Customer-reported "why are they here" stays free-form
+  text on **Intake**; the jobsheet is the standardized staff inspection only.
 
-The freeze rule still applies once the structure lands: a filled sheet becomes **read-only once
-its Intake reaches a terminal state** (`delivered`/`cancelled`), or once it's `ready?` — the
-same open question [[Data model]] previously raised against the EAV shape, restated here because
-it's a door guard on the record, not something that depended on the abandoned template/value
-split. There is no template drift to worry about now (a fixed form doesn't rename or delete
-fields under an old answer), so the freeze question is only *when*, not *how to keep history
-honest against a moving form* — that half of the old problem is gone entirely.
+**The freeze rule, answered:** a filled sheet becomes **read-only once its Intake reaches a
+terminal state** (`delivered`/`cancelled`) — [[Design laws]] #8 (*a Done job is immutable*)
+applied to this aggregate. `ready?` was considered as the cutoff and rejected — a ready intake is
+still `open` and still legitimately editable before delivery. There is no template-drift-under-an-
+old-answer problem to defend against at freeze time either: `item_keys` already pins what a sheet
+asked, independent of whatever the live template looks like by the time it's frozen.
 
 ## A Job's two responsibility sides
 - **Internal** — which staff/role acts. Resolved by WorkshopEmployment role; all changes via a
@@ -210,4 +241,5 @@ honest against a moving form* — that half of the old problem is gone entirely.
   [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]] ·
   [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
   [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] ·
   [[Inspection jobsheet — design brief]]

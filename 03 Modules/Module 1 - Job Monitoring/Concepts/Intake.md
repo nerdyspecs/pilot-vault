@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-14
+updated: 2026-08-19 (Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
 ---
 # Intake
 One car's visit — split out of the old overloaded `Job` by [[ADR-012 Intake-Job two-level
@@ -62,9 +62,12 @@ always read off its jobs.
 - `#ready?` — the one derived query (above)
 - `#active_blockers` — items with no resolved event, a query not a column
 - `#registered_by` — reads the birth transition (`from_status: nil`)
-- `has_many :job_sheet_field_values` *(Sprint 5, not yet built)* — the jobsheet is the car's
-  intake form (customer complaints + vehicle condition), one per visit, so it keys on
-  `intake_id`, not `job_id` — [[ADR-012 Intake-Job two-level aggregate]] §Consequences
+- `has_one :jobsheet` *(Sprint 5, not yet built)* — the standardized staff inspection, one per
+  visit, keyed on `intake_id` not `job_id` — [[ADR-012 Intake-Job two-level aggregate]]
+  §Consequences. **⚠ 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question
+  set]]: corrects a stale line here** — the jobsheet is the fixed inspection *only*; the
+  customer's complaint ("why are they here") is **not** a jobsheet field, it's free-form text
+  that lives on the Intake itself.
 
 ## Timeline — the goal, not yet built
 The same question `Job#timeline` answers for one repair — trace this record's own event
@@ -89,4 +92,5 @@ Tracked as **S4.5.10** in [[Sprint plan]].
 
 ## Related
 - [[Job]] · [[Event log]] · [[Blocker]] · [[Stage model]] · [[Data model]] · [[Design laws]] ·
-  [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]
+  [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]]

@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-19 (Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-19 (Session 35 — S5.1b footnoted: re-snapshot dropped, attr_readonly write-once; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -165,7 +165,16 @@ one flow. *(⚠ 2026-08-14, ADR-012: was "…+ Job" — the visit is the thing c
 first repair, via `CreateIntake`.)* This is also where **UI work resumes** — see the Sprint plan's
 top-of-file warning: the current app has no working intake-creation UI at all.
 
-> [!note] ▶ Next *(2026-08-19)* — jobsheet reversed to fixed/product-defined; storage chipped out
+> [!note] ▶ Next *(2026-08-19, Session 34)* — jobsheet storage decided; build is what's left
+> [[ADR-015 Jobsheet answers are rows against a frozen question set]] resolves what
+> [[Inspection jobsheet — design brief]] chipped out: code-defined templates + a thin `Jobsheet`
+> header (1:1 per Intake, carrying `inspection_type` + a frozen `item_keys` snapshot) +
+> field-level `JobsheetAnswer` rows (`choice`/`measurement` split, `inspected_by`, explicit
+> `not_applicable`). No door — nothing to veto, concurrent multi-actor fill. What remains is
+> **S5.1a–d below** (migration → model/catalog → seed → tests, each its own commit, per house
+> pattern). See [[worklog]] Session 34.
+
+> [!note] Superseded 2026-08-19 — jobsheet reversed to fixed/product-defined; storage chipped out
 > [[ADR-014 Jobsheet is a fixed product-defined inspection]] reverses ADR-003's owner-configurable
 > core: the jobsheet's fields are set by the product (versioned in code), not owner-CRUD at
 > runtime. The EAV build (`JobSheet`/`JobSheetField` template models, branch
@@ -175,7 +184,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 > here**, chipped out to [[Inspection jobsheet — design brief]] for a future session to design and
 > build from scratch off `main`. Two fill-layer decisions from Session 32 are folded into that
 > brief rather than parked separately: the freeze condition, and jobsheet-in-the-intake-form vs. a
-> later step. See [[worklog]] Session 33.
+> later step. See [[worklog]] Session 33. **Storage decided, Session 34 — see the note above.**
 
 - ~~**S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).~~
 - ~~**S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
@@ -188,22 +197,54 @@ top-of-file warning: the current app has no working intake-creation UI at all.
   judged the source of the print-control/versioning/drift problems; S5.3 (EAV values) and S5.4
   (owner field-admin) never applied to begin with once the fields aren't owner-CRUD. Replaced by:
 
-- [ ] **S5.1 (rev)** — fixed inspection jobsheet: design storage structure + build model/migration/
+  ~~**S5.1 (rev)** — fixed inspection jobsheet: design storage structure + build model/migration/
       tests (see [[Inspection jobsheet — design brief]]). Supersedes old S5.1–S5.4 per
-      [[ADR-014 Jobsheet is a fixed product-defined inspection]].
+      [[ADR-014 Jobsheet is a fixed product-defined inspection]].~~
+
+  **Storage designed 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question set]].**
+  Split into the four-layer build, each its own commit, per house pattern:
+
+- [ ] **S5.1a** Migration — `jobsheets` (`workshop_id, intake_id` unique, `inspection_type`,
+      `item_keys` string array) + `jobsheet_answers` (`workshop_id, jobsheet_id, item_key` unique
+      per jobsheet, `choice, measurement, not_applicable, note, inspected_by_id`). RLS +
+      `workshop_id` + composite FK on `inspected_by_id`, per house pattern (see
+      `app/models/concerns/workshop_scoped.rb` and the intake/blocker migrations for the concrete
+      shape). → [[ADR-015 Jobsheet answers are rows against a frozen question set]].
+- [ ] **S5.1b** Models + catalog — `Jobsheet` (`has_many :jobsheet_answers`, snapshots
+      `item_keys` from the template on create/re-select-while-empty), *(⚠ 2026-08-19 — re-snapshot
+      dropped at build: `inspection_type` and `item_keys` are both `attr_readonly`, write-once on
+      create, so there is no re-select-while-empty path. A mis-typed sheet is deleted and
+      recreated. Narrows ADR-015's re-snapshot rule; the frozen question set itself is unchanged.
+      See [[Data model]] §The jobsheet for the full footnote.)* `JobsheetAnswer`
+      (`item_key` inclusion-validated against its jobsheet's own `item_keys`; only the value
+      column matching the catalog's `answer_type` populated), and `app/inspections/car_routine.rb`
+      — the code-defined catalog module, one file per inspection type.
+- [ ] **S5.1c** Seed — the drafted 39-item `car_routine` field list (see the design brief §2;
+      still tentative wording/grouping, treat as a strong starting point).
+- [ ] **S5.1d** Tests: `item_key` bounded to the jobsheet's frozen list · only-one-value-column
+      populated · `not_applicable` orthogonal to value · completion derived correctly (required,
+      non-`not_applicable` keys answered) and only meaningful while `open` · frozen once the
+      intake leaves `open` · RLS/tenancy isolation on both tables, same shape as the blocker
+      isolation tests.
 - [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
-      registration number) → **`CreateIntake`** (opens the visit + its first repair) → fill jobsheet
-      field values + complaints. One screen/flow. *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" —
-      creation goes through `CreateIntake`, not a bare `Job.create!` or a door verb.)* **Spec:
-      [[Intake flow]]** (full SA decision tree, both lookup keys, two-branch mismatch confirm —
-      designed 2026-07-15; unaffected by the backend split, still the UI spec to build against).
+      registration number) → **`CreateIntake`** (opens the visit + its first repair, auto-creates
+      its `Jobsheet`) → capture the customer's **complaint** (free text on Intake) → fill the
+      **jobsheet** (staff-recorded inspection answers) as its own step. One screen/flow, two
+      distinct kinds of data — *(⚠ 2026-08-19, ADR-015: was "jobsheet field values + complaints" as
+      one clause — the complaint is Intake data, never a jobsheet field; see ADR-015 §Why.)*
+      *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" — creation goes through `CreateIntake`, not a
+      bare `Job.create!` or a door verb.)* **Spec: [[Intake flow]]** (full SA decision tree, both
+      lookup keys, two-branch mismatch confirm — designed 2026-07-15; unaffected by the backend
+      split, still the UI spec to build against).
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
 - [ ] **S5.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
       prior **intakes**.
 - [ ] **S5.8** Plate normalization + existing-vehicle lookup.
-- [ ] **S5.9** Tests: intake creates the full graph · jobsheet values saved · ETA persists · history shows.
+- [ ] **S5.9** Tests: intake creates the full graph (incl. its auto-created `Jobsheet`) · complaint
+      saved on Intake · jobsheet answers saved (see S5.1d for the model-level answer tests) · ETA
+      persists · history shows.
 
 ---
 
@@ -276,4 +317,5 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 - [[Roadmap]] · [[M1-F1 Status flow and transitions]] · [[Data model]] · [[Intake]] ·
   [[Design laws]] · [[Product gaps]] · [[ADR-012 Intake-Job two-level aggregate]] ·
   [[ADR-013 The door decomposed]] · [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] ·
   [[Inspection jobsheet — design brief]]
