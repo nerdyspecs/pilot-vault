@@ -1,7 +1,7 @@
 ---
 type: roadmap
 module: M1
-updated: 2026-08-19 (Session 34 — slice 6 jobsheet storage decided, ADR-015, designed not yet built; prior: slice 6 jobsheet re-pointed at ADR-014, fixed/product-defined, storage chipped out; prior: 2026-08-14 slice 5.5 built; slice 7 re-pointed at Intake's token — ADR-012, ADR-013)
+updated: 2026-08-19 (Session 35 — slice 6 jobsheet backend built (S5.1a/b), UI still pending; prior: Session 34 — slice 6 jobsheet storage decided, ADR-015, designed not yet built; prior: slice 6 jobsheet re-pointed at ADR-014, fixed/product-defined, storage chipped out; prior: 2026-08-14 slice 5.5 built; slice 7 re-pointed at Intake's token — ADR-012, ADR-013)
 ---
 # Module 1 — Build roadmap & design backlog
 
@@ -19,7 +19,7 @@ exists; **needs design** = real thinking still required before/while building.
 | 4   | Blockers                                                      | ✅ **built** (Sprint 3 closed 2026-07-24) |
 | 5   | Acknowledged handoffs, surfaced on the board                  | ✅ **built** (Sprint 4 closed 2026-07-28, `982f7e9`+`8fad8c9`; colour deferred to S6.7) |
 | 5.5 | **Intake/Job aggregate morph** — the visit split out above the repair | ✅ **built** (Sprint 4.5 closed 2026-08-14, [[ADR-012 Intake-Job two-level aggregate]] + [[ADR-013 The door decomposed]]) |
-| 6   | Job intake + fixed inspection jobsheet                        | ✅ **designed**, not yet built *(storage decided — [[ADR-015 Jobsheet answers are rows against a frozen question set]]; UI not yet built — see [[Sprint plan]])* |
+| 6   | Job intake + fixed inspection jobsheet                        | 🔨 **backend built**, UI not yet built *(models + migration + catalog shipped, S5.1a/S5.1b — [[ADR-015 Jobsheet answers are rows against a frozen question set]]; intake/jobsheet UI = S5.5, see [[Sprint plan]])* |
 | 7   | Owner status page (token link)                                | ⚠️ needs design *(token now on Intake, not Job — ADR-012, see §7 below)* |
 | 8   | Reporting & attribution                                       | ⚠️ needs design          |
 

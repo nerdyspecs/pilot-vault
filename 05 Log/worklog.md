@@ -1,11 +1,57 @@
 ---
 type: log
-updated: 2026-08-19 (Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-19 (Session 35 — jobsheet backend built (S5.1a/b): catalog + migration + models; two build-time footnotes narrowing ADR-015; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-19 · Session 35 — jobsheet backend built (S5.1a/b): catalog, migration, models
+
+**Summary.** Received Session 34's carry-back cold, ran the ADR-015 coherence check against the
+vault (clean — the red-flag sweep found only historical/struck references), then built the jobsheet
+backend as three commits on `main`: the code catalog (`c5b8977`), the migration (`6041a0b`), the
+models (`a1889a3`). Suite green throughout (139 runs). No UI — that's S5.5. **S5.1c** (seed) and
+**S5.1d** (model tests, incl. the R11 orphan-scan) are still open.
+
+**Two build-time deviations from ADR-015, both recorded as dated footnotes (ADRs are never edited).**
+
+1. **Re-snapshot dropped.** ADR-015 allows a jobsheet's `item_keys` to be re-snapshotted while it has
+   zero answers (so a mis-typed `inspection_type` could be corrected before filling). At build this
+   became the design's only genuinely tricky rule — a conditional callback plus a state-dependent
+   validation — for an edge case. Simplified to `attr_readonly :inspection_type, :item_keys`:
+   write-once at creation, and Rails raises `ReadonlyAttributeError` on a later write
+   (`load_defaults 8.0`). A mis-typed sheet is deleted and recreated. The frozen-question-set
+   decision — the load-bearing part — is unchanged and actually strengthened. Footnote in
+   [[Data model]] §The jobsheet and [[Sprint plan]] S5.1b.
+
+2. **Complaint moved to the jobsheets header.** ADR-015 §Decision placed the customer's complaint on
+   **Intake** ("the complaint is not a jobsheet field"). At build the builder moved it to a free-form
+   `complaint` column on the `jobsheets` header instead. Framed as a **narrowing, not a reversal**:
+   the ADR's real argument — keep free text out of a fixed-answer form — is fully honoured, because
+   the complaint is a plain header column, never an `InspectionItem`; `ANSWER_TYPES` stays
+   `rating|boolean|enum|numeric`. Only *which table* holds the text changed. It sits with the sheet
+   because the walk-around and the complaint are one act at intake, and both freeze together when the
+   intake goes terminal. So **Intake has no complaint column**. Footnotes in [[Data model]],
+   [[Intake]], and [[Sprint plan]] S5.5.
+
+**The shape as built.** `Inspection` (registry, `TYPES`-guarded lookup) + `InspectionItem` (value
+object) + `CarRoutineInspection`/`LorryRoutineInspection` (39 items each, lorry mirrors car for now,
+duplicated not shared so a car edit can't rewrite lorry sheets). `Jobsheet` (1:1 with Intake,
+auto-created inside `CreateIntake`, freezes `item_keys` from the template on create; `complete?` /
+`editable?` derived, never stored). `JobsheetAnswer` (validates `item_key` against the sheet's own
+frozen list, not the live catalog; value column must match the item's `answer_type`; upsert write
+path settles `inspected_by` as last-writer). Both tables RLS-policed; `inspected_by` carries the
+composite `(id, workshop_id)` FK to `workshop_staff` (ADR-010). Three content calls flagged in
+`car_routine_inspection.rb` to revisit before real sheets exist (battery voltage / pad thickness /
+pedal free play typing) — keys are retire-only, so getting them right now is cheaper than later.
+
+**R11 note.** The `item_key` code↔data handshake still has no FK behind it (accepted, [[Risk ledger]]).
+The first automated net — a test scanning every answer's key back to the catalog — lands with
+**S5.1d**, not yet written.
 
 ---
 

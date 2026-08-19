@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (Session 36 — complaint moved to the jobsheets header at build (footnote narrowing ADR-015's Intake placement); prior: Session 35 — re-snapshot dropped at build, item_keys/inspection_type attr_readonly (footnote narrowing ADR-015); prior: Session 34 — jobsheet storage decided, ADR-015; entity map + freeze rule filled in; prior: jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
+updated: 2026-08-19 (Session 35 — S5.1 built (catalog/migration/models); at build re-snapshot dropped (item_keys/inspection_type attr_readonly) and complaint moved to the jobsheets header — both footnotes narrowing ADR-015; prior: Session 34 — jobsheet storage decided, ADR-015; entity map + freeze rule filled in; prior: jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.

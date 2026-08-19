@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (Session 36 — complaint moved to jobsheets header at build (no complaint column on Intake); prior: Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
+updated: 2026-08-19 (Session 35 — has_one :jobsheet built; complaint moved to jobsheets header (no complaint column on Intake); prior: Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
 ---
 # Intake
 One car's visit — split out of the old overloaded `Job` by [[ADR-012 Intake-Job two-level
@@ -62,7 +62,7 @@ always read off its jobs.
 - `#ready?` — the one derived query (above)
 - `#active_blockers` — items with no resolved event, a query not a column
 - `#registered_by` — reads the birth transition (`from_status: nil`)
-- `has_one :jobsheet` *(Sprint 5, not yet built)* — the standardized staff inspection, one per
+- `has_one :jobsheet` *(built S5.1b; fill UI = S5.5)* — the standardized staff inspection, one per
   visit, keyed on `intake_id` not `job_id` — [[ADR-012 Intake-Job two-level aggregate]]
   §Consequences. **⚠ 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question
   set]]: corrects a stale line here** — the jobsheet's *inspection answers* are fixed-vocabulary
