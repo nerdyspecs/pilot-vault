@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-08-19 (Session 35 — jobsheet backend built (S5.1a/b): catalog + migration + models; two build-time footnotes narrowing ADR-015; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-19 (Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -49,9 +49,21 @@ composite `(id, workshop_id)` FK to `workshop_staff` (ADR-010). Three content ca
 `car_routine_inspection.rb` to revisit before real sheets exist (battery voltage / pad thickness /
 pedal free play typing) — keys are retire-only, so getting them right now is cheaper than later.
 
-**R11 note.** The `item_key` code↔data handshake still has no FK behind it (accepted, [[Risk ledger]]).
-The first automated net — a test scanning every answer's key back to the catalog — lands with
-**S5.1d**, not yet written.
+**Model-core tests (S5.1d core, `4b77664`).** Built the durable mechanics for both models, kept
+deliberately independent of catalog *content* — they touch only `Inspection::DEFAULT_TYPE`/`TYPES`
+and read `item_keys` back off the row, and answers are built value-less so nothing depends on an
+item's `answer_type`: freeze, write-once (`attr_readonly`), one-per-intake / one-per-item, both DB
+CHECKs, RLS + composite-FK isolation. **Deferred** (need catalog content, the churny part):
+`value_matches_answer_type` and `complete?`. The builder flagged wanting to redo the test structure
+later — this is the core, not the final shape. S5.1c (seed) is a ticked no-op: the catalog is code,
+nothing to seed.
+
+**R11 net is a rake task, not a unit test — corrected.** Earlier this session assumed the orphan
+scan would be an S5.1d test; walking it through showed it can't be. The test DB is empty (no
+fixtures), so there are no persisted answers to orphan — a catalog rename stays green in the suite.
+The real net is a deploy-time data-integrity check against real data (scan `item_key`/`item_keys`,
+resolve each via `Inspection.item`). Deferred to first deploy; [[Risk ledger]] R11 updated to say so
+rather than implying tests will catch it.
 
 ---
 

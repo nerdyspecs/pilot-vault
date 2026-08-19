@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-19 (Session 35 — S5.1a/S5.1b built + ticked; build footnotes: re-snapshot dropped (attr_readonly write-once), complaint moved to jobsheets header; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-19 (Session 35 — S5.1a/S5.1b built + ticked; S5.1c ticked (no-op), S5.1d core done (value-type/completion + R11 deferred); build footnotes: re-snapshot dropped (attr_readonly write-once), complaint moved to jobsheets header; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -221,13 +221,16 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       column matching the catalog's `answer_type` populated), and
       `app/inspections/car_routine_inspection.rb` + `lorry_routine_inspection.rb` — the
       code-defined catalog modules (lorry mirrors car for now), fronted by an `Inspection` registry.
-- [ ] **S5.1c** Seed — the drafted 39-item `car_routine` field list (see the design brief §2;
-      still tentative wording/grouping, treat as a strong starting point).
-- [ ] **S5.1d** Tests: `item_key` bounded to the jobsheet's frozen list · only-one-value-column
-      populated · `not_applicable` orthogonal to value · completion derived correctly (required,
-      non-`not_applicable` keys answered) and only meaningful while `open` · frozen once the
-      intake leaves `open` · RLS/tenancy isolation on both tables, same shape as the blocker
-      isolation tests.
+- [x] **S5.1c** *(2026-08-19 — n/a)* Seed — moot: the catalog is code (`c5b8977`), not DB rows, so
+      the 39-item list ships in `car_routine_inspection.rb`, nothing to seed. Kept as a ticked
+      no-op so the four-layer numbering stays intact.
+- [~] **S5.1d** *(2026-08-19, `4b77664` — core done, two rules deferred)* Tests: `item_key` bounded
+      to the jobsheet's frozen list · both DB CHECKs (one value column; `not_applicable` orthogonal)
+      · frozen once the intake leaves `open` · one-per-item · RLS/tenancy + composite-FK isolation,
+      same shape as the blocker tests. **Deferred** (need catalog *content*, the churny part): the
+      `value_matches_answer_type` (numeric→measurement/else→choice) and `complete?` (required set)
+      rules — write once the flagged content calls settle, or via a registry stub. **R11 orphan
+      protection is NOT a unit test** — it's a deploy-time data-integrity check (see [[Risk ledger]]).
 - [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
       registration number) → **`CreateIntake`** (opens the visit + its first repair, auto-creates
       its `Jobsheet`) → capture the customer's **complaint** (free text on the `jobsheets` header)
