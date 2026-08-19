@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
+updated: 2026-08-19 (Session 36 — complaint moved to jobsheets header at build (no complaint column on Intake); prior: Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
 ---
 # Intake
 One car's visit — split out of the old overloaded `Job` by [[ADR-012 Intake-Job two-level
@@ -65,9 +65,13 @@ always read off its jobs.
 - `has_one :jobsheet` *(Sprint 5, not yet built)* — the standardized staff inspection, one per
   visit, keyed on `intake_id` not `job_id` — [[ADR-012 Intake-Job two-level aggregate]]
   §Consequences. **⚠ 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question
-  set]]: corrects a stale line here** — the jobsheet is the fixed inspection *only*; the
-  customer's complaint ("why are they here") is **not** a jobsheet field, it's free-form text
-  that lives on the Intake itself.
+  set]]: corrects a stale line here** — the jobsheet's *inspection answers* are fixed-vocabulary
+  only; the customer's complaint ("why are they here") is **not** an inspection item. *(⚠ Further
+  corrected at build, 2026-08-19: ADR-015 §Decision placed the complaint on **Intake**; at build it
+  moved to a free-form `complaint` column on the `jobsheets` header instead — still not a catalog
+  item, so the ADR's free-text-out-of-a-fixed-form argument holds; only the table changed. It sits
+  with the sheet because the walk-around and the complaint are one act, and freeze together. So
+  Intake has **no** complaint column. See [[Data model]] §The jobsheet for the full footnote.)*
 
 ## Timeline — the goal, not yet built
 The same question `Job#timeline` answers for one repair — trace this record's own event

@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-19 (Session 35 — S5.1b footnoted: re-snapshot dropped, attr_readonly write-once; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-19 (Session 36 — S5.5 footnoted: complaint moved to jobsheets header; prior: Session 35 — S5.1b footnoted: re-snapshot dropped, attr_readonly write-once; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -204,21 +204,23 @@ top-of-file warning: the current app has no working intake-creation UI at all.
   **Storage designed 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question set]].**
   Split into the four-layer build, each its own commit, per house pattern:
 
-- [ ] **S5.1a** Migration — `jobsheets` (`workshop_id, intake_id` unique, `inspection_type`,
-      `item_keys` string array) + `jobsheet_answers` (`workshop_id, jobsheet_id, item_key` unique
+- [x] **S5.1a** *(2026-08-19, `6041a0b`)* Migration — `jobsheets` (`workshop_id, intake_id` unique,
+      `inspection_type`, `item_keys` string array, `complaint` text — see the S5.5 footnote) +
+      `jobsheet_answers` (`workshop_id, jobsheet_id, item_key` unique
       per jobsheet, `choice, measurement, not_applicable, note, inspected_by_id`). RLS +
       `workshop_id` + composite FK on `inspected_by_id`, per house pattern (see
       `app/models/concerns/workshop_scoped.rb` and the intake/blocker migrations for the concrete
       shape). → [[ADR-015 Jobsheet answers are rows against a frozen question set]].
-- [ ] **S5.1b** Models + catalog — `Jobsheet` (`has_many :jobsheet_answers`, snapshots
+- [x] **S5.1b** *(2026-08-19, catalog `c5b8977` + models `a1889a3`)* Models + catalog — `Jobsheet` (`has_many :jobsheet_answers`, snapshots
       `item_keys` from the template on create/re-select-while-empty), *(⚠ 2026-08-19 — re-snapshot
       dropped at build: `inspection_type` and `item_keys` are both `attr_readonly`, write-once on
       create, so there is no re-select-while-empty path. A mis-typed sheet is deleted and
       recreated. Narrows ADR-015's re-snapshot rule; the frozen question set itself is unchanged.
       See [[Data model]] §The jobsheet for the full footnote.)* `JobsheetAnswer`
       (`item_key` inclusion-validated against its jobsheet's own `item_keys`; only the value
-      column matching the catalog's `answer_type` populated), and `app/inspections/car_routine.rb`
-      — the code-defined catalog module, one file per inspection type.
+      column matching the catalog's `answer_type` populated), and
+      `app/inspections/car_routine_inspection.rb` + `lorry_routine_inspection.rb` — the
+      code-defined catalog modules (lorry mirrors car for now), fronted by an `Inspection` registry.
 - [ ] **S5.1c** Seed — the drafted 39-item `car_routine` field list (see the design brief §2;
       still tentative wording/grouping, treat as a strong starting point).
 - [ ] **S5.1d** Tests: `item_key` bounded to the jobsheet's frozen list · only-one-value-column
@@ -228,10 +230,13 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       isolation tests.
 - [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
       registration number) → **`CreateIntake`** (opens the visit + its first repair, auto-creates
-      its `Jobsheet`) → capture the customer's **complaint** (free text on Intake) → fill the
-      **jobsheet** (staff-recorded inspection answers) as its own step. One screen/flow, two
-      distinct kinds of data — *(⚠ 2026-08-19, ADR-015: was "jobsheet field values + complaints" as
-      one clause — the complaint is Intake data, never a jobsheet field; see ADR-015 §Why.)*
+      its `Jobsheet`) → capture the customer's **complaint** (free text on the `jobsheets` header)
+      → fill the **jobsheet** (staff-recorded inspection answers) as its own step. One screen/flow,
+      two distinct kinds of data — *(⚠ 2026-08-19, ADR-015: was "jobsheet field values +
+      complaints" as one clause — the complaint is free text, never a fixed inspection item; see
+      ADR-015 §Why.)* *(⚠ corrected at build, 2026-08-19: ADR-015 put the complaint on **Intake**;
+      it ships as a free-form `complaint` column on the `jobsheets` header instead — not a catalog
+      item, so the ADR's argument holds; see [[Data model]] §The jobsheet footnote.)*
       *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" — creation goes through `CreateIntake`, not a
       bare `Job.create!` or a door verb.)* **Spec: [[Intake flow]]** (full SA decision tree, both
       lookup keys, two-branch mismatch confirm — designed 2026-07-15; unaffected by the backend

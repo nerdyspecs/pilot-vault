@@ -1,7 +1,7 @@
 ---
 type: concept
 module: M1
-updated: 2026-08-19 (Session 35 — re-snapshot dropped at build, item_keys/inspection_type attr_readonly (footnote narrowing ADR-015); prior: Session 34 — jobsheet storage decided, ADR-015; entity map + freeze rule filled in; prior: jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
+updated: 2026-08-19 (Session 36 — complaint moved to the jobsheets header at build (footnote narrowing ADR-015's Intake placement); prior: Session 35 — re-snapshot dropped at build, item_keys/inspection_type attr_readonly (footnote narrowing ADR-015); prior: Session 34 — jobsheet storage decided, ADR-015; entity map + freeze rule filled in; prior: jobsheet section rewritten for the fixed/product-defined model — ADR-014; storage structure deferred to design brief)
 ---
 # Data model
 Customers, vehicles, jobs, and who's allowed to touch them.
@@ -110,7 +110,9 @@ filling. Simplified: both `inspection_type` and `item_keys` are `attr_readonly` 
 creation, enforced by Rails (`ReadonlyAttributeError` under `load_defaults 8.0`). A sheet created
 with the wrong type is deleted and recreated. The frozen-question-set decision is unchanged; only
 the escape hatch is gone — it cost the design's one genuinely tricky rule for an edge case. The
-ADR is not edited; this is the dated footnote.)* **`JobsheetAnswer`** is the field-level record — one row per answered item, unique
+ADR is not edited; this is the dated footnote.)* The header also carries the customer's `complaint`
+(free-form text — see the settled bullet below for why it lives here rather than on Intake).
+**`JobsheetAnswer`** is the field-level record — one row per answered item, unique
 on `(jobsheet_id, item_key)` — with two value columns rather than one per type: `choice` (string)
 for rating/boolean/enum items, `measurement` (decimal) for numeric ones (tread depth, tyre
 pressure, pad thickness), plus an explicit `not_applicable` boolean and `note`. The split between
@@ -138,8 +140,17 @@ exception — see ADR-015) stamps each row with who actually recorded that findi
 - The field *set* changes only by a product release, never by a workshop; catalog keys are
   permanent (retire, never rename/delete — a meaning change is a new key).
 - S5.4 (owner field-admin UI) is dropped — there is nothing left to administer.
-- **The complaint is not a jobsheet field.** Customer-reported "why are they here" stays free-form
-  text on **Intake**; the jobsheet is the standardized staff inspection only.
+- **The complaint is not an inspection item**, but it is a jobsheet column. Customer-reported "why
+  are they here" is free-form `complaint` **text on the `jobsheets` header** — never an
+  `InspectionItem`, so the fixed catalog stays pure fixed-vocabulary. The jobsheet's answer *rows*
+  are the standardized staff inspection only. *(⚠ 2026-08-19 — complaint moved to the jobsheets
+  header at build. ADR-015 §Decision put it on **Intake** ("the complaint is not a jobsheet field")
+  to keep free text out of a fixed-answer form. That argument is honoured a different way here: the
+  complaint is a plain header column, never a catalog item — `ANSWER_TYPES` stays
+  `rating|boolean|enum|numeric` — so only *which table* holds the text changed, not the
+  free-text-vs-fixed-form separation. It sits with the sheet because the walk-around and the
+  complaint are one act at intake, and both freeze together when the intake goes terminal. The ADR
+  is not edited; this is the dated footnote. Also corrected in [[Intake]] §Associations.)*
 
 **The freeze rule, answered:** a filled sheet becomes **read-only once its Intake reaches a
 terminal state** (`delivered`/`cancelled`) — [[Design laws]] #8 (*a Done job is immutable*)
