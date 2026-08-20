@@ -96,5 +96,7 @@ untouched by that. Separately, Session 23 raised **QR self-enrollment** — an o
 this ADR's bilateral invite-then-accept requirement. Recorded, not adopted: a QR is a bearer secret
 with no identity proof, and auto-assigning a role on scan is exactly what Decision 1 refuses. The
 full proposal and its three recorded risks live in [[V2 - Customer and company dashboards]]
-§QR self-enrollment. **Reopen only at v2 kickoff, and only for Company crew** — workshop crew
-joining stays bilateral.
+§QR self-enrollment. The builder's stated intent (2026-07-18) was to reopen this ADR for
+**workshop crew too**, not only for v2's Company — when it is designed properly, never
+retrofitted informally. Until that design pass produces a real supersession, every clause here
+stands in force; this footnote is a marker, not a change.

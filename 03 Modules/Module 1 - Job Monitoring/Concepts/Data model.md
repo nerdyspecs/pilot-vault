@@ -229,6 +229,9 @@ asked, independent of whatever the live template looks like by the time it's fro
 > ADR-010 for the full shape and accepted trade-offs (no ownership history in v1).
 
 ## v2 — additive, do not build
+> **Feature vision + relational design for the dashboards these seeds enable:**
+> [[V2 - Customer and company dashboards]] (designed 2026-07-18, Session 23).
+
 - **Company + CompanyEmployment** (roles: owner / fleet_manager / driver); Company claims company-kind Customers via `customers.company_id`.
   *(2026-07-13, builder: Company also gets its own **governance edge** (`CompanyOwnership`-style),
   mirroring Workshop's Ownership — both are instances of one reusable pattern: organisation ─
