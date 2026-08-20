@@ -58,6 +58,27 @@ CHECKs, RLS + composite-FK isolation. **Deferred** (need catalog content, the ch
 later — this is the core, not the final shape. S5.1c (seed) is a ticked no-op: the catalog is code,
 nothing to seed.
 
+**Recovered a month-old orphaned note during the sweep.** A vault-wide coherence pass turned up
+three stale git worktrees under `.claude/worktrees` (gitignored, invisible to `git status`, and
+tripling every grep). Two were detached at commits already in `main` and were pruned. The third
+held **three unmerged commits from Session 23 (2026-07-18)** carrying a 256-line
+[[V2 - Customer and company dashboards]] note — the v2 read-surface vision, the **claim-flow
+token-bridge** (with its own critique: a bearer link proves possession, not identity), **QR
+self-enrollment** for company crew, and a **strategic fence** ruling daily driver↔truck tracking
+out of Knot entirely (it's fleet-ops software on a second tenant). None of that thread existed on
+`main` or was referenced anywhere. Restored the file, left the body as the faithful Session 23
+record, and added a drift banner covering five corrections since (ADR-010 killed the
+`WorkshopEmployment`/`WorkshopOwnership` naming its down-payment argument rested on; ADR-012 moved
+the token and the frozen stamp to Intake; sprint numbers predate the 5↔6 swap; the one down-payment
+it asked for — canonicalizing `vehicle.vin` like the plate — is still undone). Linked from
+[[Deferred design]], and gave [[ADR-008 Crew joining requires acceptance]] a forward-pointer
+footnote so its QR-reopen flag isn't dangling. **Nothing was lost, and nothing v1 built depends on
+it** — the note's own §"What v1 should do NOW" asked for *"Schema: nothing."*
+
+**Also fixed in the sweep:** 11 wikilinks wrapped across newlines (Obsidian rendered them as plain
+text, not links) and the crew entry in [[Open questions]] still saying `JobMechanic` a month after
+the technician rename.
+
 **R11 net is a rake task, not a unit test — corrected.** Earlier this session assumed the orphan
 scan would be an S5.1d test; walking it through showed it can't be. The test DB is empty (no
 fixtures), so there are no persisted answers to orphan — a catalog rename stays green in the suite.

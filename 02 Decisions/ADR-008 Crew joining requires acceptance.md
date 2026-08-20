@@ -87,3 +87,14 @@ core (Ownership vs Employment split, thin User, one access door) — only its on
 naming, mirroring the v2 fleet edges (`CompanyEmployment` / `CompanyOwnership`-style, one
 reusable organisation─membership─governance pattern, never one table). Every clause of this
 ADR reads with the new names; nothing else changes.
+
+**Footnote 2026-08-19 (Session 35) — flagged for a future reopen; decision unchanged for v1.**
+Both renamed edges above were themselves superseded by [[ADR-010 WorkshopStaff supersedes the edge split]]
+(one `WorkshopStaff` row + append-only `WorkshopStaffRole`); this ADR's *joining* ruling is
+untouched by that. Separately, Session 23 raised **QR self-enrollment** — an owner displays a
+"register as driver / fleet manager" QR, and scanning auto-joins with a role — which would bypass
+this ADR's bilateral invite-then-accept requirement. Recorded, not adopted: a QR is a bearer secret
+with no identity proof, and auto-assigning a role on scan is exactly what Decision 1 refuses. The
+full proposal and its three recorded risks live in [[V2 - Customer and company dashboards]]
+§QR self-enrollment. **Reopen only at v2 kickoff, and only for Company crew** — workshop crew
+joining stays bilateral.

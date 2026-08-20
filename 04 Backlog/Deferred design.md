@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-19 (Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-08-19 (Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -236,4 +236,7 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
 
 ## Related
 - [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]] ·
-  [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] ·
+  [[V2 - Customer and company dashboards]] (the v2 read-surface vision — customer/company
+  dashboards, the claim-flow token bridge, QR self-enrollment; recovered 2026-08-19, carries its
+  own drift banner)
