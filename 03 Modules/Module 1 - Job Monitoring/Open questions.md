@@ -11,8 +11,11 @@ decisions — they're details of how a feature behaves.
   manually (whichever channel is free/available). WhatsApp Business API vs email automation is
   **deferred — circle back later**; decide during the **intake feature** design.
 - **Single vs multiple assignees** — ✅ resolved *(re-ruled 2026-07-16, supersedes the earlier
-  "one `primary` + optional helpers" answer)*: v1 is **single mechanic per job, no flag at all** —
-  S2.6 shipped `JobMechanic` without the column. When helpers arrive the flag lands as **`lead`**
+  "one `primary` + optional helpers" answer)*: v1 is **single technician per job, no flag at all** —
+  S2.6 shipped the crew-membership model without the column. *(⚠ vocabulary: written as
+  "mechanic"/`JobMechanic`; renamed **technician**/`JobTechnician` 2026-07-17 — code uses
+  technician throughout. Same rename banner as [[M1-F1 Status flow and transitions]].)*
+  When helpers arrive the flag lands as **`lead`**
   (not `primary` — naming settled to avoid re-litigation). See [[Deferred design]] (crew entry) +
   [[M1-F1 Status flow and transitions]] Settled 2026-07-16.
 - **One active job per vehicle** — ✅ resolved 2026-07-15 ([[Risk ledger]] R5, commit `2c5ca91`),

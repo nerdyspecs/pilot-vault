@@ -202,8 +202,9 @@ footnote — not a silent assumption.
 
 ## Related
 - [[ADR-014 Jobsheet is a fixed product-defined inspection]] (extended by this — the fixed/
-  product-defined ruling stands; this decides the storage it deferred) · [[ADR-012 Intake-Job
-  two-level aggregate]] (the per-visit anchor, unchanged — keyed on `intake_id`) ·
+  product-defined ruling stands; this decides the storage it deferred) ·
+  [[ADR-012 Intake-Job two-level aggregate]] (the per-visit anchor, unchanged — keyed on
+  `intake_id`) ·
   [[ADR-013 The door decomposed]] (the contrast this ADR draws against — no veto, no door) ·
   [[Inspection jobsheet — design brief]] (the entry point this ADR resolves) · [[Data model]] ·
   [[Design laws]] · [[Deferred design]] · [[Risk ledger]] · [[Sprint plan]]

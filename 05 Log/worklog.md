@@ -373,8 +373,9 @@ table), [[Features overview]] (F2, F6).
 
 **Summary.** Picked up Session 29's built-but-uncommitted Intake/Job split and took it the rest of
 the way: a codebase sweep, then layered commits (schema → models → services/controllers →
-remainder), a comment-noise pass, and a naming/comment-discipline standard added to the [[Agent
-guide]]. Then, reviewing the service layer, the builder pushed back hard on `JobActions` doing too
+remainder), a comment-noise pass, and a naming/comment-discipline standard added to the
+[[Agent guide]]. Then, reviewing the service layer, the builder pushed back hard on `JobActions`
+doing too
 much — three separate concerns (state moves, authorization, creation) crammed into one class — which
 produced a second decision this session, **[[ADR-013 The door decomposed]]**: creation left for
 `CreateIntake`/`CreateJob`, authorization left for a new **`Permissions`** class checked at the

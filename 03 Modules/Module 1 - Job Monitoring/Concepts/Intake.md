@@ -4,8 +4,9 @@ module: M1
 updated: 2026-08-19 (Session 35 — has_one :jobsheet built; complaint moved to jobsheets header (no complaint column on Intake); prior: Session 34 — jobsheet association corrected + complaint/inspection split, ADR-015)
 ---
 # Intake
-One car's visit — split out of the old overloaded `Job` by [[ADR-012 Intake-Job two-level
-aggregate]]. Tenant-scoped, carries the facts a `Job` used to carry alone: `workshop_id`,
+One car's visit — split out of the old overloaded `Job` by
+[[ADR-012 Intake-Job two-level aggregate]]. Tenant-scoped, carries the facts a `Job` used to
+carry alone: `workshop_id`,
 `vehicle_id`, `customer_id` (frozen at intake — who this visit bills to, not necessarily the
 vehicle's current owner), and the owner status-page `token`. One `Intake` `has_many :jobs` —
 one or more repairs, each with its own stage, crew, and blockers. See [[Job]].
@@ -64,8 +65,9 @@ always read off its jobs.
 - `#registered_by` — reads the birth transition (`from_status: nil`)
 - `has_one :jobsheet` *(built S5.1b; fill UI = S5.5)* — the standardized staff inspection, one per
   visit, keyed on `intake_id` not `job_id` — [[ADR-012 Intake-Job two-level aggregate]]
-  §Consequences. **⚠ 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question
-  set]]: corrects a stale line here** — the jobsheet's *inspection answers* are fixed-vocabulary
+  §Consequences. **⚠ 2026-08-19,
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]]: corrects a stale line
+  here** — the jobsheet's *inspection answers* are fixed-vocabulary
   only; the customer's complaint ("why are they here") is **not** an inspection item. *(⚠ Further
   corrected at build, 2026-08-19: ADR-015 §Decision placed the complaint on **Intake**; at build it
   moved to a free-form `complaint` column on the `jobsheets` header instead — still not a catalog

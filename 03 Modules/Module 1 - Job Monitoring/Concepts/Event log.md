@@ -176,8 +176,9 @@ The **"waiting on whom" board read** = one query across the event tables:
 `receiver_id IS NOT NULL AND acknowledged_at IS NULL`, grouped by job
 (`Job.pending_acknowledgements_by_job`) or filtered to a person
 (`WorkshopStaff#pending_acknowledgements`). A query, not a table ([[Design laws]] #3), and there is
-no inbox — the board is the only surface. *(2026-07-28, [[ADR-011 Acknowledgement as stored
-visibility]]: the earlier `.pending_ack` handoff predicate is **deleted**. It solved the "a bare
+no inbox — the board is the only surface.
+*(2026-07-28, [[ADR-011 Acknowledgement as stored visibility]]: the earlier `.pending_ack`
+handoff predicate is **deleted**. It solved the "a bare
 `acknowledged_at IS NULL` overcounts" problem — NULL meaning both dropped-handoff and
 never-was-a-handoff — with a read-time classifier; storing `receiver_id` solves the same overcount
 structurally: `receiver_id IS NULL` **is** "never was a handoff", so the two-column check is exact

@@ -82,8 +82,8 @@ list above was also dropped, removed by ADR-006 long before.)*
 - **Job** — tenant-scoped, `belongs_to :intake` only; reaches vehicle/customer through it. One
   repair on a visit ([[Job]]). Per-repair, not per-visit — a visit can own several.
 - **Inspection jobsheet** — fixed, product-defined inspection form, one per Intake; `Jobsheet`
-  (thin header) + `JobsheetAnswer` (field-level rows), decided by [[ADR-015 Jobsheet answers are
-  rows against a frozen question set]] (below).
+  (thin header) + `JobsheetAnswer` (field-level rows), decided by
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] (below).
 - **Trackers** *(restructured 2026-07-16; crew re-restructured to Design B 2026-07-17)*:
   `JobTechnician` (present-tense membership, deleted on remove) + `JobTechnicianTransition`
   (self-contained joined/left history); `JobBlocker` (item, written once) +

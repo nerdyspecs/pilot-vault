@@ -85,8 +85,9 @@ RLS design reads those.
 ## 2026-07-28 · Session 28 — Sprint 4 reshaped and built: acknowledgement as stored visibility
 
 **Summary.** Went to plan Sprint 4 on Session 27's *holder* model, and a chip-out study of the
-proposed `handoff` concern reshaped the whole answer. **[[ADR-011 Acknowledgement as stored
-visibility]] revised in place** (it was never committed): the holder dies, the receiver is **stored
+proposed `handoff` concern reshaped the whole answer.
+**[[ADR-011 Acknowledgement as stored visibility]] revised in place** (it was never committed):
+the holder dies, the receiver is **stored
 at write time**, and the feature is **visibility, not an inbox**. Then built it: `982f7e9` (write side + board), then
 `8fad8c9` (the done-awaiting-delivery pin + a coherency pass). 102 unit + 9 system green.
 
@@ -812,8 +813,8 @@ Headline rulings: **named verbs, no generic `change_stage!`** — the door's pub
 allow-list IS the verb set and the Done-freeze is structural (nothing accepts `done` but
 `deliver!`; nothing accepts the terminals). Refusals raise `JobActions::Refused` with a human
 message; every verb wraps read-check-write in `job.with_lock` — the **row-lock deferral
-woken** (one shared line, the "wait until it hurts" trade lost its upside) — [[Deferred
-design]] superseded with a dated note. Next: build S2.7–S2.10 against this spec, on the
+woken** (one shared line, the "wait until it hurts" trade lost its upside) —
+[[Deferred design]] superseded with a dated note. Next: build S2.7–S2.10 against this spec, on the
 builder's go.
 
 **The rulings, in brief** (full detail: [[M1-F1 Status flow and transitions]] Settled
@@ -843,8 +844,9 @@ builder's go.
   workload is a query feeding S5.2, zero Phase 3 work.
 
 **Sweep.** [[Deferred design]]: row-lock entry superseded (woken), new `swap_mechanic!`
-entry, self-join entry's swap sentence dated-corrected. [[M1-F1 Status flow and
-transitions]]: new Settled 2026-07-16 (Phase 3) section + dated corrections on the
+entry, self-join entry's swap sentence dated-corrected.
+[[M1-F1 Status flow and transitions]]: new Settled 2026-07-16 (Phase 3) section + dated
+corrections on the
 responsibility rule's swap wording, the resolved ⚠ edge, and the concurrency-deferral line.
 Sprint plan S2.7–S2.10 respecified to the verb surface (guards: `ensure_counter!` ·
 `ensure_crew_technician!` · `ensure_technician!` + per-verb stage checks; S2.10 =

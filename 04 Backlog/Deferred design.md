@@ -19,8 +19,9 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   priced. [[ADR-015 Jobsheet answers are rows against a frozen question set]] gets the same
   fidelity for one array column (`item_keys`, frozen per jobsheet) plus an append-only catalog —
   git already preserves label history for free.
-- **Jobsheet photos** *(design-for, not built — [[ADR-015 Jobsheet answers are rows against a
-  frozen question set]])* — Active Storage, `has_many_attached :photos` on `JobsheetAnswer`, so a
+- **Jobsheet photos** *(design-for, not built —
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]])* — Active Storage,
+  `has_many_attached :photos` on `JobsheetAnswer`, so a
   photo anchors to the specific finding ("rear bumper → attention") rather than the whole sheet or
   the whole visit. Deferred because attachments are their own topic; the model is shaped to not
   preclude it — the payoff (a per-item photo organizer, not a binder pile) only exists because
@@ -32,8 +33,9 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   here, an unlogged edit is unrecoverable after the fact; there's no migration that reconstructs
   "what did this used to say." Decide before it's needed if a dispute/audit case makes "who
   changed the tread reading" matter.
-- **Multiple inspection types** (PDI, lorry, passenger-car variants) — [[ADR-015 Jobsheet answers
-  are rows against a frozen question set]] builds the *mechanism* now (per-template Ruby files +
+- **Multiple inspection types** (PDI, lorry, passenger-car variants) —
+  [[ADR-015 Jobsheet answers are rows against a frozen question set]] builds the *mechanism* now
+  (per-template Ruby files +
   `inspection_type` on the jobsheet header) but ships only `car_routine`'s content. Adding a
   second template is a new file + seed, no migration. **Trigger:** an actual PDI or lorry-service
   workshop customer.
