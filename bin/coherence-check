@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Vault + app coherence check. Run at the start of a main session, and after any carry-back.
+# Everything below should read clean; anything flagged is a real drift to reconcile.
+A=/Users/teckhong/teckhong/pilot
+V=/Users/teckhong/teckhong/pilot-vault
+
+echo "── uncommitted ──"
+echo "  app[$(git -C $A status --porcelain | wc -l | tr -d ' ')]  vault[$(git -C $V status --porcelain | wc -l | tr -d ' ')]"
+
+echo "── unpushed ──"
+echo "  app[$(git -C $A log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]  vault[$(git -C $V log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]"
+
+echo "── unmerged branches (work a sub-session may have stranded) ──"
+found=0
+for R in $A $V; do
+  for b in $(git -C $R for-each-ref --format='%(refname:short)' refs/heads | grep -v '^main$'); do
+    n=$(git -C $R rev-list --count main.."$b" 2>/dev/null)
+    [ "$n" != "0" ] && { echo "  ⚠ $(basename $R)/$b — $n commit(s) not in main"; found=1; }
+  done
+done
+[ $found = 0 ] && echo "  none"
+
+echo "── stray worktrees (gitignored, invisible to git status) ──"
+echo "  app[$(git -C $A worktree list | tail -n +2 | wc -l | tr -d ' ')]  vault[$(git -C $V worktree list | tail -n +2 | wc -l | tr -d ' ')]"
+
+echo "── vault citations leaking into app code ──"
+n=$(grep -rniE 'ADR-[0-9]|law [0-9]|\(S[0-9]|Sprint [0-9]' $A/app 2>/dev/null | wc -l | tr -d ' ')
+echo "  $n  (must be 0 — a reader without the vault can't resolve them, and they rot)"
+
+echo "── vault links ──"
+python3 - "$V" <<'PY'
+import re, os, sys
+root = sys.argv[1]; notes = set(); files = []
+for r, d, fs in os.walk(root):
+    d[:] = [x for x in d if x not in ('.git', '.claude')]
+    for f in fs:
+        if f.endswith('.md'):
+            files.append(os.path.join(r, f)); notes.add(f[:-3])
+bad = []
+for p in files:
+    s = open(p, encoding='utf-8').read()
+    for m in re.finditer(r'\[\[([^\]]*?)\]\]', s, re.S):
+        t = ' '.join(m.group(1).split('|')[0].split())
+        if t.startswith('#') or t == 'link':      # heading anchors and prose examples
+            continue
+        if '\n' in m.group(1):
+            bad.append(f"{os.path.relpath(p, root)} -> wrapped across a newline: [[{t}]]")
+        elif t not in notes:
+            bad.append(f"{os.path.relpath(p, root)} -> unresolved: [[{t}]]")
+print(f"  {len(notes)} notes, {len(bad)} broken")
+for b in bad:
+    print(f"  ⚠ {b}")
+PY
