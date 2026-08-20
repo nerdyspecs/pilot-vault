@@ -59,3 +59,8 @@ special floor-device / PIN mechanism yet ("as is" for now — revisit later).
 - No GraphQL — REST is sufficient and simpler
 - No background job complexity for v1 — keep it synchronous unless there is a clear need
 - No Redis for now — revisit if real-time features require it
+
+## Local dev credentials
+Kept here rather than in the app repo's `CLAUDE.md` so no password enters the code history.
+- **Dev DB throwaway login:** `preview-check@test.local` / `proofdrive123`
+- Seeded personas (`db/seeds.rb`, all roles): password `seedpass123`
