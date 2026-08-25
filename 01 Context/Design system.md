@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-25 (Session 36 — renamed from 'Visual theme' and made the SINGLE SOURCE OF TRUTH for design: absorbs the component inventory, navigation/IA, posture, journey and build order from [[Screen map]]; type scale, elevation and the border/ink ramps corrected against the live Bay prototype; RE-LOCKED on the Bay system's visual language: Helvetica/Arial, ink #101010, warm-neutral canvas, square corners + visible 1px borders, status chips re-derived as border/fill/text, new interaction + accessibility rules; Knot's brand and action colours retained; prior: 2026-07-28 waiting-pin ageing bands — ADR-011)
+updated: 2026-08-25 (Session 36 — sizing/spacing/type ruled onto BOOTSTRAP's ladder after a side-by-side A/B; accent reversed to #2727D9 and --brand retired; canvas corrected to white; two border weights; desktop-only scope; page template added; reference implementation at 08 Experiments/knot-board-desktop.html; renamed from 'Visual theme' and made the SINGLE SOURCE OF TRUTH for design: absorbs the component inventory, navigation/IA, posture, journey and build order from [[Screen map]]; type scale, elevation and the border/ink ramps corrected against the live Bay prototype; RE-LOCKED on the Bay system's visual language: Helvetica/Arial, ink #101010, warm-neutral canvas, square corners + visible 1px borders, status chips re-derived as border/fill/text, new interaction + accessibility rules; Knot's brand and action colours retained; prior: 2026-07-28 waiting-pin ageing bands — ADR-011)
 ---
 # Design system
 
@@ -19,6 +19,16 @@ updated: 2026-08-25 (Session 36 — renamed from 'Visual theme' and made the SIN
 >    *visible* instead of a doc-versus-code guess.
 >
 > Layer 3 is the one that makes the other two honest. It is [[Sprint plan]] **S5.5a**.
+>
+> **Scope: desktop only, for now** *(2026-08-25, builder — "for simplicity and sanity, everything on
+> monitor screens first")*. This does **not** reverse the three-posture commitment; it confirms the
+> desk-first sequencing already recorded in L2. UI law 5 (thumb-first) is **dormant, not deleted**,
+> and the fluid-type note under §The scale is the first thing to re-check when the phone posture
+> returns.
+>
+> **Bootstrap 5.3.3 is the base, and the default answer.** Where Bootstrap has a value, we take it;
+> the brand layer holds only what Bootstrap cannot express — colour, negative tracking, the six
+> component dimensions, and five components.
 
 ~~Locked 2026-07-06 (worked out interactively — samples compared, choices deliberate).~~
 **Re-locked 2026-08-25 (Session 36)** on the visual language of the **Bay system reference**, so the
@@ -43,24 +53,33 @@ with the status vocabulary. A "secondary button" is a *style* (outlined, quiet),
 
 | Role | Token | Value | Job |
 |---|---|---|---|
-| Brand | `--brand` | `#22456B` | steel blue — wordmark, heading accents. Scarce on purpose. **Kept — identity.** |
-| Action | `--action` | `#2D5E94` | buttons, links, focus — "you can act here". **Kept — identity.** |
-| Action hover | `--action-hover` | `#24507F` | hover/pressed |
-| Page | `--page` | ~~`#F5F6F8`~~ **`#F4F4F2`** | app canvas — Bay's canvas value |
-| Surface | `--surface` | `#FFFFFF` | cards, app bar |
-| Border | `--border` | ~~`#E2E6EB`~~ **`#D8D8D4`** | **container edges** — card/panel outlines. Structure, not a whisper |
-| Border inner | `--border-inner` | **`#E7E7E3`** | **rules *inside* a container** — row dividers, section splits. Lighter, so a dense list doesn't read as a grid of boxes |
-| Toolbar surface | `--surface-sunk` | **`#F7F7F5`** | list toolbars and filter bars — a third tone between white and canvas |
-| Text | `--text` | ~~`#1C2B3A`~~ **`#101010`** | body — Bay's ink |
-| Text muted | `--text-muted` | ~~`#5C6670`~~ **`#55554F`** | default muted — row body copy |
-| Text quiet | `--text-quiet` | **`#6D6D68`** | sub-navigation, counts, secondary labels |
-| Text faint | `--text-faint` | **`#777773`** | micro-type only (10–11px): timestamps, "waiting" ages |
+| Action | `--action` | **`#2727D9`** | primary buttons, selected nav, links, icons, live bullets |
+| Action hover | `--action-hover` | **`#1F1FB0`** | hover/pressed |
+| Page **and** surface | `--page` / `--surface` | **`#FFFFFF`** | canvas and panels are **both white** — hairlines do all the separating |
+| Hover | `--hover` | **`#F4F4F2`** | the *only* job the grey has: row, tile and nav hover |
+| Border | `--border` | **`#D8D8D4`** | container edges **and** grid dividers (metric strip) |
+| Rule | `--rule` | **`#E5E5E1`** | dividers between rows *inside* a panel |
+| Ink | `--ink` | **`#101010`** | body text, inverted panels, avatars |
+| Muted | `--text-muted` | **`#55554F`** | row body copy |
+| Quiet | `--text-quiet` | **`#6D6D68`** | sub-nav, counts, secondary labels |
+| Faint | `--text-faint` | **`#777773`** | micro-type: eyebrows, timestamps, ages |
+| Placeholder | `--placeholder` | **`#A9A9A4`** | input placeholder text only — never body copy |
 
-**Corrected 2026-08-25 against the live prototype**
-*(see [[Bay system reference — external comparison]] §Verified)*: the first pass of this restyle
-recorded **one** border token and **one** muted ink. Both are wrong — the system uses a **ramp**. Container edges and inner rules are
-deliberately different weights (that is what stops a dense table reading as heavy), and muted text
-steps down with size rather than being one grey. A separate sunken tone carries toolbars.
+> [!warning] `--brand` `#22456B` is **retired** *(2026-08-25, builder)*
+> Knot's steel blue was kept in the first pass of the restyle, and the accent stayed at `#2D5E94`
+> with Bay's `#2727D9` explicitly declined. **Both of those are reversed.** The builder leaned the
+> design the rest of the way toward Bay, and a steel-blue wordmark beside an indigo primary button
+> reads as broken — so the mark takes `--action` too. The wordmark, the K tile and the square
+> avatar are Knot's; the *hue* is now shared. There is no separate brand colour.
+
+**Two border weights, deliberately — not three.** The reference implementation uses three
+(`#D8D8D4`, `#E8E8E5`, `#E5E5E1`); the last two are visually indistinguishable, so Knot standardises
+on two. The distinction that *does* earn its keep: a metric strip's dividers use the **full**
+`--border` so the strip reads as a grid, while a list's row dividers use `--rule` so a dense list
+reads as a list. Same hairline logic, opposite jobs.
+
+**The muted ink is a ramp, not one grey** — it steps down as type gets smaller. Recorded because
+the first pass of this restyle had a single muted value, which is what made dense rows look flat.
 
 **Changed 2026-08-25:** ~~Neutrals are not true grays — each carries a faint blue undertone so the
 whole app reads as one family.~~ Neutrals are now **warm-achromatic**, in Bay's idiom: the family is
@@ -69,10 +88,16 @@ the chrome is the brand/action blue. This is a real trade — the old rule bough
 wash; the new one buys crispness and makes the status chips read louder against their surroundings,
 which is what the status vocabulary is for.
 
-**`--page` is not white**, though Bay's operational canvas is. Bay's own review surface uses
-`#F4F4F2` and Knot takes that value, because the 2026-07-06 lock rejected a pure-white canvas for
-glare and nothing about the restyle changes that reasoning. This is a deliberate, reasoned decline
-of one line of Bay's spec.
+> [!danger] **The canvas is white. An earlier note here said otherwise and was wrong.**
+> The first pass recorded `--page: #F4F4F2` as "a deliberate, reasoned decline" of Bay's
+> operational-canvas-is-white line, on the 2026-07-06 glare argument. **Checked against the
+> shipped CSS on 2026-08-25 and that was a mistake:** the reference sets
+> `.bay-app-shell { background: #f4f4f2 }` and then *overrides it* to `#fff` — the operational
+> canvas has always been white, exactly as its own written spec said.
+> The grey is not unused: it is the **hover** tone. Retaining it as the canvas gave it a job it
+> never had and left hover with none.
+
+Chrome style: **all-light** — white app bar and canvas, blue only in the mark and in actions.
 
 Chrome style: **all-light** ("Option A") — white app bar, blue only in wordmark + actions.
 
@@ -148,29 +173,40 @@ pass after real use. Uses the existing palette — **no new colour is introduced
 - Mono for plates & job numbers: `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`.
   **Unchanged** — Bay says nothing about mono, and the plate treatment is Knot's own.
 
-### The scale *(measured from the live prototype, 2026-08-25 — the written reference omitted all of this)*
+### The scale — **Bootstrap's, not ours** *(ruled 2026-08-25)*
 
-Display type is the loudest part of the language, and it is **not** "big and bold". It is
-**regular weight, set tighter than its own size, and negatively tracked** — the tracking gets
-tighter as the size grows.
+The scale was measured off the reference first (44 / 28 / 20 / 15 / 13 / 12 / 11 / 10 px, on a 1.6
+ratio) and then **compared side by side against Bootstrap's own ladder in a working mock**. Bootstrap
+won on the builder's call. Three of the six sizes were already identical; the rest moved by 1–4px.
 
-| Role | Size | Line-height | Tracking | Weight |
-|---|---|---|---|---|
-| Hero (marketing / empty-state) | `4.48rem` ≈ 72px | **0.93** | `-0.065em` | 400 |
-| Page title (h1) | `2.56rem` ≈ 41px | **0.98** | `-0.06em` | 400 |
-| Card title / stat number | `1.75rem` = 28px | 1.0 | `-0.045em` … `-0.07em` | 400 |
-| Section heading | 15px | normal | 0 | 600 |
-| Body | 13px | normal | 0 | 400 |
-| Row title | 13px | normal | 0 | **700** |
-| Sub-navigation, counts | 11px | normal | 0 | 400–600 |
-| Micro (ages, timestamps) | 10–11px | normal | 0 | 400 |
+| Role | Bootstrap | rem / px | Weight | Tracking | Leading |
+|---|---|---|---|---|---|
+| Page title | `.display-6` | 2.5 / 40 | 400 | `-0.05em` | 1.0 |
+| Metric number | `.fs-3` | 1.75 / 28 | 400 | `-0.05em` | 1.0 |
+| Panel title | `.fs-5` | 1.25 / 20 | 400 | `-0.03em` | 1.2 |
+| Section heading | `.fs-6` | 1 / 16 | 600 | 0 | 1.3 |
+| Body | `--bs-body-font-size` | 0.875 / 14 | 400 | 0 | 1.45 |
+| Row title | — | 0.875 / 14 | **700** | 0 | 1.3 |
+| Support · eyebrow · chip | `.small` | 0.75 / 12 | 400 / **700** | 0 / **+0.08em** | 1.4 |
 
-Sizes step on a **1.6 ratio**. Two rules that matter more than the numbers:
+**Six steps, five of them Bootstrap classes.** The only override is body size, and Bootstrap 5.3.3
+exposes it as a variable (`body { font-size: var(--bs-body-font-size) }`), so it is a one-line
+change with no build step.
 
-1. **Display weight is 400, never bold.** Size and tracking carry the emphasis. A bold 41px
-   heading is the single fastest way to stop looking like this system.
-2. **Negative tracking is proportional, not fixed.** Roughly `-0.045em` at 28px growing to
-   `-0.065em` at 72px. Body text and anything under 15px is tracked normally.
+Three rules matter more than the numbers:
+
+1. **Display type is weight 400, never bold.** Size and tracking carry the emphasis. A bold 40px
+   heading is the fastest way to stop looking like this system.
+2. **Tracking is always `em`, never `px`.** Negative above 20px, zero on body, positive on eyebrows.
+   This is what replaced values like the reference's `0.825px`.
+3. **Leading drops below 1.0 nowhere.** The reference sets 0.93–0.98 on display sizes; Bootstrap's
+   ladder plus `line-height: 1` is close enough and is one less number to carry.
+
+> [!note] Fluid type, and why desktop-only makes it safe
+> `.display-6` and `.fs-1`–`.fs-4` are **fluid** below the `xl` breakpoint — Bootstrap's RFS makes
+> them `calc(rem + vw)` and only snaps to the exact rem at ≥1200px. Knot is **desktop-only for now**
+> (below), so they resolve exactly. **Revisit this deliberately when the phone posture returns**
+> rather than discovering it then.
 
 ### The eyebrow
 A recurring component, not a one-off: **small uppercase letterspaced muted label** sitting directly
@@ -209,6 +245,120 @@ from Bay, and the most visible half of the restyle:
 This obeys law 1 rather than straining it: geometry is doing the work decoration used to, and none
 of it draws the eye the way status does.
 
+## Sizing and spacing — Bootstrap's ladder *(ruled 2026-08-25)*
+
+**Every spacing decision comes from Bootstrap's spacer scale.** Nothing is ours to maintain, and
+no value is an orphan like `15.5px`.
+
+`0 · .25rem · .5rem · 1rem · 1.5rem · 3rem`  →  **0 · 4 · 8 · 16 · 24 · 48**
+
+| Need | Bootstrap | px |
+|---|---|---|
+| Page padding | `p-5` | 48 |
+| Section gap · panel head | `gap-3` · `p-3` | 16 |
+| Row padding | `py-2 px-3` | 8 × 16 |
+| Sidebar block rhythm | `mb-4` | 24 |
+| Icon ↔ label · chip padding-x | `gap-2` · `px-2` | 8 |
+| Nav gap | `gap-1` | 4 |
+
+Two things this buys beyond tidiness: the values can live as **utility classes in the Slim
+templates** rather than in our CSS at all, and row padding-x now equals panel-head padding-x, so
+a row's text aligns with its panel's title. (In the reference those differ by 4px.)
+
+**The ladder is coarse** — it jumps 24 → 48 with nothing at 32. This template never needs 32. If a
+screen does, that is one component value, not a reason to fork the scale.
+
+### The six dimensions Bootstrap has no utility for
+
+Component sizes, not spacing. They would live in CSS under any scheme; all six are clean 8px
+multiples.
+
+| Token | rem | px |
+|---|---|---|
+| `--sidebar` | 14 | 224 |
+| `--topbar` | 4.5 | 72 |
+| `--rail` | 20 | 320 |
+| `--control` (button, nav item) | 2.5 | 40 |
+| `--row-min` | 5 | 80 |
+| `--tile-min` | 4 | 64 |
+
+**Six numbers for the whole system.**
+
+## Layout archetypes
+
+**Every screen is one of the archetypes below.** There are two. A screen that fits neither is not a
+styling problem — it is a **new archetype, and it gets recorded here before it gets built.** That
+rule exists because the sign-in screen was designed first and defined second, and came out
+disconnected from everything else.
+
+### Archetype 1 — the app page
+
+Everything behind the sign-in wall. Four things, always in this order.
+
+1. **Frame** — fixed sidebar `--sidebar`, full viewport height, 1px right edge. The content column
+   is grid column 2, and **the topbar lives inside it**, not above the whole shell.
+2. **Topbar** — `--topbar` tall, sticky, eyebrow + context on the left, avatar right.
+3. **Page head** — eyebrow → page title, one primary action on the right, **bottom-aligned**
+   (the button sits level with the title's baseline, not its cap), `p-3` below.
+4. **Section stack** — sections separated by `gap-3`. Only two section types exist:
+   - **Metric strip** — *n* equal columns, borders collapsed, `--border` between.
+   - **Split** — `minmax(0,1fr)` + `--rail`, `gap-3`.
+
+**Panel anatomy:** head (`p-3`, `--rule` below) + rows (`--row-min`, `py-2 px-3`, `--rule` between,
+`--hover` on hover).
+
+Any screen is *frame → head → n sections → panels*. If a screen needs a fifth thing, that is a
+design decision, not a layout one.
+
+### Archetype 2 — the gate
+
+The screens **outside** the wall: sign in, sign up, forgot password, reset password. No sidebar, no
+topbar, no page head — so archetype 1 does not apply and its own layout (`layouts/auth.html.slim`)
+is correct. What makes it *on-system* rather than a one-off:
+
+1. **Canvas** — `--hover` grey, not white. The gate is outside the product, and the grey is what
+   lets a white card lift off the page without a shadow. This is the same token doing a second,
+   documented job; it is **not** a second grey.
+2. **One centred column**, `max-width: 25rem`, vertically centred, page padding `p-5`.
+3. **Head** — the square mark, then **eyebrow → title** exactly as archetype 1's page head, and one
+   supporting line at body size in `--text-quiet`. Left-aligned. The eyebrow is not optional here.
+4. **One card** — `--border`, square, `p-4`, holding the form and both actions.
+5. **The action pair** — one solid primary (the screen's own verb), then a `--rule` divider, then
+   the **cross-link as an outlined full-width button** (Sign in ⇄ Create an account). Law 3 holds:
+   the outlined button is a *style*, not a second primary.
+6. **Footnote** below the card in `--text-faint`: the owner-facing line that keeps vehicle owners
+   out of staff signup.
+
+The gate never does workshop creation, invitation acceptance, or role selection. **Its job ends at
+authentication**; everything after is `home#index`.
+
+## Bootstrap is the default answer *(rule, not preference)*
+
+**If Bootstrap ships the component, we use Bootstrap's and theme it through `--bs-*` variables.
+We never hand-roll an equivalent.** This is the whole point of the single-source-of-truth ruling,
+and it is the rule most easily broken without noticing — a hand-built input looks fine and quietly
+forks the system.
+
+| Need | Use | Theme via |
+|---|---|---|
+| Text / email / password field | `.form-control` | `--bs-border-radius`, `--bs-border-color`, `--bs-body-font-size` |
+| Label | `.form-label` | our type tokens |
+| Checkbox / radio | `.form-check-input` | `--bs-form-check-bg`, `--bs-border-color` |
+| Select | `.form-select` | as above |
+| Button, solid | `.btn.btn-primary` | `--bs-btn-bg`, `--bs-btn-border-color`, `--bs-btn-hover-bg` |
+| Button, outlined | `.btn.btn-outline-secondary` | `--bs-btn-color`, `--bs-btn-border-color` |
+| Table | `.table` | `--bs-table-*` |
+| Focus ring | Bootstrap's | `--bs-focus-ring-color/width/opacity` — **never a hand-rolled `box-shadow`** |
+| Validation message | `.invalid-feedback` | our type tokens |
+
+**The brand layer holds only what Bootstrap cannot express:** colour tokens, `--bs-border-radius: 0`,
+`--bs-body-font-size`, `--font-sans`, negative tracking, the six component dimensions, the eyebrow,
+and the five components Bootstrap has no equivalent for — panel, list row, metric tile, status chip,
+side-nav item.
+
+**Spacing never appears in our CSS.** It comes from Bootstrap utility classes in the Slim templates.
+If a padding or gap value is written in `application.css`, that is the smell.
+
 ## Components
 
 The named inventory. **A component is named here *before* a screen uses it twice** — UI law 7 has
@@ -223,12 +373,12 @@ On mobile the primary action becomes a **full-width bar** below the heading inst
 
 | Component | Spec |
 |---|---|
-| **Card / panel** | White, `1px --border`, square, **no shadow**. Section rules inside use `--border-inner` |
+| **Card / panel** | White, `1px --border`, square, **no shadow**. Row dividers inside use `--rule` |
 | **Inverted panel** | `#101010` background, white text, `1px --border`, 18px padding. For context//"what this screen is" copy — used sparingly, it is the loudest thing on a page |
-| **Stat tile row** | Tiles **share their 1px rules** rather than sitting in a gapped grid. Each: number at 28px/400 tracked `-0.07em`, label beside it, arrow right. Reflows 3-up → 2-up → 1-up, borders collapsing throughout |
-| **List row** | CSS grid, ~76px, `12px 20px` padding, divider `--border-inner`. Title 13px/**700**, muted subline 11px `--text-faint`, then columns, then a right arrow. **One row component** — the attention queue and every list reuse it |
-| **List toolbar** | `--surface-sunk` bar at the top of a list: search left (with icon), record count right, 11px `--text-quiet` |
-| **Status badge** | 1px border + pale fill + dark text of one hue family, square. See §Status colors |
+| **Metric strip** | Tiles **share their 1px rules** (`--border`) rather than sitting in a gapped grid. Each: `--tile-min` tall, number at `.fs-3`/400, label beside it, arrow right |
+| **List row** | CSS grid, `--row-min`, `py-2 px-3`, divider `--rule`, `--hover` on hover. Title 0.875rem/**700**, subline 0.75rem `--text-quiet`, then columns, then a right arrow. **One row component** — the attention queue and every list reuse it |
+| **List toolbar** | A panel head carrying search left (with icon) and the record count right, 0.75rem `--text-quiet` |
+| **Status chip** | 1px border + pale fill + dark text of one hue family, square, `0.75rem`, `px-2`. See §Status colors |
 | **Square bullet** | 7×7, no radius. `--action` when the row is live, `#B9B9B4` when it is not |
 | **Avatar** | 32×32 **square**, `#101010` fill, white initials. Never a circle |
 
@@ -236,11 +386,11 @@ On mobile the primary action becomes a **full-width bar** below the heading inst
 
 | Part | Spec |
 |---|---|
-| Sidebar | White, `1px --border` right edge, collapsible to an icon rail. Brand + collapse toggle top, workshop name under it |
+| Sidebar | White, **fixed**, full viewport height, `--sidebar` wide, `1px --border` right edge, collapsible to an icon rail. Brand + collapse toggle top, workshop name under it. **The topbar is not above it** — it sits in the content column |
 | Group label | Eyebrow style, above each cluster of items |
-| Nav item | **42px** tall, 13px, `#4E4E49`, padding `0 10px` |
+| Nav item | `--control` tall, body size, `#4E4E49`, `gap-2` to its icon |
 | Nav item, selected | **Full-bleed solid `--action`, white text.** Not a tint, not a left bar |
-| Sub-nav item | 33px, 11px/600, `--text-quiet`, indented |
+| Sub-nav item | 0.75rem/600, `--text-quiet`, indented **with a vertical rule**. Exists **only** under a parent — never as a standalone indent |
 | Sidebar footer | **Account chip pinned to the bottom** — square avatar + name/role + chevron |
 
 ### Navigation *(mobile)*
@@ -629,7 +779,14 @@ no CDN) with `application.css` as a **brand layer** on top — it maps Bootstrap
 never fork `bootstrap.min.css`; new screens compose Bootstrap utilities + brand classes, no
 inline styles. Token values in this note still win if anything differs.
 
-**Token additions from the 2026-08-25 correction** (on top of the re-lock below): `--border-inner`,
+**What the brand layer holds after the 2026-08-25 ruling** — and nothing else: the colour tokens ·
+`--bs-border-radius: 0` (squares buttons, cards, inputs, badges in one line) ·
+`--bs-body-font-size: .875rem` · `--font-sans` · the six component dimensions · negative tracking
+(Bootstrap has no letter-spacing utilities) · the eyebrow · five components (panel, list row, metric
+tile, status chip, nav item). **Every spacing value comes from Bootstrap utilities in the templates**,
+so no padding or gap number lives in our CSS at all.
+
+~~**Token additions from the 2026-08-25 correction**~~ (on top of the re-lock below): `--border-inner`,
 `--surface-sunk`, and the muted ink ramp `--text-muted` / `--text-quiet` / `--text-faint` — plus the
 three floating-layer shadows. The type scale is `--font-sans` sizes with proportional negative
 tracking; nothing here needs a build step.

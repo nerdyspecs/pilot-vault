@@ -90,12 +90,22 @@ inverted `#101010` context panel, square 7×7 bullets, square 32px avatars, bord
 tiles, the list toolbar, the `bay-` class convention, and the responsive rules (primary action
 becomes a full-width bar; 52×52 square floating control).
 
-**Confirmed as documented:** square corners, `#F4F4F2` canvas, white cards, 1px borders, ~40–42px
-desktop controls.
+**Confirmed as documented:** square corners, white cards, 1px borders, ~40–42px desktop controls.
 
-**Confirmed by absence — Bay really has no status colour system.** No `badge`/`chip`/`pill`/`status`
-class exists anywhere in the markup. The builder's ruling to *re-derive* Knot's five was therefore
-made on accurate information: there was nothing to copy.
+**Disproved: the canvas.** `#F4F4F2` is the *review-surface* value. The shipped CSS sets
+`.bay-app-shell { background: #f4f4f2 }` and then **overrides it to `#fff`** — the operational canvas
+is white, exactly as Bay's own written spec said. Knot's first pass recorded a "reasoned decline" of
+that line and was wrong; corrected in [[Design system]]. The grey's real job is the **hover** tone
+(`.bay-action-row:hover`, `.bay-signal-strip a:hover`).
+
+**Bay has no status *colour* system — but it does have badge components.** *(Corrected 2026-08-25:
+an earlier version of this line claimed no `badge`/`chip`/`pill`/`status` class existed anywhere.
+That was based on dashboard markup alone and was too strong.)* The stylesheet carries `.status`,
+`.status-muted`, `.status-active`, `.status-ready`, `.status-risk` and `.label-chip` — but they are
+**monochrome and blue only** (grey fill, blue-tint fill, solid blue), flat, borderless, 10px. There
+is no red/amber/green vocabulary and nothing semantic to copy, so **the substance holds**: the
+builder's ruling to *re-derive* Knot's five was made on accurate information. What is worth noting
+is the shape difference — Bay's badges are flat fills, Knot's are border + fill + text.
 
 > [!warning] **`/design-preview` is an empty shell.** All nine sections (`typography`, `colour`,
 > `buttons`, `fields`, `status`, `navigation`, `data`, `feedback`, `bootstrap`) return **empty
@@ -129,7 +139,8 @@ four questions the component exists to answer.
 | From Bay | Why not |
 |---|---|
 | **`Employment` as the authorisation edge** | **The loudest one.** Knot *retired* this concept — `WorkshopEmployment`/`WorkshopOwnership` were collapsed into `WorkshopStaff` on 2026-07-21 ([[ADR-010 WorkshopStaff supersedes the edge split]], Session 25). Importing Bay's role table would resurrect a dead vocabulary into notes that took a session to clean |
-| Bay blue `#2727D9`; brand asset `bay.svg`; the name "Bay blue" | Another product's **badge**, not a style system. Knot keeps its wordmark, the K tile, and brand steel blue `#22456B`. The accent was offered and declined; `--action` stays `#2D5E94` |
+| Brand asset `bay.svg`; the name "Bay blue" | Another product's **badge**. Knot keeps its own wordmark, K tile and square avatar |
+| ~~Bay blue `#2727D9`~~ **— adopted after all** | Declined in the first pass, then **reversed 2026-08-25** when the builder leaned the design the rest of the way toward Bay. `--action` is now `#2727D9` and `--brand #22456B` is **retired** — a steel-blue mark beside an indigo button reads as broken. See [[Design system]] §Color roles |
 | Stack: Rails 8.1 · ERB · SQLite · Propshaft · Docker/Render · Netlify | Conflicts with Knot's pinned 8.0.5, Slim views, vendored Bootstrap with no build step, and PaaS deploy ([[Tech stack]], ADR-001) |
 | `lucide-rails` | A third gem after devise and slim-rails. **Deferred, not refused** — the icon rail is the only real use, and the sidebar it belongs to is still an open call. Decide both together; inline-vendored SVGs are the no-dependency alternative |
 | The `/` role chooser | Knot has real Devise auth and `Permissions`. Adopting a prototype's role selector would be a regression |

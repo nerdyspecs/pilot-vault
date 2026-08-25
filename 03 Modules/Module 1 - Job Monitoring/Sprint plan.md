@@ -254,16 +254,17 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       declared it and never built it, so Knot is the first to actually populate it.
 - [ ] **S5.5b** *(cross-cutting)* **The visual re-lock** — apply [[Design system]]'s 2026-08-25
       restyle in `application.css`, all through Bootstrap variables and still never forking the
-      vendored file: `--font-sans` → Helvetica/Arial · neutral tokens re-pointed (`--page` `#F4F4F2`,
-      `--border` `#D8D8D4`, `--text` `#101010`, `--text-muted` `#5A5A57`) · `--bs-border-radius`
-      family → `0` · borders visible at 1px · **the ramps** (`--border-inner`, `--surface-sunk`,
-      and the muted ink steps `--text-muted`/`--text-quiet`/`--text-faint`) · the **type scale**
-      with proportional negative tracking · the three **floating-layer shadows** (inline structure
-      stays flat) · **`.stage-badge` re-cut from two-part to
-      border + fill + text** · **flashes moved off `.alert-info`/`.alert-warning`**, which were
-      wearing reserved status hues (UI law 2). A **token-level restyle, not a rewrite** — only the
-      badge and the flash need markup changes. Provenance:
-      [[Bay system reference — external comparison]].
+      vendored file. **Largely a transcription** — `08 Experiments/knot-board-desktop.html` already
+      carries the intended `:root` block ([[UI experiments]] §3). Contents: `--font-sans` →
+      Helvetica/Arial · `--action` `#2727D9` (`--brand` retired) · `--page`/`--surface` **white**,
+      `--hover` `#F4F4F2` · two border weights (`--border` `#D8D8D4`, `--rule` `#E5E5E1`) · the muted
+      ink ramp · `--bs-border-radius` family → `0` · `--bs-body-font-size` → `.875rem` · negative
+      tracking in `em` · the six component dimensions · the three **floating-layer shadows** (inline
+      structure stays flat) · **`.stage-badge` re-cut from two-part to border + fill + text** ·
+      **flashes moved off `.alert-info`/`.alert-warning`**, which were wearing reserved status hues
+      (UI law 2). **No spacing values** — those come from Bootstrap utility classes in the templates
+      ([[Design system]] §Sizing and spacing). A token-level restyle, not a rewrite: only the badge
+      and the flash need markup changes.
 - [ ] **S5.5c** *(cross-cutting)* **The shell** ([[Design system]] §Components + L1): one header, one back
       affordance (four wordings exist today), reachability for Customers/Crew/Blocker types (which
       exist only as buttons on the board), **and page width** — every workshop screen is currently

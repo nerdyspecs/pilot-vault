@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knot — board</title>
+<style>
+/* ===================================================================
+   Two scales, same markup. Flip with the control at bottom-right.
+
+   data-scale="bay" = measured off bay-qwyg.onrender.com at 1440px
+   data-scale="bs"  = Bootstrap 5.3.3 only: spacers 0/.25/.5/1/1.5/3rem,
+                      type from .display-6/.fs-3/.fs-5/.fs-6, body .875rem,
+                      plus six component dimensions Bootstrap has no
+                      utility for (all clean 8px multiples).
+   =================================================================== */
+:root{
+  /* colour is identical in both scales */
+  --action:#2727D9;  --action-hover:#1F1FB0;
+  --page:#FFFFFF;    --surface:#FFFFFF;   --hover:#F4F4F2;
+  --border:#D8D8D4;  --rule:#E5E5E1;
+  --ink:#101010;     --muted:#55554F;  --quiet:#6D6D68;  --faint:#777773;  --nav-ink:#4E4E49;
+  --font:Helvetica, Arial, sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+/* ---------- SCALE A : Bay, as measured (default) ---------- */
+:root{
+  --page-pad-y:42px;   --page-pad-x:57.6px;
+  --gap-section:16px;
+  --pad-panel-y:16px;  --pad-panel-x:20px;
+  --pad-row-y:13px;    --pad-row-x:20px;    --row-min:82px;
+  --pad-tile-y:12px;   --pad-tile-x:18px;   --tile-min:66px;
+  --topbar-h:72px;     --sidebar-w:224px;   --rail-w:323px;
+  --nav-h:42px;        --nav-gap:3px;       --icon-gap:11px;   --control-h:42px;
+  --side-pad:23px 16px 16px;  --side-inset:10px;
+  --brand-mb:23px;     --workshop-mb:27px;  --head-mb:17px;
+  --fs-title:44px;     --ls-title:-.06em;   --lh-title:.98;
+  --fs-metric:28px;    --ls-metric:-.07em;
+  --fs-panel:20px;     --ls-panel:-.045em;
+  --fs-body:13px;      --fs-row-title:13px; --fs-sub:11px;
+  --fs-eyebrow:11px;   --ls-eyebrow:.825px;
+  --fs-label:12px;     --fs-link:12px;      --fs-chip:11px;
+  --chip-h:22px;       --chip-pad-x:8px;
+}
+/* ---------- SCALE B : Bootstrap 5.3.3 (wins when the box is ticked) ---------- */
+html:has(#scale-bs:checked){
+  --page-pad-y:3rem;   --page-pad-x:3rem;          /* p-5 */
+  --gap-section:1rem;                               /* gap-3 */
+  --pad-panel-y:1rem;  --pad-panel-x:1rem;          /* p-3 */
+  --pad-row-y:.5rem;   --pad-row-x:1rem;   --row-min:5rem;    /* py-2 px-3 */
+  --pad-tile-y:.5rem;  --pad-tile-x:1rem;  --tile-min:4rem;
+  --topbar-h:4.5rem;   --sidebar-w:14rem;  --rail-w:20rem;
+  --nav-h:2.5rem;      --nav-gap:.25rem;   --icon-gap:.5rem;  --control-h:2.5rem;
+  --side-pad:1.5rem 1rem 1rem;  --side-inset:.5rem;
+  --brand-mb:1.5rem;   --workshop-mb:1.5rem;  --head-mb:1rem;
+  --fs-title:2.5rem;   --ls-title:-.05em;  --lh-title:1;      /* .display-6 */
+  --fs-metric:1.75rem; --ls-metric:-.05em;                    /* .fs-3 */
+  --fs-panel:1.25rem;  --ls-panel:-.03em;                     /* .fs-5 */
+  --fs-body:.875rem;   --fs-row-title:.875rem;  --fs-sub:.75rem;
+  --fs-eyebrow:.75rem; --ls-eyebrow:.08em;
+  --fs-label:.75rem;   --fs-link:.75rem;   --fs-chip:.75rem;
+  --chip-h:1.5rem;     --chip-pad-x:.5rem;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+body{font-family:var(--font);background:var(--page);color:var(--ink);font-size:var(--fs-body)}
+a{text-decoration:none;color:inherit}
+.eyebrow{font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:var(--ls-eyebrow);
+  text-transform:uppercase;color:var(--faint);line-height:1.2}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:100vh}
+.sidebar{position:fixed;z-index:2;top:0;left:0;width:var(--sidebar-w);height:100vh;
+  background:var(--surface);border-right:1px solid var(--border);padding:var(--side-pad);
+  display:flex;flex-direction:column}
+.main{grid-column:2;min-width:0}
+.brand-row{display:flex;align-items:flex-start;justify-content:space-between;
+  margin:0 0 var(--brand-mb) var(--side-inset)}
+.wordmark{display:inline-flex;align-items:center;font-weight:600;font-size:16px;color:var(--action)}
+.wordmark .k{width:33px;height:33px;font-size:17px;background:var(--action);color:#fff;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;margin-right:9px}
+.collapse{width:26px;height:26px;border:1px solid var(--border);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--nav-ink)}
+.workshop{font-size:var(--fs-label);color:var(--quiet);margin:0 var(--side-inset) var(--workshop-mb)}
+.side-nav{display:grid;gap:var(--nav-gap)}
+.side-nav a{height:var(--nav-h);padding:0 var(--side-inset);display:flex;align-items:center;
+  gap:var(--icon-gap);font-size:var(--fs-body);color:var(--nav-ink)}
+.side-nav a:hover{background:var(--hover)}
+.side-nav a.is-active{background:var(--action);color:#fff}
+.side-nav svg{width:18px;height:18px;flex:0 0 auto;stroke-width:1.8}
+.side-foot{margin-top:auto;border-top:1px solid var(--rule);padding-top:15px;
+  display:flex;align-items:center;gap:10px}
+.side-foot b{display:block;font-size:var(--fs-label);font-weight:600}
+.side-foot span{font-size:var(--fs-sub);color:var(--quiet)}
+.avatar{width:32px;height:32px;background:var(--ink);color:#fff;font-size:var(--fs-sub);font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+
+.topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 var(--page-pad-x);display:flex;align-items:center;justify-content:space-between}
+.topbar .role{font-size:var(--fs-body);font-weight:600;margin-top:3px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+
+.page{padding:var(--page-pad-y) var(--page-pad-x) var(--page-pad-x)}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:var(--head-mb)}
+h1{font-size:var(--fs-title);line-height:var(--lh-title);letter-spacing:var(--ls-title);font-weight:400;margin-top:6px}
+.btn{height:var(--control-h);padding:0 16px;display:inline-flex;align-items:center;gap:8px;
+  background:var(--action);color:#fff;border:0;font-family:inherit;font-size:var(--fs-body);
+  font-weight:600;cursor:pointer;flex:0 0 auto}
+.btn:hover{background:var(--action-hover)}
+
+.strip{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--border)}
+.strip .tile{min-height:var(--tile-min);padding:var(--pad-tile-y) var(--pad-tile-x);display:grid;
+  grid-template-columns:auto minmax(0,1fr) 18px;gap:11px;align-items:center;border-right:1px solid var(--border)}
+.strip .tile:last-child{border-right:0}
+.strip .tile:hover{background:var(--hover)}
+.tile .n{font-size:var(--fs-metric);line-height:1;letter-spacing:var(--ls-metric)}
+.tile .l{font-size:var(--fs-label);font-weight:600}
+.tile .a{color:var(--action)}
+
+.ops{display:grid;grid-template-columns:minmax(0,1fr) var(--rail-w);gap:var(--gap-section);
+  margin-top:var(--gap-section);align-items:start}
+.panel{background:var(--surface);border:1px solid var(--border)}
+.panel-head{padding:var(--pad-panel-y) var(--pad-panel-x);border-bottom:1px solid var(--rule);
+  display:flex;align-items:flex-end;justify-content:space-between;gap:15px}
+.panel-title{font-size:var(--fs-panel);line-height:1.15;letter-spacing:var(--ls-panel);font-weight:400;margin-top:5px}
+.panel-link{font-size:var(--fs-link);font-weight:600;color:var(--action);white-space:nowrap}
+.panel-link:hover{text-decoration:underline}
+
+.arow{min-height:var(--row-min);padding:var(--pad-row-y) var(--pad-row-x);display:grid;
+  grid-template-columns:8px minmax(0,1fr) minmax(130px,.52fr) 56px;gap:13px;align-items:center;
+  border-bottom:1px solid var(--rule)}
+.arow:last-child{border-bottom:0}
+.arow:hover{background:var(--hover)}
+.bullet{width:7px;height:7px;background:var(--action)}
+.bullet.off{background:#B9B9B4}
+.rt{font-size:var(--fs-row-title);font-weight:700}
+.rs{font-size:var(--fs-sub);color:var(--quiet);margin-top:5px}
+.rmeta .chipline{margin-bottom:5px}
+.rmeta .wait{font-size:var(--fs-sub);color:var(--quiet)}
+.go{color:var(--action);font-size:var(--fs-link);font-weight:600;text-align:right}
+
+.chip{display:inline-flex;align-items:center;height:var(--chip-h);padding:0 var(--chip-pad-x);
+  font-size:var(--fs-chip);border:1px solid;white-space:nowrap}
+.chip.registered{border-color:#D8D6CE;background:#F6F5F1;color:#3A3A37}
+.chip.progress  {border-color:#A9C7E6;background:#EDF4FB;color:#0A3A6B}
+.chip.blocked   {border-color:#E8B4B4;background:#FCEFEF;color:#6E1A1A}
+.chip.done      {border-color:#C4DA9F;background:#F1F7E8;color:#21450A}
+
+.aside{display:grid;gap:var(--gap-section)}
+.kv{padding:var(--pad-row-y) var(--pad-row-x);display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--rule)}
+.kv .k{font-size:var(--fs-sub);color:var(--quiet)}
+.kv .v{font-size:var(--fs-body);font-weight:700}
+.panel-foot{padding:var(--pad-row-y) var(--pad-row-x)}
+.note{background:var(--ink);border:1px solid var(--border);padding:var(--pad-panel-x);color:#fff}
+.note .eyebrow{color:#AFAFA9}
+.note p{font-size:var(--fs-body);line-height:1.5;margin-top:9px;color:#E4E4E0}
+
+/* dev control — not part of the design, works with scripts disabled */
+.scale-input{position:fixed;opacity:0;pointer-events:none}
+.scale-toggle{position:fixed;right:16px;bottom:16px;z-index:50;background:#fff;border:2px solid var(--ink);
+  padding:10px 12px;font-family:var(--mono);font-size:11px;line-height:1.4;display:flex;gap:10px;
+  align-items:center;cursor:pointer;box-shadow:0 4px 16px rgba(16,16,16,.14)}
+.scale-toggle .box{width:16px;height:16px;border:2px solid var(--ink);flex:0 0 auto;position:relative}
+html:has(#scale-bs:checked) .scale-toggle .box{background:var(--ink)}
+html:has(#scale-bs:checked) .scale-toggle .box::after{content:"";position:absolute;left:3px;top:0;
+  width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.scale-toggle i{color:var(--quiet);font-style:normal}
+html:has(#scale-bs:checked) .scale-toggle i::before{content:"now: Bootstrap"}
+html:has(#scale-bs:checked) .scale-toggle i{font-size:0}
+html:has(#scale-bs:checked) .scale-toggle i::before{font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand-row">
+      <span class="wordmark"><span class="k">K</span>Knot</span>
+      <button class="collapse" aria-label="Collapse"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18"/><path d="M9 3v18"/></svg></button>
+    </div>
+    <div class="workshop">Ah Seng Motor Works</div>
+
+    <nav class="side-nav">
+      <a href="#" class="is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Board</span></a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        <span>Customers</span></a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>Crew</span></a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.42l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><path d="M7.5 7.5h.01"/></svg>
+        <span>Blocker types</span></a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="avatar">TH</div>
+      <div><b>Teck Hong</b><span>Service advisor</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Today &middot; Ah Seng Motor Works</div>
+        <div class="role">Service advisor</div>
+      </div>
+      <div class="topbar-right"><div class="avatar">TH</div></div>
+    </header>
+
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Board &middot; Service advisor</div>
+          <h1>Six cars on the floor.</h1>
+        </div>
+        <button class="btn">&#43;&nbsp; New visit</button>
+      </div>
+
+      <div class="strip">
+        <div class="tile"><span class="n">6</span><span class="l">Active repairs</span><span class="a">&rarr;</span></div>
+        <div class="tile"><span class="n">1</span><span class="l">Held at the counter</span><span class="a">&rarr;</span></div>
+        <div class="tile"><span class="n">3</span><span class="l">Ready to collect</span><span class="a">&rarr;</span></div>
+      </div>
+
+      <div class="ops">
+        <section class="panel">
+          <div class="panel-head">
+            <div><div class="eyebrow">Needs action now</div><div class="panel-title">6 cars with a next owner</div></div>
+            <a class="panel-link" href="#">Open full board</a>
+          </div>
+          <div class="arow"><span class="bullet"></span>
+            <div><div class="rt">Brake pads and discs</div><div class="rs">WVK3721 &middot; Volvo XC60 &middot; Lim Ah Kow</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip blocked">Blocked</span></div><div class="wait">Waiting 1d 4h</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+          <div class="arow"><span class="bullet"></span>
+            <div><div class="rt">Aircon service</div><div class="rs">JHB8842 &middot; Hilux &middot; Speedy Logistics Sdn Bhd</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip progress">In progress</span></div><div class="wait">Waiting 6 hr</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+          <div class="arow"><span class="bullet off"></span>
+            <div><div class="rt">60,000 km service</div><div class="rs">WA1102C &middot; Toyota Yaris &middot; Tan Mei Ling</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip registered">Registered</span></div><div class="wait">Waiting 1 hr</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+          <div class="arow"><span class="bullet off"></span>
+            <div><div class="rt">Timing belt and water pump</div><div class="rs">PKM774 &middot; Mazda CX-5 &middot; Ng Boon Huat</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip progress">In progress</span></div><div class="wait">Waiting 22 min</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+          <div class="arow"><span class="bullet off"></span>
+            <div><div class="rt">Battery replacement</div><div class="rs">BKV9013 &middot; Audi A3 &middot; Farah Aziz</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip registered">Registered</span></div><div class="wait">Waiting 8 min</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+          <div class="arow"><span class="bullet off"></span>
+            <div><div class="rt">Alternator</div><div class="rs">MAA3391 &middot; BMW 320i &middot; Ooi Kim Seng</div></div>
+            <div class="rmeta"><div class="chipline"><span class="chip done">Done</span></div><div class="wait">Ready 2 hr</div></div>
+            <a class="go" href="#">Open &rarr;</a></div>
+        </section>
+
+        <div class="aside">
+          <section class="panel">
+            <div class="panel-head"><div><div class="eyebrow">Your counter today</div><div class="panel-title">Keep cars moving</div></div></div>
+            <div class="kv"><span class="k">Visits opened</span><span class="v">4</span></div>
+            <div class="kv"><span class="k">Longest in stage</span><span class="v">1d 4h</span></div>
+            <div class="kv"><span class="k">Next action</span><span class="v">Parts advisor</span></div>
+            <div class="panel-foot"><a class="panel-link" href="#">View the full board &rarr;</a></div>
+          </section>
+          <div class="note">
+            <div class="eyebrow">Operating context</div>
+            <p>Every car in the workshop, the stage it is at, and who owes the next move.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<input type="checkbox" id="scale-bs" class="scale-input">
+<label class="scale-toggle" for="scale-bs">
+  <span class="box"></span>
+  <span class="txt">Use <b>Bootstrap</b> scale<br><i>unticked = Bay measured</i></span>
+</label>
+</body>
+</html>

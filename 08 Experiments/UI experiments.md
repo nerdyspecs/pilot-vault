@@ -1,7 +1,7 @@
 ---
 type: experiment
 created: 2026-07-07
-updated: 2026-07-07
+updated: 2026-08-25 (Session 36 — added knot-board-desktop.html, the reference implementation of [[Design system]] with the Bay-vs-Bootstrap scale switch)
 ---
 # UI experiments
 Two standalone HTML mocks, both fully self-contained (open in any browser, no server, no
@@ -41,6 +41,29 @@ none are committed scope:
 7. **Plate-scan intake** — camera mock; returning vehicles autofill. Intake in seconds.
 8. **Exceptions-only manager view** — "Needs you" list + "N jobs moving normally" calm
    state; handoff health shown **by role, never by person** (no surveillance leaderboard).
+
+## 3 · `knot-board-desktop.html` — the reference implementation of the design system
+*(2026-08-25, Session 36)*
+
+**Unlike experiments 1 and 2, this one is not exploratory — it is the design system made real**, and
+it is what [[Design system]] was written from. The board (`workshops#show`) at desktop width, built
+only from settled tokens: Bootstrap's spacing ladder and type scale, the re-derived status chips, the
+white canvas, square geometry, the fixed full-height sidebar with the topbar inside the content
+column, and the page-head bottom-alignment.
+
+**It carries a scale switch** (bottom-right checkbox, pure CSS via `:has()` — no JavaScript, so it
+survives sandboxed previews). Unticked renders the values measured off the reference implementation;
+ticked renders Bootstrap's ladder. Same markup, only the token block swaps — the two sets are
+verified to hold identical token names. **This is the A/B the builder ruled on**: Bootstrap won, and
+that comparison is reproducible by opening the file.
+
+Its `:root` block is deliberately written as a preview of what `application.css` should hold, so
+[[Sprint plan]] S5.5b is largely a transcription rather than a fresh authoring job.
+
+**What it deliberately does not show:** the amber Waiting/ageing band (deferred to S6.7 — the pin
+ships muted per [[ADR-011 Acknowledgement as stored visibility]]), and any phone layout (desktop-only
+by ruling). Its icons are hand-vendored inline SVG, not a gem — the `lucide-rails` question stays
+open.
 
 ## Judgment calls embedded (not settled by the vault — candidates for [[Open questions]])
 - **Deliver is gated on active blockers** (Hold for payment blocks Delivered) — gives the

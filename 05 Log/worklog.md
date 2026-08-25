@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-08-25 (Session 36 — design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-25 (Session 36 — layout archetypes recorded (app page + the gate) and seven design rules moved into CLAUDE.md after a sign-in mock broke five of them; sizing/spacing/type ruled onto Bootstrap's ladder via an A/B mock; accent reversed to #2727D9, --brand retired; canvas corrected to white; desktop-only scope; reference implementation in 08 Experiments; design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -9,7 +9,7 @@ Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story
 
 ---
 
-## 2026-08-25 · Session 36 — the UI design plan, a visual re-lock, and one source of truth for design
+## 2026-08-25 · Session 36 — the UI design plan, a visual re-lock, and the design system on Bootstrap
 
 **Summary.** Opened as the chipped-out intake-screen design session and **widened, on the builder's
 call, into the UI design plan for the whole app**. Ran the coherence check first (clean: 0 broken
@@ -218,6 +218,106 @@ never edited and the archive is closed.
 **What makes the source of truth actually true** is three layers that must agree: the note
 (authoritative), `application.css` (implements it), and `/design-preview` (renders it, so drift is
 visible instead of a doc-versus-code guess). That third layer is S5.5a.
+
+**Then the design system got built, compared, and ruled on.** A working desktop mock of the board
+was built from the settled tokens, iterated against the live reference five times, and used to settle
+the open calls by *looking* rather than arguing. It now lives at
+`08 Experiments/knot-board-desktop.html` and is documented in [[UI experiments]] — unlike the earlier
+experiments it is not exploratory, it is **the reference implementation** [[Design system]] was
+written from.
+
+**Sizing and spacing ruled onto Bootstrap's ladder.** The mock carries a **scale switch** (pure CSS,
+`:has()` plus a checkbox, no JavaScript) flipping between the values measured off the reference and
+Bootstrap 5.3.3's own — same markup, only the token block swaps, both sets verified to hold identical
+token names. Three of six type sizes were already identical; the rest moved 1–4px. **Bootstrap won on
+the builder's call** ("easy win, Bootstrap sizing looks way better"). The payoff is that spacing stops
+being ours: every padding and gap value can live as a Bootstrap utility class in the Slim templates,
+so **no spacing number lives in our CSS at all**. What remains in the brand layer is colour, negative
+tracking (Bootstrap has no letter-spacing utilities), six component dimensions, and five components.
+
+**Four reversals and corrections, all recorded.**
+
+1. **The accent reversed.** `--action` is now `#2727D9`, and **`--brand #22456B` is retired** — the
+   builder leaned the design the rest of the way toward the reference, and a steel-blue mark beside
+   an indigo button reads as broken. The first pass had explicitly declined that accent to keep
+   Knot's identity; the wordmark, K tile and square avatar stay ours, but the hue is shared.
+2. **The canvas is white, and the earlier note was wrong.** It recorded `#F4F4F2` as a "deliberate,
+   reasoned decline" of the reference's white-canvas line on the 2026-07-06 glare argument. The
+   shipped CSS sets `#f4f4f2` then **overrides it to `#fff`** — the operational canvas always was
+   white, as the reference's own spec said. The grey's real job is the **hover** tone; retaining it
+   as canvas gave it a job it never had and left hover with none.
+3. **Two border weights, not three.** The reference uses three; two are indistinguishable. The
+   distinction that earns its keep: metric-strip dividers take the full `--border` so the strip reads
+   as a grid, list rows take `--rule` so a list reads as a list.
+4. **The "no status classes anywhere" claim was too strong** — based on dashboard markup alone. The
+   stylesheet does carry `.status*` and `.label-chip`, but they are monochrome and blue, flat and
+   borderless. No semantic hue vocabulary, so the substance held and the re-derivation ruling stands.
+
+**Scope narrowed to desktop, deliberately** ("for simplicity and sanity, everything on monitor
+screens first"). This **confirms** rather than reverses the desk-first sequencing in L2 — law 5 is
+dormant, not deleted. One consequence recorded so it isn't discovered later: Bootstrap's `.display-6`
+and `.fs-1`–`.fs-4` are **fluid below the xl breakpoint**, so they resolve exactly only at ≥1200px.
+That is the first thing to re-check when the phone posture returns.
+
+**Two structural bugs the mock exposed**, both fixed and both now in the spec: the sidebar is
+**fixed, full viewport height, with the topbar inside the content column** (not a full-width bar
+above the shell), and the page head is **bottom-aligned** so the primary action sits level with the
+title's baseline. Also caught by the builder from a screenshot: a sub-nav item styled as an indent
+with **no parent above it** — sub-navigation exists only under a parent, with a vertical rule.
+
+**[[Design system]] gained a §Page template** — the four-part skeleton every desktop screen follows
+(frame → topbar → page head → section stack), with only two section types and one panel anatomy.
+
+**The gate — and a design failure worth recording.** Started the sign-in / sign-up screens as
+[[Design system]] L3 step 1, noting first that they can legitimately jump the queue ahead of the
+cross-cutting X1–X4 because the auth layout has **no shell** — X3 does not block them.
+
+Two facts corrected on the way in. The vault said Devise views "stay unstyled until the theme grows";
+they are in fact **fully styled, to the old theme**, so this is a restyle with live breakage. And
+retiring `--brand` is one of those breakages: `.auth-badge` reads `var(--brand)` on all four gate
+screens, and `--brand` appears in five CSS rules also covering `.wordmark` and the marketing home.
+That has to be handled in S5.5b regardless of any design decision.
+
+**The failure: the first sign-in mock broke five of the rules the session had just written.** Built
+it, then audited it when the builder asked plainly whether it followed the design language. It did
+not — off-ladder spacing (`.75rem`, `2rem`), an off-scale font size, a raw hex outside the tokens, a
+hand-rolled focus-ring `box-shadow`, an invented `--canvas-alt` duplicating `--hover`, and no eyebrow.
+Worst of all it **hand-rolled the input, button and checkbox** that Bootstrap already ships — the
+exact duplication the single-source-of-truth ruling existed to end, on a screen that is mostly a form.
+
+**Root cause was structural, not carelessness: the gate had no archetype.** §The page template covers
+app screens only — frame → topbar → page head → sections — and the gate has none of those. The gap
+was flagged, the builder redirected off a split layout, and the screen then got built with nothing in
+the system defining what it should be. A screen with no spec cannot be checked against one.
+
+**Three fixes, in that order.**
+
+1. **[[Design system]] §The page template became §Layout archetypes**, with **two**: the app page and
+   **the gate**. The gate's spec is explicit — grey canvas so a white card lifts without a shadow,
+   one 25rem centred column, mark → eyebrow → title, one card, and the action pair (solid primary,
+   rule, outlined cross-link). It carries the boundary too: **the gate's job ends at authentication**;
+   workshop creation and invitation acceptance stay on `home#index`. The section opens with the rule
+   that would have prevented all of this — *a screen fitting neither archetype is a new archetype,
+   recorded before it is built.*
+2. **A new §Bootstrap is the default answer** — a table of which Bootstrap component to use for which
+   need and which `--bs-*` variable themes it, plus the smell test: **a padding or gap value written
+   in `application.css` is the smell**, because spacing belongs in utility classes in the templates.
+3. **`CLAUDE.md` now carries seven checkable design rules** *(builder's call — "we probably need to
+   change it into claude.md so it follows the design rules we came up with")*. It is loaded every
+   session, where the vault is only read when someone opens it. The rules are deliberately short and
+   testable: Bootstrap-first · the spacing ladder ("12px and 32px do not exist") · six type steps,
+   display at weight 400 · tokens only, no raw hex · square, shadows only on floating things · one
+   solid primary · every screen is a recorded archetype.
+
+**The rebuilt mock loads the repo's actual vendored `bootstrap.min.css`** rather than approximating
+it, so what it renders is what Rails will render — the earlier mocks were bespoke CSS that only
+looked Bootstrap-ish. Its brand layer is ~40 lines and holds nothing Bootstrap can express, which is
+the target shape for `application.css` after S5.5b. It passes all seven rules on audit. Kept in
+scratch rather than promoted to `08 Experiments/` — the board mock earned that place by being ruled
+on; this one has not been.
+
+**Still open on this screen:** forgot-password and reset-password reuse the gate archetype but are
+not drawn, and the confirm-password field on sign-up is a call not yet made.
 
 **Two stale code comments to fix when their screens are touched** (neither is a vault citation):
 `config/routes.rb:35` and `app/views/customers/show.html.slim:38` both still say the front door
