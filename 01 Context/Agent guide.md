@@ -15,7 +15,9 @@ Read in this order:
 4. [[Tech stack]]
 5. [[Decisions]]
 6. [[Design laws]] — the invariants every decision must obey
-7. [[Visual theme]] — palette, typography, and the UI laws for every screen
+7. [[Design system]] — **the single source of truth for design**: tokens, type scale, geometry,
+   elevation, components, UI laws, and the UI build order *(renamed from `Visual theme` 2026-08-25;
+   it also absorbed the design plan that lived in [[Screen map]])*
 8. [[Overview]] — current work (Module 1: Job Monitoring)
 9. [[Roadmap]] — what's designed vs left to build
 10. [[Sprint plan]] — task-level build order and progress ticks
@@ -24,14 +26,14 @@ Read in this order:
 ## Reading list — branding / marketing
 1. [[Positioning]] — the anchor: name story (Knot), audience, message hierarchy, pricing posture
 2. [[Voice and tone]] — the voice laws every line of copy obeys
-3. [[Visual theme]] — brand color, typography, the "industrial & confident" mood
+3. [[Design system]] — brand color, typography, the "industrial & confident" mood
 4. [[Product overview]] — what the product is and is NOT
 5. [[User stories]] — the audience and their language
 
 (When `07 Brand` grows past a few notes, reinstate a [[Brand overview]] hub as item 1.)
 
 Skip the ADRs, data model, tech stack, and sprint plan — they don't bind brand work.
-If a brand decision would touch the app's UI, [[Visual theme]] is the source of truth and
+If a brand decision would touch the app's UI, [[Design system]] is the source of truth and
 [[Design laws]] still apply.
 
 ## How to work with me

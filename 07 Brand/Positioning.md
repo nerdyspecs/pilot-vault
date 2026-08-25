@@ -5,7 +5,7 @@ updated: 2026-07-24 (ADR-011 — the crew veto no longer breaks the product; #5 
 ---
 # Brand positioning
 Locked 2026-07-06 (worked out interactively — options pressure-tested, choices deliberate).
-The words-side twin of [[Visual theme]]. Every piece of marketing derives from this note.
+The words-side twin of [[Design system]]. Every piece of marketing derives from this note.
 
 ## The name
 **Knot.** Committed. The story: the system **ties all the playing parties together** — front
@@ -86,4 +86,4 @@ whether mechanics experience the handshake as protection, or merely as the boss'
 the "crew insurance" line out of copy until that session happens.)*
 
 ## Related
-- [[Voice and tone]] · [[Product overview]] · [[Visual theme]] · [[Builder identity]]
+- [[Voice and tone]] · [[Product overview]] · [[Design system]] · [[Builder identity]]

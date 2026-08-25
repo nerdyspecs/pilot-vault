@@ -20,7 +20,7 @@ Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at th
 - Rails views in **Slim** (`slim-rails` gem, chosen 2026-07-06; Devise's generated views stay
   ERB until restyled) — no separate frontend build step
 - Owner-facing job status page — lightweight, mobile-friendly, no login required
-- Visual system (palette, typography, UI laws): [[Visual theme]] — **Bootstrap 5.3.3** base
+- Visual system (palette, typography, UI laws): [[Design system]] — **Bootstrap 5.3.3** base
   (vendored CSS, no build step, Bootstrap JS not loaded) + a brand layer of CSS custom
   properties; chosen 2026-07-06 for expansion speed over the earlier no-framework stance
 

@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-25 (flow 7 chipped out — Intake UI build brief)
+updated: 2026-08-25 (Session 36 — flows 6 and 7 re-shaped: vehicles get their own create screen, intake ships happy path only; plan of record [[Design system]]; prior: flow 7 chipped out)
 ---
 # Screen flow
 
@@ -27,12 +27,12 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
 | # | Flow | Screen | Api | Components (C) | Actions (A) | → triggers |
 |-|-|-|-|-|-|-|
 | 5 | Customer create | New customer ✅ | `GET /customers/new` · `POST /customers` | kind · name · phone · contact · address | Add customer `[counter]` | → **Customer show** → *Add vehicle* |
-| 6 | Add vehicle | Customer show ❌ | *(no route)* — today born inline in *New intake* | registration # | Add vehicle | → **Customer show** / **Intake show** |
+| 6 | Add vehicle | Add vehicle ❌ | *(no route, no controller)* — today born only inside *New intake* | registration # | Add vehicle `[counter]` | → **Customer show** |
 
 ## Daily loop
 | # | Flow | Screen | Api | Components (C) | Actions (A) | → triggers |
 |-|-|-|-|-|-|-|
-| 7 | New intake | New intake ⚠️ | `GET /intakes/new` ❌ · `POST /intakes` | plate field · customer/vehicle pick · complaint · inspection type | Via reg # · Via customer `[counter]` | both → **Intake show** |
+| 7 | New intake | New intake ⚠️ | `GET /intakes/new` ❌ · `POST /intakes` | plate field · complaint · inspection type | Look up `[counter]` | found → **Intake show** · in house → *that visit* · not found → **Add vehicle** |
 | 8 | Add repair | on Intake show ⚠️ | `POST /intakes/:intake_id/jobs` | add-repair form *(no UI yet)* | Add repair `[counter]` | → **Job show** |
 | 9 | Assign technician | Job show ✅ | `POST /jobs/:id/technician` · `DELETE` | technician picker | Assign · Remove `[counter]` | → *stays* (unassigned→assigned) |
 | 10 | Work the repair | Job show ✅ | `…/start_work` · `/mark_done` · `/send_back` · `/cancel` · `/blockers` | stage · technician · blockers · timeline | Start · Mark done `[crew]` · Send back · Cancel `[counter]` · Raise/clear blocker `[role]` | moves → *stays* · blocker → **Blocker show** |
@@ -57,6 +57,13 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
   *(2026-08-25: flow 7 — the counter half of the front door — is **chipped out** to
   [[Intake UI — design brief]], Sprint plan S5.5. Flow 8 (add a repair to an open intake) and the
   jobsheet fill screen are **not** in that chip.)*
+- **Flows 6 and 7 re-shaped 2026-08-25 (Session 36).** Ruled with the builder: a vehicle gets its
+  own create screen under a customer (flow 6, still unbuilt — there is no `VehiclesController`), and
+  flow 7 therefore ships **happy path only** — [[Intake flow]] §1a plus §1c, with the §1b mismatch
+  forks and the §2a/§2b dedup tree deferred. Flow 7's not-found outcome is a *routed* dead end into
+  flow 6, not a refusal (UI law 8). The dedup consequence this creates, and the search-first guard
+  that answers it, are recorded in [[Design system]] L3. Build order for both: [[Sprint plan]]
+  S5.5a–i.
 - **Considered and declined: renaming the blocker-type catalog route.** `/blockers` (catalog)
   sits beside `/intakes/:id/blockers` and `/jobs/:id/blockers` (applied). Renaming the catalog to
   `/blocker_types` was tried and reverted: the nested controllers already disambiguate, this

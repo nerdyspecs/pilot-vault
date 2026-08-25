@@ -1,9 +1,17 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-25 (two stale entries corrected against code — the "Add job" 500 and the two pre-ADR-012 templates were already fixed; front door chipped out; prior: 2026-08-17 Session 32 — board §3 regroup deferred to S6, ADR-012 citation)
+updated: 2026-08-25 (Session 36 — the design plan (Part I) moved out to [[Design system]], now the single source of truth for design; this note is purely the code-reflection inventory again; prior: finding 6 added (UI law 9 broken app-wide: every screen is col-lg-6); L0 gains the /design-preview route and L1 the IA + nav rules adopted from [[Bay system reference — external comparison]]; restructured into two halves: Part I the UI design plan (clean-slate rulings, build order, L0–L3), Part II the existing code-reflection inventory; prior: two stale entries corrected against code — the "Add job" 500 and the two pre-ADR-012 templates were already fixed; front door chipped out)
 ---
 # Screen map
+
+> [!info] This note is **a reflection of code**, and only that.
+> The **design plan** that lived here as Part I — the component inventory, navigation and IA,
+> posture, the journey and the build order — **moved to [[Design system]]** on 2026-08-25
+> (Session 36), which is now the single source of truth for everything design. Keep the split in
+> mind when reading: **this note says what *exists*; [[Design system]] says how it should look and
+> behave, and what to build next.**
+
 
 A screen-first inventory of Knot's UI surface — every page you can land on, and under each
 one every button/link/form, the request it fires, who may use it, and where it lands. Built
@@ -32,7 +40,7 @@ for a front-end designer to read, and for us to catch drift when routes change.
 > `app/services/permissions.rb`, `app/helpers/permissions_helper.rb`, and each controller's
 > `before_action` table. "Counter" = `Permissions.counter?` (owner ∨ service_advisor ∨
 > workshop_manager). "Manager" gate = `require_manager!` (owner ∨ workshop_manager). Colours,
-> spacing, and the status palette are **not** defined here — see [[Visual theme]]. The
+> spacing, and the status palette are **not** defined here — see [[Design system]]. The
 > reshape from a job-grouped board to an Intake-grouped board is ADR-012/ADR-013; models are
 > [[Intake]] / [[Job]].*
 
@@ -60,7 +68,7 @@ haven't selected a workshop yet, `/` sends you straight to the board.
 
 **States to handle** — *No workshops yet* (create-workshop card) · *pending invitation*
 (highlighted card, must be seen — the auto-route won't skip it) · signed-out hero. Colours
-per [[Visual theme]].
+per [[Design system]].
 
 **Data shown** — Your accessible workshops; your fired (awaiting-you) invitations.
 
@@ -109,7 +117,7 @@ delivery, at a glance. This is the app's home screen once you're in a workshop.
 
 **States to handle** — *Empty* ("No active jobs" with a prompt) · *active list* · *"Done —
 awaiting delivery"* group (shown only when finished-but-uncollected repairs exist) · each row
-can carry an *aging / waiting* pin. Aging thresholds and pin colours per [[Visual theme]].
+can carry an *aging / waiting* pin. Aging thresholds and pin colours per [[Design system]].
 
 **Data shown** — Active repairs and done-awaiting-delivery repairs (with their car + customer
 via the visit), plus unacknowledged handoffs per repair.
@@ -214,7 +222,7 @@ and holds that stop the car leaving. The car's page.
 
 **States to handle** — Header badge shows *Ready for collection* (open + ready), else the
 stored status (open→*in progress*, *delivered*, *cancelled*) — status colours per
-[[Visual theme]]. *No holds* ("Nothing holding this car") vs an active-holds list. There is
+[[Design system]]. *No holds* ("Nothing holding this car") vs an active-holds list. There is
 **no** "add a repair to this visit" control yet (see *Screens that should exist*).
 
 **Data shown** — The vehicle, the customer, the visit's repairs (each with stage + assigned
@@ -254,7 +262,7 @@ assign/remove/send-back/cancel = counter.
 
 **States to handle** — Technician present vs *no technician yet* vs *no technicians in the
 workshop at all* (offers Add crew / Add role). *No blockers* vs active-blocker list. History
-is always shown (stage/technician/blocker events, newest handling per [[Visual theme]]).
+is always shown (stage/technician/blocker events, newest handling per [[Design system]]).
 
 **Data shown** — The repair's stage, car, customer, technician, active blockers, the
 technician-role picker, the raiseable-blocker picker, and the full event timeline.
@@ -353,7 +361,8 @@ POST endpoints exist and work, but nothing renders a form to reach them:
 
 | Intended screen | Would feed | Status | Notes |
 |---|---|---|---|
-| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow. **Chipped out 2026-08-25 — [[Intake UI — design brief]]** (Sprint plan S5.5). Target of the board's "New job". |
+| **Add a vehicle** (`GET /customers/:id/vehicles/new`) | *no endpoint yet* | **not-built** | No `VehiclesController`, no route, no screen — today a vehicle can only be born inside the intake flow. **Ruled 2026-08-25 ([[Design system]] L3 step 6):** it becomes ordinary CRUD under a customer. Carries the dedup consequence [[Design system]] names. |
+| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow. **Happy path only in its first cut** (2026-08-25, [[Design system]] L3 step 7): [[Intake flow]] §1a plus §1c, with the §1b mismatch forks and the §2a/§2b dedup tree deferred. Design brief: [[Intake UI — design brief]] (Sprint plan S5.5). Target of the board's reserved front-door slot. |
 | **Add a repair to an intake** (`GET /intakes/:intake_id/jobs/new`) | `POST /intakes/:intake_id/jobs` | **not-built** | No way in the UI to add a second repair to an open intake yet; the intake page even notes the gap. *(2026-08-16: create nested under its intake — `ed2595c`.)* |
 | **Customer status page** (public, by token) | — read-only — | **not-built** | Each visit carries a share token for an owner-facing "how's my car?" page. No route yet. |
 
@@ -376,9 +385,13 @@ restyled.
 
 ## How to keep this true
 
-The **built** half of this note is a reflection of code. Re-sync it from `bin/rails routes`
-(filter out devise/rails/active_storage/asset noise; split GET = screens from
-POST/PATCH/DELETE = the buttons) **whenever routes change** — and re-verify each gate against
-`app/services/permissions.rb` and the controllers' `before_action` tables. Make it a
-per-sprint ritual, same as the test-review pass. The **intended** half (not-built rows) moves
-only when design intent changes.
+This note is **a reflection of code**. Re-sync it from `bin/rails routes` (filter out
+devise/rails/active_storage/asset noise; split GET = screens from POST/PATCH/DELETE = the buttons)
+**whenever routes change** — and re-verify each gate against `app/services/permissions.rb` and the
+controllers' `before_action` tables. Make it a per-sprint ritual, same as the test-review pass.
+
+Two things this ritual must **not** do:
+
+- The **not-built** rows below are *intent*, not code. They move only when [[Design system]] moves.
+- A re-sync that finds code contradicting [[Design system]] has found **drift, not an update**: say
+  so and reconcile it deliberately, rather than quietly rewriting either side.

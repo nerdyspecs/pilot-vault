@@ -1684,8 +1684,8 @@ S0.5 stays unticked until the user reviews and commits.
 - **Slim templates** (`slim-rails`) — user preference; Devise's generated views stay ERB for now.
 - **Bootstrap 5.3.3** (most stable 5.3, vendored `bootstrap.min.css`, no build step, JS not
   loaded) with `application.css` reduced to a **brand layer**: Bootstrap CSS variables mapped to
-  the [[Visual theme]] tokens + branding-only classes. Chosen for expansion speed; supersedes
-  the "no CSS framework" stance in [[Tech stack]] and [[Visual theme]] (both updated today).
+  the [[Design system]] tokens + branding-only classes. Chosen for expansion speed; supersedes
+  the "no CSS framework" stance in [[Tech stack]] and [[Design system]] (both updated today).
 - Landing copy ported from the Session-3-era Knot mockup — already passes [[Voice and tone]].
   Title carries the pairing rule: "Knot — no job goes unseen". Dropped the mockup's "See a live
   board" CTA (nothing to show — UI law 8) and second primary button (law 3).
@@ -1715,7 +1715,7 @@ existing content removed or rewritten.
 - New `07 Brand/` folder. [[Positioning]] (worked out in parallel, locked same day) is the
   **anchor**: name **Knot** committed, audience (owner-boss, crew veto), message hierarchy
   ("No job goes unseen"), flat per-workshop pricing posture. [[Brand overview]] is the folder's
-  index — points to sources of truth (never duplicates [[Visual theme]] or [[Positioning]]),
+  index — points to sources of truth (never duplicates [[Design system]] or [[Positioning]]),
   clarifies app-scope "not a CRM" vs marketing-the-product, grounds the workstream in
   [[Main problem list]] L3-P3 (Workshop Marketing), and tracks what's still open (logo, voice,
   final copy, landing page, assumption validation).
@@ -1744,7 +1744,7 @@ yet" list (tagline, domain, logo, landing page, assumption validation). No impac
 **Summary.** Building started. Sprint 0 executed through S0.4 in a **learning mode**: builder
 drives the commands/code, Claude navigates (explains, specifies, verifies read-only). Worked out
 the entire visual identity interactively (sample boards → choices) and locked it as a new context
-note, [[Visual theme]]. Closed with a vault audit (connectivity + consistency).
+note, [[Design system]]. Closed with a vault audit (connectivity + consistency).
 
 **Sprint 0 progress** (see [[Sprint plan]] ticks):
 - **S0.1 ✓** stripped Rails 8 defaults — Docker/Kamal/Thruster gone, Solid Queue/Cache/Cable gone,
@@ -1756,7 +1756,7 @@ note, [[Visual theme]]. Closed with a vault audit (connectivity + consistency).
 - **S0.5 in flight** — home `index` behind `authenticate_user!`; code specified (tokens CSS +
   layout shell + view), builder implementing.
 
-**Decisions (design, recorded in [[Visual theme]]):**
+**Decisions (design, recorded in [[Design system]]):**
 - **Theme locked:** industrial & confident · light, high-contrast · one theme for both clients.
   Brand steel blue `#22456B` (scarce), action blue `#2D5E94`, blue-tinted neutrals, all-light
   chrome ("Option A"). **No secondary hue** — deliberately.
@@ -1767,11 +1767,11 @@ note, [[Visual theme]]. Closed with a vault audit (connectivity + consistency).
 - **Dark mode deferred** → derive surfaces from brand steel blue ([[Deferred design]]).
 
 **Vault audit:** 0 broken links · stale-term scan clean (persona/ADR-footnote hits legitimate) ·
-fixed: [[Visual theme]] orphan (now in [[Agent guide]] reading list + [[Tech stack]]),
+fixed: [[Design system]] orphan (now in [[Agent guide]] reading list + [[Tech stack]]),
 7 stale `updated:` frontmatter dates, this missing session entry.
 
 **Open:** S0.5 proof drive + commit, then S0.6–S0.9 (vault → `docs/`, `CLAUDE.md` — must now
-include [[Visual theme]] — deploy, tag `S0`).
+include [[Design system]] — deploy, tag `S0`).
 
 ---
 

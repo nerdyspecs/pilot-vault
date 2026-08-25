@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-08-19 (Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-25 (Session 36 — design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -8,6 +8,224 @@ Each session (~one work period) opens with a **summary**, then **topic entries**
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
 
 ---
+
+## 2026-08-25 · Session 36 — the UI design plan, a visual re-lock, and one source of truth for design
+
+**Summary.** Opened as the chipped-out intake-screen design session and **widened, on the builder's
+call, into the UI design plan for the whole app**. Ran the coherence check first (clean: 0 broken
+links, 0 citation leaks, no stranded branches), read the intake brief and behaviour spec, then
+verified every load-bearing claim against code at `2c5816f` before writing anything. Output is
+documentation only — **no app code was written**, per the chip's constraint. Plan of record is now
+**[[Design system]]**.
+
+**The brief's headline question rested on a false premise, and it was verified false.** The brief
+claimed the intake flow "creates visits the app cannot list." It does not: `GET /workshop`
+(`workshops#show`) **is** the board — it loads `Job.for_current_workshop.active` plus
+done-awaiting-delivery and renders a row for each; `Job.active` includes `unassigned`
+(`app/models/job.rb:17`) and `CreateIntake` defaults to `jobs: [{}]`, one unassigned repair, so
+**every new intake surfaces on the board immediately**. The row links to `jobs#show`, which carries
+"← This car's visit". So: no Sprint 6 pull-forward, no stopgap list, and — because the finding
+*supports* Session 32's S5-before-S6 deferral rather than reversing it — **no dated footnote is
+owed**. Corrected in place in [[Intake UI — design brief]] §2 and Q1, including *how* the error
+happened: it was read off `bin/rails routes` (no `/intakes` or `/jobs` index) without then checking
+whether an existing screen already rendered the list. **A missing index route is not a missing
+list.**
+
+**Why the session widened.** Designing the intake screens first would have invented a header and a
+component set the other eleven screens then had to match. Looking at the whole view layer instead
+turned up five problems that all sit *above* the screen level, none of them intake's:
+
+1. **No navigation model.** The layout is a wordmark, workshop name, email, Sign out. Every screen
+   invents its own way back — four different wordings for the same affordance. `/customers` is
+   reachable from exactly one place.
+2. **Three postures designed, one has screens.** Every built view is the desk layout.
+   `app/views/jobs/show.html.slim` *is* the technician's screen and is a 106-line PC page; UI law 5
+   has never been exercised by anything.
+3. **UI law 3 broken where it matters** — `jobs/show` carries four solid `btn-primary`,
+   `home/index` three. Those screens never decided their one next step.
+4. **UI law 2 broken in the layout, so on all 27 templates** — flashes render as Bootstrap's
+   `.alert-info` cyan and `.alert-warning` yellow, neither remapped, both wearing reserved status
+   hues. (The badges are correct — `.stage-badge`, one source, sacred palette.)
+5. **UI law 7 broken concretely** — `intakes/_blocker_item` and `jobs/_blocker_item` are twins
+   differing by six lines of naming, out of only four shared partials in the app.
+
+**Builder rulings (all recorded in [[Design system]]).** Clean slate is **design-level**, not a
+teardown; the rebuild-or-keep verdict is taken **per screen, when reached** — deliberately not
+recorded now. Scope is every surface including the marketing page, but ordered **bread-and-butter
+first**. **Desk-first**; floor and owner postures planned later, with the `jobs/show` trap named so
+it isn't mistaken for a finding that they're unnecessary. The plan lives inside [[Screen map]],
+restructured into two halves — the risk of mixing intent with the half re-synced from
+`bin/rails routes` was raised, accepted, and contained by a two-part split. *(Superseded later the
+same session — see the consolidation entry below: the plan moved out of [[Screen map]] entirely.)*
+
+**The ordering rule, which is the actual deliverable:** *do the things that change every screen
+before drawing any screen.* Four cross-cutting fixes first (component inventory + merge the twins ·
+flash recolour · the shell · the law-3 audit), then the spine in the order a real workshop lives
+through it — because that is the only order in which the product can be walked end to end after
+**every** step. **Only two genuinely new screens exist in the whole gap**: add-vehicle, and the
+intake front door. Most of the twelve built screens are right and merely unshelled.
+
+**The ruling that reshaped intake: customer → vehicle as ordinary CRUD, intake happy-path only.**
+Vehicles get a real create screen (there is no `VehiclesController` at all today — a vehicle can
+only be born inside the intake flow), so the front door ships [[Intake flow]] **§1a plus §1c** and
+the §1b mismatch tree and §2a/§2b dedup forks wait. Three consequences put on the record rather than
+discovered later:
+
+- **§1c cannot go with the rest of the tree.** `index_intakes_one_open_per_vehicle` is a partial
+  unique index (`… ON intakes (vehicle_id) WHERE (status = 0)`); keying an in-house plate without
+  handling it raises `RecordNotUnique` — **a 500, not a branch**.
+- **The dedup trap moves rather than disappears.** With a standalone add-vehicle, an SA who can't
+  find the customer creates a new one and hangs the car off it — [[Intake flow]] §2a's reverse-wife
+  trap promoted from edge case to *primary* path. The guard is a screen rule, not new logic:
+  `Customer.search` already matches name **or** canonicalized phone, so "New customer" must be
+  reachable only *through* an empty search result (S5.5e).
+- **Screen A's not-found outcome is a routed dead end, not a refusal** — it must say what to do next
+  and take the SA to add-vehicle (UI law 8). And `IntakesController#create` stays narrow: widened by
+  `complaint:` only, not by `customer:`.
+
+**A real finding against the recorded mismatch design.** [[Deferred design]]'s two-branch confirm
+(`[Just this visit]` / `[Vehicle changed hands]`) answers only the *payer* question, but
+[[Intake flow]] §1b has **four** forks. A screen showing just those two silently drops **1b-i**
+(bill the file as usual) and **1b-iv** ("that's my old number" — the dedup trap that splits one
+person into two cards). So the mismatch surface is **three** choices and the recorded two-branch
+confirm is the **tail of the third**, reached only after the payer's own phone is looked up. Two
+buttons stays right *at that point*, for the reason originally recorded. Written as a dated addendum
+on that entry, together with the deferral. Also recorded there so it isn't re-derived: the §1
+silent-compare rule means the phone comparison is **server-side on submit** — no client-side
+compare, no hidden field, no `data-` attribute — while the file-holder's **name** may be shown
+(builder ruling: a narrower exception, since the SA says it aloud at the counter anyway).
+
+**Sprint plan.** S5.5 rewritten as the UI build order, **S5.5a–i**, in the order they run. **S5.8
+superseded and split** — it was half-done and mis-ordered: the plate-normalization half already
+shipped as `Vehicle.canonicalize`, the existing-vehicle-lookup half is a *prerequisite* of the
+intake screen (now S5.5g), and the phone half moves with the deferred dedup tree.
+
+**Left open, named as open.** Floor and owner postures. The §1b/§2 tree. Rebuild-or-keep per screen.
+Add-a-repair, the jobsheet fill screen, the owner token page. Whether to restyle Devise. And
+**S5.5i's system-test call** — un-suspending the Capybara layer suspended 2026-08-14 costs one
+harness file, since capybara and selenium-webdriver are still in the `Gemfile`; these are the first
+real pages since, and "does Enter on the plate field reach the visit" is what a controller test
+cannot see. Not ruled — the session was redirected before it was put.
+
+**Late in the session: the Bay system reference, and a visual re-lock.** The builder brought in an
+external document — the *Bay system reference*, a **parallel design of the same product** (same
+domain, same roles, decision dates 2026-08-04/08-09) — first to mine for UI ideas, then with the
+ruling that **Bay's style becomes Knot's style, so the two read as one house**. Triage,
+provenance, and every accept/reject sits in the new note
+[[Bay system reference — external comparison]] (`06 Design/`). It is explicitly **not binding** —
+where Bay conflicts with a recorded Knot decision, Knot wins and the conflict is written down
+rather than quietly resolved.
+
+**It exposed a sixth systemic finding, and this one is Knot's own.** Bay's "desktop content uses the
+available canvas width" prompted a check: **every workshop screen is `col-12 col-md-8 col-lg-6`** —
+a centred half-column on a PC, across the board, the visit, the repair, customers, crew and blocker
+types. That is the stretched-phone layout **UI law 9 forbids**, and it is arguably the largest of
+the six because it caps what the board can ever show. Added to [[Design system]] as finding 6,
+and folded into S5.5c — page width and sidebar-vs-centred are one decision, not two.
+
+**[[Design system]] re-locked** (the 2026-07-06 lock's *structure* survives; the *surface* changed).
+Adopted: Helvetica/Arial · ink `#101010` · warm-achromatic neutrals replacing the blue-undertoned
+family · a **new Geometry section** (square corners, visible 1px borders, restrained elevation, no
+pills — Knot had **no shape rule at all** and was on Bootstrap's rounded defaults by accident) · a
+**new Interaction and accessibility section** (desktop ~40px / mobile ≥48px, visible focus,
+colour-independence, `prefers-reduced-motion`, safe-area). **Knot's identity is not part of the
+adoption** — wordmark, K tile and brand steel blue stay ours; Bay's `#2727D9` and `bay.svg` were
+offered and declined, so `--action` remains `#2D5E94`.
+
+**The status palette was re-derived — the builder over-ruled the recommendation to keep it, and
+that is recorded as their call.** Bay has *no* status colour system, so there was nothing to copy;
+the five were re-derived against the new white surface and `#101010` ink. **The hue families did not
+move** — that is what keeps the reserved words reserved. What changed is structure: with a visible
+1px border the fill can lighten, so a badge is now **border + fill + text**, square-cornered.
+Values are flagged in [[Design system]] as a **first derivation that has not been sample-compared** —
+the 2026-07-06 palette was locked by comparing rendered samples, and these deserve the same before
+being called final. **No footnote is owed against [[ADR-011 Acknowledgement as stored visibility]]:**
+it says explicitly *"Colour — deferred, not decided here."*
+
+**Best single idea taken: `/design-preview`** — a route rendering every component once, in every
+state. It turns UI law 7 from an assertion into something checkable, it would have caught the
+`_blocker_item` twins on day one, and it is where the re-derived chips get their sample comparison.
+Folded into S5.5a. Also adopted into L1: Bay's IA rule (*durable work areas in primary navigation;
+detail, create flows and item actions reached contextually*), the sidebar/drawer pattern **with its
+cost named** (no Bootstrap JS is loaded, so collapse needs Stimulus, and a rail needs icons — one
+coupled call, deferred), and the four-question attention test.
+
+**Loudest rejection: `Employment`.** Bay authorises on an `Employment` edge — a concept Knot
+*retired* on 2026-07-21 when `WorkshopEmployment`/`WorkshopOwnership` collapsed into `WorkshopStaff`
+([[ADR-010 WorkshopStaff supersedes the edge split]], Session 25). Importing Bay's role table would
+have resurrected a dead vocabulary into notes that took a session to clean. Also declined: the
+stack (Rails 8.1/ERB/SQLite/Propshaft/Docker/Netlify), `lucide-rails` (deferred with the sidebar,
+not refused), the `/` role chooser, signed jobsheet snapshots (ADR-014/015 went elsewhere), and
+Bay's entire "Still Proposed" list — Knot has already decided nearly all of it.
+
+**Corroborations worth keeping.** Bay independently reaches "age the *stalled state*, not the
+creation date" (ADR-011), "urgency in text, not a competing colour rule" (ADR-011's chip rule),
+intake under a minute ([[User stories]]), and "surface exceptions rather than search every job"
+(Design law #3). Two independent designs landing on the same reasoning is evidence it holds.
+
+**Verified the Bay reference against the running prototype, and it changed things.** The pasted
+document turned out to be a **thin summary**. Walked `bay-qwyg.onrender.com` — login, component
+inventory, all four role dashboards, a destination view, the mobile posture — and measured the real
+values. **Two things this session had already written down were wrong:**
+
+1. **"Restrained elevation" is not "no shadows".** Inline cards genuinely carry none, but every
+   *floating* layer has a specified shadow (drawer, tray, floating control, scrim). The rule is
+   **elevation means "above the page", never "important"**.
+2. **One border token and one muted ink are both wrong — each is a ramp.** Container edges
+   `#D8D8D4` (which had been derived independently and matched exactly), inner rules `#E5E5E1`–
+   `#E8E8E5`; muted ink steps down with size across four values; plus a third surface `#F7F7F5`
+   for toolbars. A dense table reads heavy without the lighter inner rule — exactly the doubt
+   raised when the sample board mock was reviewed, now confirmed as a real token.
+
+**The largest omission was the type treatment**, which the document reduces to "Helvetica / Arial".
+It is a **1.6 modular scale at weight 400 with proportional negative tracking** and display
+line-height *below* 1.0 — regular weight, set tighter than its own size. Also absent: the eyebrow
+component, the page pattern (eyebrow → display heading → one primary top-right), the full nav spec
+(42px rows; **selected = full-bleed solid accent**, not a tint; account chip pinned to the sidebar
+footer), the role matrix, the inverted `#101010` context panel, square bullets and avatars,
+border-collapsed stat tiles, the list toolbar, and the responsive rules. All now in
+[[Design system]].
+
+**Confirmed by absence:** no `badge`/`chip`/`pill`/`status` class exists anywhere in Bay's markup —
+so the ruling to *re-derive* Knot's status palette was made on accurate information. **And
+`/design-preview` is an empty shell**: all nine sections return empty Turbo frames. The idea stays
+the best one taken from Bay, but it is unproven there — Knot will be the first to populate it.
+
+**One divergence recorded rather than absorbed:** Bay puts "Add customer" as the top-right primary
+beside the search, the opposite of Knot's search-first rule (S5.5e). Knot's reason still holds; the
+difference is now deliberate. Two patterns explicitly **not** copied: list rows as grid `div`s
+rather than a `<table>` (an accessibility regression on a dense board), and attention rows dropping
+the owner and waiting columns on mobile — which discards two of the four questions the component
+exists to answer.
+
+**Consolidation: one source of truth for design (builder ruling).** [[Design system]] — **renamed
+from *Visual theme***, 51 links updated across 15 notes — now holds *everything* design: tokens,
+type scale, geometry, elevation, the component inventory, UI laws, interaction/accessibility, **and
+the whole design plan** (findings, rulings, build order, L0–L3) that had been living in
+[[Screen map]] Part I. [[Screen map]] goes back to being purely **a reflection of code** — what
+screens exist — with its not-built rows the one piece of intent it still carries.
+
+I argued for a narrower split (system in one note, per-sprint plan in another, because half of
+Screen map is mechanically re-synced from `bin/rails routes`); the builder ruled for full
+consolidation, and it is recorded as their call. The re-sync ritual is protected by an explicit rule
+at the foot of [[Screen map]]: a re-sync that finds code contradicting [[Design system]] has found
+**drift, not an update**.
+
+**The rename touched a link inside [[ADR-011 Acknowledgement as stored visibility]] and two closed
+archive notes.** Link text only — no decision content altered — but recorded here because ADRs are
+never edited and the archive is closed.
+
+**What makes the source of truth actually true** is three layers that must agree: the note
+(authoritative), `application.css` (implements it), and `/design-preview` (renders it, so drift is
+visible instead of a doc-versus-code guess). That third layer is S5.5a.
+
+**Two stale code comments to fix when their screens are touched** (neither is a vault citation):
+`config/routes.rb:35` and `app/views/customers/show.html.slim:38` both still say the front door
+lands with "S6", stale since the 5↔6 swap. The customer-page one marks a TODO the builder asked to
+raise **when that page is reached**, not now.
+
+---
+
 
 ## 2026-08-19 · Session 35 — jobsheet backend built (S5.1a/b): catalog, migration, models
 

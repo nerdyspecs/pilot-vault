@@ -20,13 +20,13 @@ should keep that user in mind.
 
 ## What exists today (sources of truth)
 - **Name & positioning** — **Knot** (committed), audience, message hierarchy ("No job goes
-  unseen"), pricing posture. Defined in [[Positioning]] — the words-side twin of [[Visual theme]].
+  unseen"), pricing posture. Defined in [[Positioning]] — the words-side twin of [[Design system]].
 - **Voice & tone** — locked 2026-07-06: the "good foreman" voice, neutral international English,
   5 voice laws. Defined in [[Voice and tone]] — every line of copy obeys it.
-- **Brand color** — steel blue `--brand #22456B`, deliberately scarce. Defined in [[Visual theme]]
+- **Brand color** — steel blue `--brand #22456B`, deliberately scarce. Defined in [[Design system]]
   (single source of visual truth; if values ever differ, that note wins).
-- **Mood** — industrial & confident · light · high-contrast ([[Visual theme]]).
-- **Typography** — system stack; Inter is the noted escape hatch ([[Visual theme]]).
+- **Mood** — industrial & confident · light · high-contrast ([[Design system]]).
+- **Typography** — system stack; Inter is the noted escape hatch ([[Design system]]).
 - **Positioning** — job monitoring for vehicle workshops; owner visibility without calls
   ([[Product overview]], [[User stories]]).
 - **Design artifacts** — `06 Design/knot-ui-flow.svg` (UI flow, not marketing collateral).
@@ -46,4 +46,4 @@ should keep that user in mind.
 - [x] Voice & tone — locked 2026-07-06 → [[Voice and tone]]
 
 ## Related
-- [[Positioning]] · [[Voice and tone]] · [[Agent guide]] · [[Visual theme]] · [[Product overview]] · [[User stories]] · [[Main problem list]]
+- [[Positioning]] · [[Voice and tone]] · [[Agent guide]] · [[Design system]] · [[Product overview]] · [[User stories]] · [[Main problem list]]

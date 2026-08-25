@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-19 (Session 35 — S5.1a/S5.1b built + ticked; S5.1c ticked (no-op), S5.1d core done (value-type/completion + R11 deferred); build footnotes: re-snapshot dropped (attr_readonly write-once), complaint moved to jobsheets header; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-25 (Session 36 — design source of truth consolidated into [[Design system]] (renamed from Visual theme); S5.5a/b re-pointed and widened after verifying the Bay prototype live; prior: S5.5b now carries the Visual theme re-lock and S5.5a the /design-preview route, after the Bay comparison; S5.5c absorbs the law-9 width fix; S5.5 rewritten as the UI build order (S5.5a–i): four cross-cutting fixes before any screen, then add-vehicle and the happy-path intake front door; S5.8 superseded/split; plan of record is [[Design system]]; prior: Session 35 — S5.1a/S5.1b built + ticked; S5.1c ticked (no-op), S5.1d core done (value-type/completion + R11 deferred); build footnotes: re-snapshot dropped (attr_readonly write-once), complaint moved to jobsheets header; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -231,34 +231,96 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       `value_matches_answer_type` (numeric→measurement/else→choice) and `complete?` (required set)
       rules — write once the flagged content calls settle, or via a registry stub. **R11 orphan
       protection is NOT a unit test** — it's a deploy-time data-integrity check (see [[Risk ledger]]).
-- [ ] **S5.5** Intake flow: pick/create Customer → pick/create Vehicle (lookup by
-      registration number) → **`CreateIntake`** (opens the visit + its first repair, auto-creates
-      its `Jobsheet`) → capture the customer's **complaint** (free text on the `jobsheets` header)
-      → fill the **jobsheet** (staff-recorded inspection answers) as its own step. One screen/flow,
-      two distinct kinds of data — *(⚠ 2026-08-19, ADR-015: was "jobsheet field values +
-      complaints" as one clause — the complaint is free text, never a fixed inspection item; see
-      ADR-015 §Why.)* *(⚠ corrected at build, 2026-08-19: ADR-015 put the complaint on **Intake**;
-      it ships as a free-form `complaint` column on the `jobsheets` header instead — not a catalog
-      item, so the ADR's argument holds; see [[Data model]] §The jobsheet footnote.)*
-      *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" — creation goes through `CreateIntake`, not a
-      bare `Job.create!` or a door verb.)* **Spec: [[Intake flow]]** (full SA decision tree, both
-      lookup keys, two-branch mismatch confirm — designed 2026-07-15; unaffected by the backend
-      split, still the *behaviour* spec). **Design brief: [[Intake UI — design brief]]**
-      *(2026-08-25 — **design chipped out, not build**. [[Intake flow]] is a behaviour spec, not a
-      screen spec: nothing says how many screens the branching tree is. The design session settles
-      screen decomposition, the two-branch mismatch confirm as a real surface, the silent-compare
-      constraint, and — its headline question — **what to build first**, since the app currently
-      has no `/intakes` or `/jobs` index and would create visits nobody can list. It carries the
-      settled create-path decision (lookups as model class methods, branch resolution in the UI
-      flow, `CreateIntake` widened by `complaint:` only). The **jobsheet fill screen is NOT in
-      this chip** — different user, different device, and it waits on the flagged catalog content
-      calls.)*
+- [ ] **S5.5** ~~Intake flow: pick/create Customer → pick/create Vehicle → `CreateIntake` → complaint
+      → jobsheet, one screen/flow.~~ **Rewritten 2026-08-25 (Session 36) into the UI build order —
+      plan of record: [[Design system]].** The design session widened past the intake screen:
+      the problems that block *every* screen turned out to sit above the screen level (no nav
+      model, one posture of three, UI law 3 broken on `jobs/show`/`home/index`, law 2 broken in the
+      layout so on all 27 templates, law 7 broken by duplicated `_blocker_item` twins). **The rule
+      driving the order below: do the things that change every screen before drawing any screen.**
+      Sub-tasks run in order; each leaves the app walkable one notch further than before.
+      *(Prior footnotes preserved: ⚠ 2026-08-19 ADR-015 — the complaint is free text, never a fixed
+      inspection item; ⚠ corrected at build 2026-08-19 — it ships on the `jobsheets` header, not on
+      Intake; ⚠ 2026-08-14 ADR-012/013 — creation goes through `CreateIntake`, never a bare
+      `Job.create!` or a door verb.)*
+- [ ] **S5.5a** *(cross-cutting)* **Component inventory** — write it into [[Design system]] §Components,
+      **build the `/design-preview` route** (a page rendering every component once, in every state),
+      and **merge the `_blocker_item` twins** (`app/views/intakes/_blocker_item.html.slim` and
+      `app/views/jobs/_blocker_item.html.slim` differ by six lines, all naming). UI law 7 has no
+      enforceable meaning until the components are named; the review route makes it *checkable*
+      rather than asserted, and it is where the re-derived status chips get the sample comparison
+      [[Design system]] says they still owe. **`/design-preview` is the third layer of the design
+      source of truth** (note → `application.css` → rendered page); the reference implementation
+      declared it and never built it, so Knot is the first to actually populate it.
+- [ ] **S5.5b** *(cross-cutting)* **The visual re-lock** — apply [[Design system]]'s 2026-08-25
+      restyle in `application.css`, all through Bootstrap variables and still never forking the
+      vendored file: `--font-sans` → Helvetica/Arial · neutral tokens re-pointed (`--page` `#F4F4F2`,
+      `--border` `#D8D8D4`, `--text` `#101010`, `--text-muted` `#5A5A57`) · `--bs-border-radius`
+      family → `0` · borders visible at 1px · **the ramps** (`--border-inner`, `--surface-sunk`,
+      and the muted ink steps `--text-muted`/`--text-quiet`/`--text-faint`) · the **type scale**
+      with proportional negative tracking · the three **floating-layer shadows** (inline structure
+      stays flat) · **`.stage-badge` re-cut from two-part to
+      border + fill + text** · **flashes moved off `.alert-info`/`.alert-warning`**, which were
+      wearing reserved status hues (UI law 2). A **token-level restyle, not a rewrite** — only the
+      badge and the flash need markup changes. Provenance:
+      [[Bay system reference — external comparison]].
+- [ ] **S5.5c** *(cross-cutting)* **The shell** ([[Design system]] §Components + L1): one header, one back
+      affordance (four wordings exist today), reachability for Customers/Crew/Blocker types (which
+      exist only as buttons on the board), **and page width** — every workshop screen is currently
+      `col-12 col-md-8 col-lg-6`, a centred half-column, which is the stretched phone layout UI
+      law 9 forbids. Width and sidebar-vs-centred are **one decision**. **The one item here that is
+      genuinely expensive to retrofit** — every screen's header is downstream of it. ⚠ If the
+      sidebar pattern is taken, it drags in Stimulus (no Bootstrap JS is loaded) and an icon source
+      for the rail — one coupled call, recorded as open.
+- [ ] **S5.5d** *(cross-cutting)* **UI law 3 audit**: `jobs/show` carries four solid `btn-primary`,
+      `home/index` three. Each picks its one next step. Deciding it changes those screens' layout,
+      so it precedes any redesign of them. **Settle the rule itself here too** — "one primary per
+      *screen*" (Knot) vs "per *local area*" (Bay): `jobs/show`'s four primaries are four genuinely
+      distinct regions, so either the law gains a density qualifier or those screens restructure.
+      Open call in [[Design system]] UI laws.
+- [ ] **S5.5e** **Customers — the search-first rule.** `Customer.search` already matches name *or*
+      canonicalized phone. Make "New customer" reachable only *through* an empty search result,
+      never as a peer button beside the search. This is the dedup guard that S5.5f makes necessary
+      (see the [[Intake flow]] §2a consequence recorded in [[Design system]] L3).
+- [ ] **S5.5f** **Add-vehicle screen — NEW.** No `VehiclesController`, no route, no screen exists;
+      today a vehicle can only be born inside the intake flow. Builder ruling 2026-08-25: it becomes
+      ordinary CRUD under a customer. The first of the two genuinely new screens, and the smaller.
+- [ ] **S5.5g** **`Vehicle.find_by_plate`** + unit tests — the lookup Screen A needs, beside the
+      existing `Vehicle.canonicalize` ([[Design laws]] #9: logic you can't call without a request is
+      misplaced). Absorbs the live half of S5.8 below.
+- [ ] **S5.5h** **Intake front door — NEW, happy path only.** `GET /intakes/new`: one autofocused
+      monospace plate field, one primary "Look up", reached from the board's reserved front-door
+      slot (`app/views/workshops/show.html.slim` already carries the comment; every sibling control
+      there is `btn-outline-secondary`, so one solid `--action` button *satisfies* law 3 rather than
+      straining it). Three outcomes: **found** → open the visit ([[Intake flow]] §1a);
+      **found with an open intake** → report the car already in house and link to the visit
+      (**§1c — this is not polish**: `index_intakes_one_open_per_vehicle` is a partial unique index,
+      so keying an in-house plate without it raises `RecordNotUnique`, a 500);
+      **not found** → a *routed* dead end to S5.5f, saying what to do next (UI law 8). Widen
+      `CreateIntake` and `IntakesController#create` by **`complaint:` only** — not by `customer:`,
+      since §1b is deferred (the controller is currently narrower than the service: it does
+      `params.require(:vehicle_id)` while `CreateIntake` already accepts `customer:` and
+      `inspection_type:`). Keyboard-only on tab/Enter (law 10).
+- [ ] **S5.5i** **Tests.** Model/unit coverage per house convention. ⚠ **Open call, not ruled:**
+      whether to un-suspend the Capybara system-test layer (suspended 2026-08-14 when the aggregate
+      split retired the views it drove; `test/system/` and `application_system_test_case.rb` are
+      gone, but **capybara and selenium-webdriver are still in the `Gemfile`** — so it costs one
+      harness file, no new dependency). These are the first real pages since, and "does Enter on the
+      plate field reach the visit" is exactly what a controller test cannot see.
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
 - [ ] **S5.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
       prior **intakes**.
-- [ ] **S5.8** Plate normalization + existing-vehicle lookup.
+- [ ] ~~**S5.8** Plate normalization + existing-vehicle lookup.~~ **Superseded 2026-08-25
+      (Session 36) — it was half-done and mis-ordered.** The *plate-normalization* half already
+      shipped, well before S5.5, as `Vehicle.canonicalize` (called from a `before_validation`, with
+      the per-workshop unique index keying on one spelling). The *existing-vehicle lookup* half is a
+      **prerequisite of the intake screen, not a follow-on** — folded into **S5.5g**. The phone
+      side that once sat here — extracting the canonicalization duplicated between `Customer`'s
+      `before_validation` and its `search` scope, plus a `Customer.find_by_phone` — is **not needed
+      for the happy path** and moves with the deferred §2a/§2b dedup tree ([[Deferred design]]).
+      Extract it before a third caller lands.
 - [ ] **S5.9** Tests: intake creates the full graph (incl. its auto-created `Jobsheet`) · complaint
       saved on Intake · jobsheet answers saved (see S5.1d for the model-level answer tests) · ETA
       persists · history shows.

@@ -200,4 +200,4 @@ The pin ships **muted, never coloured** in Sprint 4. Ageing colour (amber/red at
 ## Related
 - [[ADR-005 Acknowledged handoffs in V1]] (extended by this) · [[Product gaps]] #5 ·
   [[Event log]] · [[M1-F1 Status flow and transitions]] · [[Blocker]] ·
-  [[Design laws]] · [[Visual theme]] · [[ADR-002 V1 scope]] · [[Sprint plan]] · [[Deferred design]]
+  [[Design laws]] · [[Design system]] · [[ADR-002 V1 scope]] · [[Sprint plan]] · [[Deferred design]]

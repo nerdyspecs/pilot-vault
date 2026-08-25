@@ -434,7 +434,7 @@ URL to be true.
       timeline, `_stage_badge` partial, sacred-palette badge CSS, dashboard active-jobs list);
       `e2c30a0` (mobile timeline wrap fix). **Stage→color mapping ruled at build:**
       registered/assigned/cancelled = neutral, in_progress = info blue, done/delivered =
-      success green — amber reserved for aging, red for blockers ([[Visual theme]] status
+      success green — amber reserved for aging, red for blockers ([[Design system]] status
       colors stay sacred). Also applied first: the uncommitted `create_with_founder!`
       half-rename reverted per the Session 20 audit ruling — vocabulary stays *owner*.
       Verified: 51/51 suite green throughout; live browser walk of all personas

@@ -88,4 +88,4 @@ If your shop runs on a whiteboard and your memory, we want you.
 - Who "the builder" is on the page (name / business identity).
 
 ## Related
-- [[Positioning]] · [[Voice and tone]] · [[Visual theme]] · [[Product overview]]
+- [[Positioning]] · [[Voice and tone]] · [[Design system]] · [[Product overview]]

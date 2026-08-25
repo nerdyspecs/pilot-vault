@@ -7,7 +7,7 @@ updated: 2026-07-07
 Two standalone HTML mocks, both fully self-contained (open in any browser, no server, no
 network). All state is in-memory — **reload = reset**. Role switching is a navbar dropdown,
 no auth. Same model spine as the vault: [[Stage model]], [[Blocker]] overlay, acknowledged
-handoffs ([[ADR-005 Acknowledged handoffs in V1]]), theme tokens from [[Visual theme]].
+handoffs ([[ADR-005 Acknowledged handoffs in V1]]), theme tokens from [[Design system]].
 
 **These are look/feel/flow references, not code to port.** The JS is throwaway vanilla —
 the Rails app re-implements the logic properly (real ONE DOOR service object, Turbo).
@@ -54,5 +54,5 @@ none are committed scope:
   addressed to them", not editing the job. Needs an ADR if ever adopted.
 
 ## Related
-- [[Visual theme]] · [[Design laws]] · [[M1-F1 Status flow and transitions]] ·
+- [[Design system]] · [[Design laws]] · [[M1-F1 Status flow and transitions]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[Positioning]]

@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-19 (Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-08-25 (Session 36 — job↔vehicle customer-match: the recorded two-branch confirm re-scoped as a sub-screen of a three-choice mismatch surface (§1b has four forks), and deferred past intake's first cut; prior: Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred design
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
@@ -119,6 +119,28 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   gap in the meantime: **weaker dedup** (no phone-first dedup) — mitigated cheaply by
   plate-first screening + a name/phone-searchable customer index (S2.5.2), the full tree
   still S5.
+  **⚠ 2026-08-25 (Session 36) — the recorded two-branch confirm is a SUB-screen, not the
+  mismatch screen; and it is deferred past intake's first cut.** Two separate findings:
+  **(1) The prose above covers two of four forks.** `[Just this visit]` / `[Vehicle changed
+  hands]` answer only the *payer* question. [[Intake flow]] §1b has **four** forks, and a screen
+  offering just these two silently drops **1b-i** ("bill my husband as usual" — file untouched,
+  stamp stays the file-holder; creates exactly as the happy path, no confirm needed) and
+  **1b-iv** ("that's my old number" — correct the card's phone, *never* a new card; the sneakiest
+  dedup trap, since missing it splits one person into two cards). So the mismatch surface, when
+  built, offers **three** choices — bill the file · correct the file's phone · bill the person at
+  the counter — and **the recorded two-branch confirm is the tail of the third**, reached only
+  after the payer's own phone has been looked up. Two buttons stays right *at that point*, for
+  exactly the reason recorded above (the two stories need different writes). It simply is not the
+  whole screen. **(2) Deferred past intake's first cut** (builder ruling 2026-08-25, plan of
+  record in [[Design system]]): customers and vehicles now get ordinary CRUD screens *ahead*
+  of the visit, so the intake front door ships [[Intake flow]] **§1a plus §1c only** and the whole
+  §1b tree — with the §2a/§2b dedup forks — waits. Code consequence: `IntakesController#create`
+  stays narrow, widening by `complaint:` only and **not** by `customer:`, even though
+  `CreateIntake` already accepts `customer:` and `inspection_type:`. The circle-back trigger is no
+  longer "when the intake UI exists" (it will exist without this) — it is **when §1b lands**.
+  Also recorded there, so it is not re-derived: the §1 silent-compare rule means the phone
+  comparison is **server-side on submit** — no client-side compare, no hidden field, no `data-`
+  attribute — while the file-holder's *name* may be shown (builder ruling, same date).
 - **Crew: helpers + the `lead` flag (2026-07-16, builder ruling).** v1 crews are a single
   responsible mechanic; S2.6 ships `job_mechanics` **without** any lead/primary flag — all
   v1 technicians on a job are treated the same. When helpers arrive, the flag lands as

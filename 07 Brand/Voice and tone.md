@@ -17,7 +17,7 @@ register, travels beyond Malaysia. Warmth comes from **specificity about worksho
 never from slang. *Deferred, not dropped:* local flavor (e.g. "towkay") may return in ad/social
 variants once core copy is stable — test there, keep the core vanilla.
 
-## Voice laws — verbal twins of the UI laws in [[Visual theme]]
+## Voice laws — verbal twins of the UI laws in [[Design system]]
 1. **Copy whispers too.** No exclamation marks, no hype adjectives ("revolutionary", "seamless").
    Twin of "chrome whispers, status shouts."
 2. **Read-once words.** A non-technical owner understands every sentence on first read. No
@@ -36,4 +36,4 @@ variants once core copy is stable — test there, keep the core vanilla.
   ✓ "Your customers watch the job themselves. The calls stop."
 
 ## Related
-- [[Positioning]] · [[Visual theme]] · [[Product overview]]
+- [[Positioning]] · [[Design system]] · [[Product overview]]

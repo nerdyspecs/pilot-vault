@@ -2,7 +2,7 @@
 type: concept
 module: M1
 created: 2026-08-25
-updated: 2026-08-25
+updated: 2026-08-25 (Session 36 — Q1's premise corrected: it was factually wrong; brief re-scoped, the screen design now lives in [[Design system]])
 ---
 # Intake UI — design brief
 **Task: design the intake flow's screens and decide the build order. This is a DESIGN session,
@@ -17,6 +17,17 @@ out to be structural. Not code.** Do not create branches, migrations, controller
 > This project runs in learning mode — the builder writes the code. A design session's job is to
 > reason the fork out *with* them, surface options and tradeoffs, and record what gets settled.
 > Bring recommendations with arguments; do not rule alone on anything structural.
+
+---
+
+> [!warning] Status, 2026-08-25 (Session 36) — read this before the questions below
+> **Q1's premise is wrong** (corrected in place below) and the session that answered these
+> questions widened past the brief. The **screen design and the build order now live in
+> [[Design system]]**, which is the current plan of record. This note is kept for its §1 and
+> §2 — the settled constraints and the state-of-the-app facts, which still hold — and for the
+> corrected Q1. **Q2–Q6 are superseded**: the builder ruled that customers and vehicles are
+> created as ordinary CRUD ahead of the visit, so intake's first cut is [[Intake flow]] §1a plus
+> §1c only, and the mismatch/dedup screens those questions were about are deferred with the tree.
 
 ---
 
@@ -72,10 +83,14 @@ with reasoning rather than quietly deviating.
 /intakes/:id  ·  /jobs/:id  ·  /invitations/new
 ```
 
-**There is no `/intakes` index and no `/jobs` index.** `/intakes/:id` and `/jobs/:id` are
+**There is no `/intakes` index and no `/jobs` index** — but ~~`/intakes/:id` and `/jobs/:id` are
 reachable only by knowing the id. The only lists in the app are customers, crew, and blocker
-types. Navigation is the wordmark plus the workshop name — there is no nav bar to hang a front
-door on.
+types.~~ **Corrected 2026-08-25 (Session 36): `/workshop` is a job list — it *is* the board.** It
+renders every active repair plus the done-awaiting-delivery group, each row linking to
+`/jobs/:id`, which links on to its visit. A missing index *route* is not a missing *list*; reading
+the first as the second is what produced Q1's false premise below.
+Navigation is the wordmark plus the workshop name — there is no nav bar to hang a front
+door on. *(That gap is real, and it is now [[Design system]] L1.)*
 
 **Backend that already works:** `CreateIntake` (opens Intake + birth transition + Jobsheet + one
 `CreateJob`, one transaction), `Intake` (token, status enum, `ready?`), `Jobsheet` (1:1, frozen
@@ -85,24 +100,48 @@ canonicalizing callbacks, `Permissions` (`require_counter!` / `counter_staff?`).
 UI caller ([[Screen flow]]). Suite: 154 runs green at `2c5816f`.
 
 **Two vestiges in the views:** `customers/new.html.slim` carries a `registration_number` hidden
-field that `customers#create` ignores; `customers/show.html.slim:37` has a comment marking where
-the start-a-visit link belongs (it says "S6" — stale since the 5↔6 swap).
+field that `customers#create` ignores; `customers/show.html.slim:38` has a comment marking where
+the start-a-visit link belongs (it says "S6" — stale since the 5↔6 swap). *(Line corrected from
+:37 — that is the first line of the two-line comment block. Its twin lives at `config/routes.rb:35`,
+which also still says S6. Neither is a vault citation.)*
 
 ---
 
 ## 3. The open design questions
 
-### Q1 — Build order. What ships first? *(the session's headline question)*
-The finding above is the tension: **the intake flow creates visits the app cannot list.** An SA
+### Q1 — Build order. What ships first? ~~*(the session's headline question)*~~
+
+> [!danger] **Corrected 2026-08-25 (Session 36) — the premise below was false.**
+> The brief claimed the intake flow "creates visits the app cannot list." **It does not**, and the
+> claim was verified false against code at `2c5816f`:
+>
+> - **`GET /workshop` (`workshops#show`) *is* the board.** It loads
+>   `Job.for_current_workshop.active` plus the done-awaiting-delivery group and renders
+>   `app/views/jobs/_board_row.html.slim` for each.
+> - **`Job.active` includes `unassigned`** (`app/models/job.rb:17`), and `CreateIntake` defaults to
+>   `jobs: [{}]` — one unassigned repair. So **every new intake surfaces on the board immediately.**
+> - The row links to `jobs#show`, which carries *"← This car's visit"*; `Job` delegates
+>   `vehicle, :customer` to `intake`. The visit is two clicks from the board, not URL-only.
+> - Separately, [[Intake flow]] §1c makes the plate field its own lookup for a car already in house.
+>
+> **Consequence:** build the intake front door as planned. **Do not pull Sprint 6 forward, and do
+> not ship a stopgap list.** The real gap was never a list — it was the front door.
+>
+> **No dated footnote is owed against Session 32.** This finding *supports* the S5-before-S6
+> deferral rather than reversing it, so CLAUDE.md's contradiction rule does not fire.
+>
+> **How the error happened, so it doesn't recur:** it was read off `bin/rails routes` — there is no
+> `/intakes` index and no `/jobs` index — without then checking whether an *existing* screen
+> already rendered the list. A missing index route is not the same fact as a missing list.
+
+~~The finding above is the tension: **the intake flow creates visits the app cannot list.** An SA
 registers a car, lands on the visit page, navigates away — and that visit is unreachable without
 the URL. The board that would list them is Sprint 6, which Session 32 deliberately deferred
-*behind* Sprint 5.
+*behind* Sprint 5.~~
 
-Options to weigh (not exhaustive): ship a minimal "in house today" list alongside intake; move
+~~Options to weigh (not exhaustive): ship a minimal "in house today" list alongside intake; move
 S6 ahead of S5 after all; accept landing on the visit page as sufficient for a first cut and
-list later. **This bears on a recorded sequencing decision — if it reverses Session 32's
-deferral, that needs a dated footnote saying so plainly** (CLAUDE.md's rule for a build
-contradicting a recorded decision).
+list later.~~ **All three are moot — the board already lists them.**
 
 ### Q2 — Screen decomposition
 Wizard (one question per screen), one page with progressive reveal, or a page re-rendering per
@@ -162,11 +201,11 @@ this interacts with Q1 (if a list ships, the list is probably the home for "New 
 
 `CLAUDE.md` · [[Intake flow]] (the behaviour spec — read in full, the forks are easy to
 under-read) · [[Deferred design]] §the job↔vehicle customer-match entry (the two-branch confirm)
-· [[Visual theme]] §UI laws · [[User stories]] §Design constraints · [[Screen map]] ·
+· [[Design system]] §UI laws · [[User stories]] §Design constraints · [[Screen map]] ·
 [[Screen flow]] · [[Sprint plan]] Sprint 5 · [[Data model]]
 
 ## Related
 [[Intake flow]] · [[Inspection jobsheet — design brief]] (the pattern this follows) ·
-[[Sprint plan]] S5.5 · [[Screen map]] · [[Screen flow]] · [[Design laws]] · [[Visual theme]] ·
+[[Sprint plan]] S5.5 · [[Screen map]] · [[Screen flow]] · [[Design laws]] · [[Design system]] ·
 [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
 [[ADR-015 Jobsheet answers are rows against a frozen question set]]
