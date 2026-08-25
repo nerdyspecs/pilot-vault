@@ -55,7 +55,7 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
   type an unknown plate during New intake). Setup + Records are otherwise fully built; the daily
   loop is built from Assign-technician onward.
   *(2026-08-25: flow 7 — the counter half of the front door — is **chipped out** to
-  [[Intake UI — build brief]], Sprint plan S5.5. Flow 8 (add a repair to an open intake) and the
+  [[Intake UI — design brief]], Sprint plan S5.5. Flow 8 (add a repair to an open intake) and the
   jobsheet fill screen are **not** in that chip.)*
 - **Considered and declined: renaming the blocker-type catalog route.** `/blockers` (catalog)
   sits beside `/intakes/:id/blockers` and `/jobs/:id/blockers` (applied). Renaming the catalog to

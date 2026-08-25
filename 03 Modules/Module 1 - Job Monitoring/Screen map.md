@@ -337,7 +337,7 @@ start a job for them.
 > the vanished `new_customer_job_path` and claimed the page **500s for every counter user**. That
 > button was already **removed in code** with the aggregate split; the page renders fine. A
 > code comment at `app/views/customers/show.html.slim:37` marks the spot where the start-a-visit
-> link belongs once the front door exists — see [[Intake UI — build brief]].
+> link belongs once the front door exists — see [[Intake UI — design brief]].
 
 **States to handle** — *Activity* summary tiles · *Vehicles* list (only when any exist).
 
@@ -353,7 +353,7 @@ POST endpoints exist and work, but nothing renders a form to reach them:
 
 | Intended screen | Would feed | Status | Notes |
 |---|---|---|---|
-| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow. **Chipped out 2026-08-25 — [[Intake UI — build brief]]** (Sprint plan S5.5). Target of the board's "New job". |
+| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow. **Chipped out 2026-08-25 — [[Intake UI — design brief]]** (Sprint plan S5.5). Target of the board's "New job". |
 | **Add a repair to an intake** (`GET /intakes/:intake_id/jobs/new`) | `POST /intakes/:intake_id/jobs` | **not-built** | No way in the UI to add a second repair to an open intake yet; the intake page even notes the gap. *(2026-08-16: create nested under its intake — `ed2595c`.)* |
 | **Customer status page** (public, by token) | — read-only — | **not-built** | Each visit carries a share token for an owner-facing "how's my car?" page. No route yet. |
 
@@ -362,7 +362,7 @@ POST endpoints exist and work, but nothing renders a form to reach them:
 > `app/views/customers/jobs/new.html.slim` were deleted with the aggregate split; there is
 > nothing left to rebuild around Intake, and the front door starts from scratch. One vestige does
 > survive: `app/views/customers/new.html.slim` still carries a `registration_number` hidden field
-> that `customers#create` ignores — flagged in [[Intake UI — build brief]] §2.
+> that `customers#create` ignores — flagged in [[Intake UI — design brief]] §2.
 
 ---
 

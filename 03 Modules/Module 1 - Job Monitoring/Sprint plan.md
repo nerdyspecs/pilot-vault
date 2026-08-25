@@ -243,12 +243,16 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" — creation goes through `CreateIntake`, not a
       bare `Job.create!` or a door verb.)* **Spec: [[Intake flow]]** (full SA decision tree, both
       lookup keys, two-branch mismatch confirm — designed 2026-07-15; unaffected by the backend
-      split, still the *behaviour* spec). **Build brief: [[Intake UI — build brief]]**
-      *(2026-08-25 — chipped out. [[Intake flow]] is a decision tree, not a screen spec; the brief
-      carries the create-path decision (lookups as model class methods, branch resolution in the UI
-      flow, `CreateIntake` widened by `complaint:` only), the code-as-it-stands, and the scope
-      fence. The **jobsheet fill screen is NOT in this chip** — it's a different user on a
-      different device, and it waits on the flagged catalog content calls.)*
+      split, still the *behaviour* spec). **Design brief: [[Intake UI — design brief]]**
+      *(2026-08-25 — **design chipped out, not build**. [[Intake flow]] is a behaviour spec, not a
+      screen spec: nothing says how many screens the branching tree is. The design session settles
+      screen decomposition, the two-branch mismatch confirm as a real surface, the silent-compare
+      constraint, and — its headline question — **what to build first**, since the app currently
+      has no `/intakes` or `/jobs` index and would create visits nobody can list. It carries the
+      settled create-path decision (lookups as model class methods, branch resolution in the UI
+      flow, `CreateIntake` widened by `complaint:` only). The **jobsheet fill screen is NOT in
+      this chip** — different user, different device, and it waits on the flagged catalog content
+      calls.)*
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
