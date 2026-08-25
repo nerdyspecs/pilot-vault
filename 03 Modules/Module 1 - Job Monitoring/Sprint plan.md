@@ -243,7 +243,12 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       *(⚠ 2026-08-14, ADR-012/013: was "→ create Job" — creation goes through `CreateIntake`, not a
       bare `Job.create!` or a door verb.)* **Spec: [[Intake flow]]** (full SA decision tree, both
       lookup keys, two-branch mismatch confirm — designed 2026-07-15; unaffected by the backend
-      split, still the UI spec to build against).
+      split, still the *behaviour* spec). **Build brief: [[Intake UI — build brief]]**
+      *(2026-08-25 — chipped out. [[Intake flow]] is a decision tree, not a screen spec; the brief
+      carries the create-path decision (lookups as model class methods, branch resolution in the UI
+      flow, `CreateIntake` widened by `complaint:` only), the code-as-it-stands, and the scope
+      fence. The **jobsheet fill screen is NOT in this chip** — it's a different user on a
+      different device, and it waits on the flagged catalog content calls.)*
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*

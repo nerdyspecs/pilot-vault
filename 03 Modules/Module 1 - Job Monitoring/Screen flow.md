@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-15
+updated: 2026-08-25 (flow 7 chipped out — Intake UI build brief)
 ---
 # Screen flow
 
@@ -32,7 +32,7 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
 ## Daily loop
 | # | Flow | Screen | Api | Components (C) | Actions (A) | → triggers |
 |-|-|-|-|-|-|-|
-| 7 | New intake | New intake ⚠️ | `GET /intakes/new` ❌ · `POST /intakes` | plate field · customer/vehicle pick | Via reg # · Via customer `[counter]` | both → **Intake show** |
+| 7 | New intake | New intake ⚠️ | `GET /intakes/new` ❌ · `POST /intakes` | plate field · customer/vehicle pick · complaint · inspection type | Via reg # · Via customer `[counter]` | both → **Intake show** |
 | 8 | Add repair | on Intake show ⚠️ | `POST /intakes/:intake_id/jobs` | add-repair form *(no UI yet)* | Add repair `[counter]` | → **Job show** |
 | 9 | Assign technician | Job show ✅ | `POST /jobs/:id/technician` · `DELETE` | technician picker | Assign · Remove `[counter]` | → *stays* (unassigned→assigned) |
 | 10 | Work the repair | Job show ✅ | `…/start_work` · `/mark_done` · `/send_back` · `/cancel` · `/blockers` | stage · technician · blockers · timeline | Start · Mark done `[crew]` · Send back · Cancel `[counter]` · Raise/clear blocker `[role]` | moves → *stays* · blocker → **Blocker show** |
@@ -54,6 +54,9 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
   UI on Intake show, and Add vehicle has no standalone screen (a vehicle is only born when you
   type an unknown plate during New intake). Setup + Records are otherwise fully built; the daily
   loop is built from Assign-technician onward.
+  *(2026-08-25: flow 7 — the counter half of the front door — is **chipped out** to
+  [[Intake UI — build brief]], Sprint plan S5.5. Flow 8 (add a repair to an open intake) and the
+  jobsheet fill screen are **not** in that chip.)*
 - **Considered and declined: renaming the blocker-type catalog route.** `/blockers` (catalog)
   sits beside `/intakes/:id/blockers` and `/jobs/:id/blockers` (applied). Renaming the catalog to
   `/blocker_types` was tried and reverted: the nested controllers already disambiguate, this
