@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-17 (Session 32 — board §3 regroup deferred to S6, ADR-012 citation)
+updated: 2026-08-25 (two stale entries corrected against code — the "Add job" 500 and the two pre-ADR-012 templates were already fixed; front door chipped out; prior: 2026-08-17 Session 32 — board §3 regroup deferred to S6, ADR-012 citation)
 ---
 # Screen map
 
@@ -331,12 +331,13 @@ start a job for them.
 
 | Label | Fires | Params | Who | Lands | Status |
 |---|---|---|---|---|---|
-| **"Add job"** | `GET new_customer_job_path` | — | Counter staff | — | **dead** |
 | "Maintain customer" | `GET /customers/:id/edit` | `:id` | Counter staff | Edit form | built |
 
-> ⚠ **"Add job" is dead.** It points at a route that doesn't exist, so this page **500s for
-> everyone who can reach it** (the page is counter-only, and every counter user sees the
-> button). Its intended destination is the (unbuilt) start-a-visit flow — see below.
+> ⚠ **Corrected 2026-08-25 — this note was stale.** It described an "Add job" button pointing at
+> the vanished `new_customer_job_path` and claimed the page **500s for every counter user**. That
+> button was already **removed in code** with the aggregate split; the page renders fine. A
+> code comment at `app/views/customers/show.html.slim:37` marks the spot where the start-a-visit
+> link belongs once the front door exists — see [[Intake UI — build brief]].
 
 **States to handle** — *Activity* summary tiles · *Vehicles* list (only when any exist).
 
@@ -352,15 +353,16 @@ POST endpoints exist and work, but nothing renders a form to reach them:
 
 | Intended screen | Would feed | Status | Notes |
 |---|---|---|---|
-| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow (S5 territory). Target of the board's "New job". |
+| **Start a visit / "New intake"** (`GET /intakes/new`) | `POST /intakes` (`vehicle_id`) | **not-built** | The plate-first entry flow. **Chipped out 2026-08-25 — [[Intake UI — build brief]]** (Sprint plan S5.5). Target of the board's "New job". |
 | **Add a repair to an intake** (`GET /intakes/:intake_id/jobs/new`) | `POST /intakes/:intake_id/jobs` | **not-built** | No way in the UI to add a second repair to an open intake yet; the intake page even notes the gap. *(2026-08-16: create nested under its intake — `ed2595c`.)* |
 | **Customer status page** (public, by token) | — read-only — | **not-built** | Each visit carries a share token for an owner-facing "how's my car?" page. No route yet. |
 
-> *Notes for us:* two stale templates survive from before the Intake split and are **not
-> routed** — `app/views/jobs/new.html.slim` (posts `registration_number` to `jobs_path`,
-> which now expects `intake_id`) and `app/views/customers/jobs/new.html.slim` (posts to the
-> non-existent `customer_jobs_path`). They're the source of the two dead helpers. Don't wire
-> them as-is — they predate ADR-012 and need rebuilding around Intake.
+> *Notes for us:* ~~two stale templates survive from before the Intake split~~ — **corrected
+> 2026-08-25: both are gone.** `app/views/jobs/new.html.slim` and
+> `app/views/customers/jobs/new.html.slim` were deleted with the aggregate split; there is
+> nothing left to rebuild around Intake, and the front door starts from scratch. One vestige does
+> survive: `app/views/customers/new.html.slim` still carries a `registration_number` hidden field
+> that `customers#create` ignores — flagged in [[Intake UI — build brief]] §2.
 
 ---
 
