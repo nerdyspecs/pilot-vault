@@ -2,10 +2,15 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-25 (Session 36 — design source of truth consolidated into [[Design system]] (renamed from Visual theme); S5.5a/b re-pointed and widened after verifying the Bay prototype live; prior: S5.5b now carries the Visual theme re-lock and S5.5a the /design-preview route, after the Bay comparison; S5.5c absorbs the law-9 width fix; S5.5 rewritten as the UI build order (S5.5a–i): four cross-cutting fixes before any screen, then add-vehicle and the happy-path intake front door; S5.8 superseded/split; plan of record is [[Design system]]; prior: Session 35 — S5.1a/S5.1b built + ticked; S5.1c ticked (no-op), S5.1d core done (value-type/completion + R11 deferred); build footnotes: re-snapshot dropped (attr_readonly write-once), complaint moved to jobsheets header; prior: Session 34 — jobsheet storage decided, ADR-015; S5.1 (rev) split into four build tasks S5.1a–d; S5.5 split (complaints vs. inspection fill); S5.9 retargeted; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; old S5.1–S5.4 EAV tasks struck/dropped, replaced by S5.1 (rev) pointing at the design brief; prior: 2026-08-17 Session 32 Sprint 5 ↔ 6 renumbered; prior: 2026-08-14 Sprint 4.5 built + ticked, S4.5.5 rewritten, S4.5.9/.10 added — ADR-013;
+updated: 2026-08-25 (Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
+
+> **Change history is not in this file.** Session-by-session narrative lives in [[worklog]] (newest
+> on top), and the exact diffs in `git log`. The `updated:` line above records only the most recent
+> change — it used to carry every prior change back to Sprint 3 and had grown to 1,800 characters.
+
 Small, assignable tasks per sprint — sized for a junior dev to pick up one at a time. The
 [[Roadmap]] is the higher-level slice map; this is the build order. Each sprint is a thin vertical
 that ends in something demoable.
@@ -24,6 +29,27 @@ that ends in something demoable.
   door split by level, creation left for `CreateIntake`/`CreateJob`, and the shared guards left
   for a new `Permissions` class, checked at the controller boundary rather than inside the
   door.)*
+- **Sequence by fan-in** *(named 2026-08-25, Session 36, by the builder)*. Rank build tasks by
+  **how many other things depend on them**, highest first — not by what is easiest to verify or most
+  interesting to build. Three criteria, strictly in this order:
+  1. **Fan-in** — how many things sit on top of this?
+  2. **Cost of late change** — how expensive is it to redo once things are sitting on it?
+  3. **Verification leverage** — does it make checking everything else easier? This earns *early*,
+     it never earns *first*.
+
+  The pattern has names: **outside-in** or **shell-first** development; formally a topological order
+  over the dependency graph. Note the **opposite** tradition — Atomic Design's atoms → molecules →
+  organisms → pages is deliberately bottom-up. That suits a component library you are publishing; it
+  is the wrong order for an application, where you end up with good buttons and no idea whether the
+  page holds together.
+
+  **Written down because it was violated the day it was implicit.** Sprint 5A originally opened with
+  `/design-preview` — the component-inventory route — on the reasoning that it is how everything else
+  gets verified. But it has **zero fan-in** (nothing depends on it) and it cannot even render until
+  the tokens exist, so it was a leaf placed before its own root. The rule "do the things that change
+  every screen before drawing any screen" was already recorded in [[Design system]]; sorting by
+  verification convenience quietly overrode it. An implicit rule loses to whichever axis feels
+  urgent.
 - **No gem without justifying why Rails' built-in isn't enough** — currently Devise only ([[Agent guide]]).
 - **Tenancy:** every workshop-owned table has `workshop_id`; never query it bare — always scope by
   `Current.workshop` ([[Design laws]] #2).
@@ -157,6 +183,65 @@ first would mean rebuilding it.
 
 ---
 
+## Sprint 5A · Design system rollout *(the UI phase)*
+**Goal:** every screen renders in the design system, and both layout archetypes are real in code.
+**Exit:** all twelve existing screens restyled and sitting on a recorded archetype · `/design-preview`
+renders every component · `application.css` contains **no `--brand`, no raw hex in a component, and
+no spacing value at all**.
+
+> [!note] Why this is its own sprint, and why the letter *(2026-08-25, Session 36)*
+> This work was `S5.5a–i`, a sub-task list inside the intake vertical. It outgrew that: it now
+> covers the auth gate and a restyle of every existing screen, neither of which is intake work.
+> **Lettered, not numbered**, because `S5.1`–`S5.9` are live task ids and another renumber would rot
+> citations the way the 5↔6 swap did. It is inserted *before* Sprint 5 in reading order because that
+> is the build order — Sprint 5's jobsheet backend is already built, and its remaining **UI** depends
+> on this phase landing first.
+>
+> **The two new intake screens are NOT here.** Add-vehicle and the intake front door stay in
+> [[#Sprint 5 · Intake + fixed inspection jobsheet|Sprint 5]] as `S5.5` — they are features, not
+> foundation, and they come after this phase.
+
+**What each task builds — files, components, style names — is in [[UI rollout]].** This is the
+order and the ticks; that note is the spec.
+
+**Ordered by fan-in** (§Conventions) — most-depended-upon first. `/design-preview` used to open this
+sprint and is now sixth: nothing depends on it, and it cannot render until the tokens exist.
+
+**Definition of done, every task:** the seven design rules in `CLAUDE.md`.
+
+### 1 · Tokens — fan-in: every screen
+- [ ] **S5A.1** Brand layer — `application.css` rewritten ⚠ *must ship with the `--brand` fixes*
+- [ ] **S5A.2** Flash off the reserved status hues
+
+### 2 · Shell — fan-in: all twelve app screens
+- [ ] **S5A.3** The frame — `application.html.slim` · `_sidebar` · `_topbar` (+ the law-9 width fix)
+- [ ] **S5A.4** `_page_head` partial
+
+### 3 · Rulings — fan-in: every screen, free to decide now
+- [ ] **S5A.5** Settle UI law 3 — "per screen" vs "per local area" *(a decision, no code)*
+
+### 4 · Verification — fan-in: zero, high leverage, so early not first
+- [ ] **S5A.6** Component inventory + `/design-preview`; merge the `_blocker_item` twins
+
+### 5 · The gate — no shell dependency
+- [ ] **S5A.7** Sign in + sign up *(restyle)*
+- [ ] **S5A.8** Forgot + reset password
+
+### 6 · Screens into the shell — each a re-cut, not a rebuild
+- [ ] **S5A.9** The board
+- [ ] **S5A.10** The visit and the repair
+- [ ] **S5A.11** Customers
+- [ ] **S5A.12** Crew and blocker types
+- [ ] **S5A.13** Home *(marketing page last, droppable)*
+
+### 7 · Tests
+- [ ] **S5A.14** System-test layer ⚠ *open call — un-suspend Capybara?*
+
+**Three open calls carried, not decided:** the sidebar's Stimulus + icon-source dependency (S5A.3),
+UI law 3's wording (S5A.5), and un-suspending Capybara (S5A.14).
+
+---
+
 ## Sprint 5 · Intake + fixed inspection jobsheet
 **Goal:** register a car end-to-end — see [[ADR-014 Jobsheet is a fixed product-defined inspection]]
 (supersedes [[ADR-003 Digitized jobsheet in V1]]'s owner-configurable core), [[Data model]].
@@ -173,33 +258,6 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 > `not_applicable`). No door — nothing to veto, concurrent multi-actor fill. What remains is
 > **S5.1a–d below** (migration → model/catalog → seed → tests, each its own commit, per house
 > pattern). See [[worklog]] Session 34.
-
-> [!note] Superseded 2026-08-19 — jobsheet reversed to fixed/product-defined; storage chipped out
-> [[ADR-014 Jobsheet is a fixed product-defined inspection]] reverses ADR-003's owner-configurable
-> core: the jobsheet's fields are set by the product (versioned in code), not owner-CRUD at
-> runtime. The EAV build (`JobSheet`/`JobSheetField` template models, branch
-> `s5-jobsheet-models`, 4 commits) is **discarded** — see old S5.1–S5.4 below, all struck. A
-> concrete 39-item field list (5 sections, mixed answer types) surfaced and reopens the storage
-> question (wide typed table vs. code-defined catalog + answer rows vs. jsonb) — **not decided
-> here**, chipped out to [[Inspection jobsheet — design brief]] for a future session to design and
-> build from scratch off `main`. Two fill-layer decisions from Session 32 are folded into that
-> brief rather than parked separately: the freeze condition, and jobsheet-in-the-intake-form vs. a
-> later step. See [[worklog]] Session 33. **Storage decided, Session 34 — see the note above.**
-
-- ~~**S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).~~
-- ~~**S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
-      position`).~~
-- ~~**S5.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).~~
-- ~~**S5.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete**).~~
-
-  **Dropped 2026-08-19, [[ADR-014 Jobsheet is a fixed product-defined inspection]].** S5.1/S5.2
-  were built (branch `s5-jobsheet-models`, discarded) then reversed once configurability was
-  judged the source of the print-control/versioning/drift problems; S5.3 (EAV values) and S5.4
-  (owner field-admin) never applied to begin with once the fields aren't owner-CRUD. Replaced by:
-
-  ~~**S5.1 (rev)** — fixed inspection jobsheet: design storage structure + build model/migration/
-      tests (see [[Inspection jobsheet — design brief]]). Supersedes old S5.1–S5.4 per
-      [[ADR-014 Jobsheet is a fixed product-defined inspection]].~~
 
   **Storage designed 2026-08-19, [[ADR-015 Jobsheet answers are rows against a frozen question set]].**
   Split into the four-layer build, each its own commit, per house pattern:
@@ -243,71 +301,31 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       inspection item; ⚠ corrected at build 2026-08-19 — it ships on the `jobsheets` header, not on
       Intake; ⚠ 2026-08-14 ADR-012/013 — creation goes through `CreateIntake`, never a bare
       `Job.create!` or a door verb.)*
-- [ ] **S5.5a** *(cross-cutting)* **Component inventory** — write it into [[Design system]] §Components,
-      **build the `/design-preview` route** (a page rendering every component once, in every state),
-      and **merge the `_blocker_item` twins** (`app/views/intakes/_blocker_item.html.slim` and
-      `app/views/jobs/_blocker_item.html.slim` differ by six lines, all naming). UI law 7 has no
-      enforceable meaning until the components are named; the review route makes it *checkable*
-      rather than asserted, and it is where the re-derived status chips get the sample comparison
-      [[Design system]] says they still owe. **`/design-preview` is the third layer of the design
-      source of truth** (note → `application.css` → rendered page); the reference implementation
-      declared it and never built it, so Knot is the first to actually populate it.
-- [ ] **S5.5b** *(cross-cutting)* **The visual re-lock** — apply [[Design system]]'s 2026-08-25
-      restyle in `application.css`, all through Bootstrap variables and still never forking the
-      vendored file. **Largely a transcription** — `08 Experiments/knot-board-desktop.html` already
-      carries the intended `:root` block ([[UI experiments]] §3). Contents: `--font-sans` →
-      Helvetica/Arial · `--action` `#2727D9` (`--brand` retired) · `--page`/`--surface` **white**,
-      `--hover` `#F4F4F2` · two border weights (`--border` `#D8D8D4`, `--rule` `#E5E5E1`) · the muted
-      ink ramp · `--bs-border-radius` family → `0` · `--bs-body-font-size` → `.875rem` · negative
-      tracking in `em` · the six component dimensions · the three **floating-layer shadows** (inline
-      structure stays flat) · **`.stage-badge` re-cut from two-part to border + fill + text** ·
-      **flashes moved off `.alert-info`/`.alert-warning`**, which were wearing reserved status hues
-      (UI law 2). **No spacing values** — those come from Bootstrap utility classes in the templates
-      ([[Design system]] §Sizing and spacing). A token-level restyle, not a rewrite: only the badge
-      and the flash need markup changes.
-- [ ] **S5.5c** *(cross-cutting)* **The shell** ([[Design system]] §Components + L1): one header, one back
-      affordance (four wordings exist today), reachability for Customers/Crew/Blocker types (which
-      exist only as buttons on the board), **and page width** — every workshop screen is currently
-      `col-12 col-md-8 col-lg-6`, a centred half-column, which is the stretched phone layout UI
-      law 9 forbids. Width and sidebar-vs-centred are **one decision**. **The one item here that is
-      genuinely expensive to retrofit** — every screen's header is downstream of it. ⚠ If the
-      sidebar pattern is taken, it drags in Stimulus (no Bootstrap JS is loaded) and an icon source
-      for the rail — one coupled call, recorded as open.
-- [ ] **S5.5d** *(cross-cutting)* **UI law 3 audit**: `jobs/show` carries four solid `btn-primary`,
-      `home/index` three. Each picks its one next step. Deciding it changes those screens' layout,
-      so it precedes any redesign of them. **Settle the rule itself here too** — "one primary per
-      *screen*" (Knot) vs "per *local area*" (Bay): `jobs/show`'s four primaries are four genuinely
-      distinct regions, so either the law gains a density qualifier or those screens restructure.
-      Open call in [[Design system]] UI laws.
-- [ ] **S5.5e** **Customers — the search-first rule.** `Customer.search` already matches name *or*
-      canonicalized phone. Make "New customer" reachable only *through* an empty search result,
-      never as a peer button beside the search. This is the dedup guard that S5.5f makes necessary
-      (see the [[Intake flow]] §2a consequence recorded in [[Design system]] L3).
+- [ ] **S5.5a** ~~cross-cutting: component inventory~~ · **S5.5b** ~~the visual re-lock~~ ·
+      **S5.5c** ~~the shell~~ · **S5.5d** ~~law-3 audit~~ · **S5.5e** ~~customers search-first~~ ·
+      **S5.5i** ~~tests~~ — **all moved 2026-08-25 (Session 36) to
+      [[#Sprint 5A · Design system rollout *(the UI phase)*|Sprint 5A]]**, which is where the UI
+      phase now lives. They were never intake work: they cover the auth gate and a restyle of every
+      existing screen. Nothing is dropped — the tasks are `S5A.1`–`S5A.13`, and the ordering rule
+      and dependencies moved with them. **What stays in S5.5 is the two genuinely new screens:**
 - [ ] **S5.5f** **Add-vehicle screen — NEW.** No `VehiclesController`, no route, no screen exists;
-      today a vehicle can only be born inside the intake flow. Builder ruling 2026-08-25: it becomes
-      ordinary CRUD under a customer. The first of the two genuinely new screens, and the smaller.
+      today a vehicle can only be born inside the intake flow. Builder ruling 2026-08-25: ordinary
+      CRUD under a customer. The smaller of the two new screens. **Depends on Sprint 5A** — it sits
+      in the app shell and uses the archetype.
 - [ ] **S5.5g** **`Vehicle.find_by_plate`** + unit tests — the lookup Screen A needs, beside the
       existing `Vehicle.canonicalize` ([[Design laws]] #9: logic you can't call without a request is
-      misplaced). Absorbs the live half of S5.8 below.
+      misplaced). Absorbs the live half of S5.8 below. **No UI dependency** — can land any time.
 - [ ] **S5.5h** **Intake front door — NEW, happy path only.** `GET /intakes/new`: one autofocused
-      monospace plate field, one primary "Look up", reached from the board's reserved front-door
-      slot (`app/views/workshops/show.html.slim` already carries the comment; every sibling control
-      there is `btn-outline-secondary`, so one solid `--action` button *satisfies* law 3 rather than
-      straining it). Three outcomes: **found** → open the visit ([[Intake flow]] §1a);
-      **found with an open intake** → report the car already in house and link to the visit
-      (**§1c — this is not polish**: `index_intakes_one_open_per_vehicle` is a partial unique index,
-      so keying an in-house plate without it raises `RecordNotUnique`, a 500);
-      **not found** → a *routed* dead end to S5.5f, saying what to do next (UI law 8). Widen
-      `CreateIntake` and `IntakesController#create` by **`complaint:` only** — not by `customer:`,
-      since §1b is deferred (the controller is currently narrower than the service: it does
-      `params.require(:vehicle_id)` while `CreateIntake` already accepts `customer:` and
-      `inspection_type:`). Keyboard-only on tab/Enter (law 10).
-- [ ] **S5.5i** **Tests.** Model/unit coverage per house convention. ⚠ **Open call, not ruled:**
-      whether to un-suspend the Capybara system-test layer (suspended 2026-08-14 when the aggregate
-      split retired the views it drove; `test/system/` and `application_system_test_case.rb` are
-      gone, but **capybara and selenium-webdriver are still in the `Gemfile`** — so it costs one
-      harness file, no new dependency). These are the first real pages since, and "does Enter on the
-      plate field reach the visit" is exactly what a controller test cannot see.
+      monospace plate field, one primary "Look up", reached from the board's reserved front-door slot
+      (`app/views/workshops/show.html.slim` already carries the comment; every sibling control there
+      is `btn-outline-secondary`, so one solid button *satisfies* law 3 rather than straining it).
+      Three outcomes: **found** → open the visit ([[Intake flow]] §1a); **found with an open intake**
+      → report the car already in house and link to the visit (**§1c — not polish**:
+      `index_intakes_one_open_per_vehicle` is a partial unique index, so keying an in-house plate
+      without it raises `RecordNotUnique`, a 500); **not found** → a *routed* dead end to S5.5f,
+      saying what to do next (UI law 8). Widen `CreateIntake` and `IntakesController#create` by
+      **`complaint:` only** — not by `customer:`, since §1b is deferred. Keyboard-only on tab/Enter
+      (law 10). **Depends on Sprint 5A.**
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
@@ -325,6 +343,37 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 - [ ] **S5.9** Tests: intake creates the full graph (incl. its auto-created `Jobsheet`) · complaint
       saved on Intake · jobsheet answers saved (see S5.1d for the model-level answer tests) · ETA
       persists · history shows.
+
+---
+
+### Superseded in Sprint 5 *(kept for the reasoning, not the plan)*
+
+> [!note] Superseded 2026-08-19 — jobsheet reversed to fixed/product-defined; storage chipped out
+> [[ADR-014 Jobsheet is a fixed product-defined inspection]] reverses ADR-003's owner-configurable
+> core: the jobsheet's fields are set by the product (versioned in code), not owner-CRUD at
+> runtime. The EAV build (`JobSheet`/`JobSheetField` template models, branch
+> `s5-jobsheet-models`, 4 commits) is **discarded** — see old S5.1–S5.4 below, all struck. A
+> concrete 39-item field list (5 sections, mixed answer types) surfaced and reopens the storage
+> question (wide typed table vs. code-defined catalog + answer rows vs. jsonb) — **not decided
+> here**, chipped out to [[Inspection jobsheet — design brief]] for a future session to design and
+> build from scratch off `main`. Two fill-layer decisions from Session 32 are folded into that
+> brief rather than parked separately: the freeze condition, and jobsheet-in-the-intake-form vs. a
+> later step. See [[worklog]] Session 33. **Storage decided, Session 34 — see the note above.**
+
+- ~~**S5.1** Migration + model **JobSheet** (`workshop_id`, one per workshop).~~
+- ~~**S5.2** Migration + model **JobSheetField** (`job_sheet_id, label, kind:integer(checkbox/text),
+      position`).~~
+- ~~**S5.3** Migration + model **JobSheetFieldValue** (`intake_id, job_sheet_field_id, value`).~~
+- ~~**S5.4** Field-admin: owner **adds** fields (reorder ok; **no destructive delete**).~~
+
+  **Dropped 2026-08-19, [[ADR-014 Jobsheet is a fixed product-defined inspection]].** S5.1/S5.2
+  were built (branch `s5-jobsheet-models`, discarded) then reversed once configurability was
+  judged the source of the print-control/versioning/drift problems; S5.3 (EAV values) and S5.4
+  (owner field-admin) never applied to begin with once the fields aren't owner-CRUD. Replaced by:
+
+  ~~**S5.1 (rev)** — fixed inspection jobsheet: design storage structure + build model/migration/
+      tests (see [[Inspection jobsheet — design brief]]). Supersedes old S5.1–S5.4 per
+      [[ADR-014 Jobsheet is a fixed product-defined inspection]].~~
 
 ---
 

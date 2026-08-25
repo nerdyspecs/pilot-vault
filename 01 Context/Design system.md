@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-25 (Session 36 — sizing/spacing/type ruled onto BOOTSTRAP's ladder after a side-by-side A/B; accent reversed to #2727D9 and --brand retired; canvas corrected to white; two border weights; desktop-only scope; page template added; reference implementation at 08 Experiments/knot-board-desktop.html; renamed from 'Visual theme' and made the SINGLE SOURCE OF TRUTH for design: absorbs the component inventory, navigation/IA, posture, journey and build order from [[Screen map]]; type scale, elevation and the border/ink ramps corrected against the live Bay prototype; RE-LOCKED on the Bay system's visual language: Helvetica/Arial, ink #101010, warm-neutral canvas, square corners + visible 1px borders, status chips re-derived as border/fill/text, new interaction + accessibility rules; Knot's brand and action colours retained; prior: 2026-07-28 waiting-pin ageing bands — ADR-011)
+updated: 2026-08-25 (Session 36 — §The order now points at the fan-in sequencing rule; sizing/spacing/type ruled onto BOOTSTRAP's ladder after a side-by-side A/B; accent reversed to #2727D9 and --brand retired; canvas corrected to white; two border weights; desktop-only scope; page template added; reference implementation at 08 Experiments/knot-board-desktop.html; renamed from 'Visual theme' and made the SINGLE SOURCE OF TRUTH for design: absorbs the component inventory, navigation/IA, posture, journey and build order from [[Screen map]]; type scale, elevation and the border/ink ramps corrected against the live Bay prototype; RE-LOCKED on the Bay system's visual language: Helvetica/Arial, ink #101010, warm-neutral canvas, square corners + visible 1px borders, status chips re-derived as border/fill/text, new interaction + accessibility rules; Knot's brand and action colours retained; prior: 2026-07-28 waiting-pin ageing bands — ADR-011)
 ---
 # Design system
 
@@ -537,6 +537,12 @@ header and a component set that the other eleven screens then had to match.
 
 One rule drives the whole sequence: **do the things that change every screen before drawing any
 screen.** Done in the other order, the screens get drawn twice.
+
+That is the design-side statement of a general sequencing rule the builder named on 2026-08-25 —
+**sequence by fan-in**, then cost of late change, then verification leverage. The full statement,
+and the mistake that forced it to be written down, are in [[Sprint plan]] §Conventions. The pattern
+is called **outside-in** or **shell-first**; it is the deliberate opposite of Atomic Design's
+bottom-up order, which suits a published component library but not an application.
 
 **First, the four cross-cutting fixes.** None of these is a screen; all four change every screen.
 

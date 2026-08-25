@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-08-25 (Session 36 — layout archetypes recorded (app page + the gate) and seven design rules moved into CLAUDE.md after a sign-in mock broke five of them; sizing/spacing/type ruled onto Bootstrap's ladder via an A/B mock; accent reversed to #2727D9, --brand retired; canvas corrected to white; desktop-only scope; reference implementation in 08 Experiments; design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-25 (Session 36 — Sprint 5A (the UI phase) promoted and ordered by fan-in, a rule now in Sprint plan §Conventions; new note [[UI rollout]] specifying what each task builds; Sprint plan cleanup; layout archetypes recorded (app page + the gate) and seven design rules moved into CLAUDE.md after a sign-in mock broke five of them; sizing/spacing/type ruled onto Bootstrap's ladder via an A/B mock; accent reversed to #2727D9, --brand retired; canvas corrected to white; desktop-only scope; reference implementation in 08 Experiments; design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -318,6 +318,56 @@ on; this one has not been.
 
 **Still open on this screen:** forgot-password and reset-password reuse the gate archetype but are
 not drawn, and the confirm-password field on sign-up is a call not yet made.
+
+**Sprint 5A · Design system rollout — the UI work promoted to its own phase.** `S5.5a–i` was a
+sub-task list inside the intake vertical, but it had grown to cover the auth gate and a restyle of all
+twelve existing screens — neither of which is intake work. Promoted to **Sprint 5A** (lettered, not
+numbered: `S5.1`–`S5.9` are live ids and another renumber would rot citations the way the 5↔6 swap
+did). **S5.5 narrows to the two genuinely new screens** — add-vehicle and the intake front door —
+both now marked as depending on 5A. Roadmap gains slice 5.75 for the same reason.
+
+**The builder named a sequencing rule, and it caught a real error in my plan.** I had opened Sprint 5A
+with `/design-preview`, on the reasoning that it is how everything else gets verified. The builder's
+instinct was to build the shell first — "creating pages/components that are shared more first" — and
+asked what the pattern is called.
+
+It is **outside-in** / **shell-first** development; formally a topological order over the dependency
+graph, and the deliberate opposite of Atomic Design's bottom-up atoms → pages (right for a component
+library you publish, wrong for an application, where you end up with good buttons and no idea whether
+the page holds together).
+
+**The rule is now in [[Sprint plan]] §Conventions as "sequence by fan-in"**, with three criteria in
+strict order: fan-in, cost of late change, verification leverage — *"this earns early, it never earns
+first."* My error was sorting by the third axis and letting it win the first slot: `/design-preview`
+has **zero fan-in**, nothing depends on it, and it cannot render until the tokens exist, so it was a
+leaf placed before its own root. The principle was already recorded in [[Design system]] as "do the
+things that change every screen before drawing any screen" — the failure was that it was implicit, and
+an implicit rule loses to whichever axis feels urgent. Sprint 5A reordered on it: tokens → shell →
+rulings → `/design-preview` → gate → screens. Two things fell out of the reorder that were not there
+before: `_page_head` became its own task (identical on twelve screens, so a partial from day one or
+twelve screens invent it), and the **law-3 ruling split from the law-3 audit** — the ruling binds every
+screen and costs nothing to decide now, while applying it is per-screen work.
+
+**New note [[UI rollout]]** *(builder: the UI phase "deserves a beefier space")*. I argued against a
+second sprint plan — two plans means two places to tick and eventually a disagreement about what is
+built, and `S5.5f`/`S5.5h` depend on 5A so that dependency would cross a file boundary. The vault
+already had the convention to reach for: **a sprint task points at a working note** (`S5.1` →
+[[Inspection jobsheet — design brief]]). Applied at phase scale. The note names, per task, the **files,
+components or style rules** you actually build — written so a junior can pick it up cold — plus the
+canonical ten-component set and the seven-rule definition of done as a checklist. The sprint entry
+dropped from 90 lines to a grouped tick list.
+
+**Cleanup pass on [[Sprint plan]], including two faults of my own.** A heading had been corrupted to
+`## Sprint 5A · e` — the likely mechanism is running several overlapping `s.index()` slice edits on one
+file in sequence, which silently eats content when a marker lands unexpectedly; headings need verifying
+after bulk edits, and the link check does not see them. A task list had been written run-together
+(`- [ ] S5A.1  - [ ] S5A.2 …`), which renders as two list items of literal text rather than fourteen
+checkboxes — and duplicated a table listing the same fourteen tasks. Also: the `updated:` frontmatter
+had grown to **1,800 characters** carrying every change back to Sprint 3, now 205 with a note that
+history lives in this worklog and `git log`; and Sprint 5 opened with **27 lines of superseded callouts
+and struck tasks before the first live task**, now parked under *Superseded in Sprint 5* at the end of
+the section. Nothing deleted, 56 tasks intact. **The same frontmatter bloat exists vault-wide** — a
+convention problem, not a one-file one, and deliberately left alone for now.
 
 **Two stale code comments to fix when their screens are touched** (neither is a vault citation):
 `config/routes.rb:35` and `app/views/customers/show.html.slim:38` both still say the front door
