@@ -1,6 +1,6 @@
 ---
 type: agent-guide
-updated: 2026-08-08 (naming + comment discipline — names land first-read, comments say what the code can't)
+updated: 2026-08-26 (Session 37 — running the app is the builder's call, not the agent's)
 ---
 # Agent Guide
 Instructions for Claude. At the start of every session, pick the reading list that matches the
@@ -15,6 +15,8 @@ Read in this order:
 4. [[Tech stack]]
 5. [[Decisions]]
 6. [[Design laws]] — the invariants every decision must obey
+7. **Building UI (a Sprint 5A task)?** Also read [[UI rollout]] — it names the files, components
+   and style rules each task builds.
 7. [[Design system]] — **the single source of truth for design**: tokens, type scale, geometry,
    elevation, components, UI laws, and the UI build order *(renamed from `Visual theme` 2026-08-25;
    it also absorbed the design plan that lived in [[Screen map]])*
@@ -80,6 +82,12 @@ explain, it belongs in an ADR or the module note, not inlined.
 - Never suggest a gem without explaining why the Rails built-in isn't enough.
 - Never rewrite working code into a "better pattern" unless I ask.
 - Never give me three versions — pick the best one and explain why.
+- **Never start the dev server or drive the in-app browser unless I ask.** Verify by reading
+  the code and running the test suite; if seeing it rendered is the only way to be sure, say
+  so and wait. *(Session 37: driving the browser to check a layout put two stray
+  `WorkshopStaffRole` rows on a seeded persona — element refs went stale after a collapse and
+  the clicks landed on the Crew screen — and twice left an orphaned server holding the port.
+  Running the app is my call to make, not the agent's.)*
 
 ## Default working mode
 - Reason before building: for non-trivial work, propose the approach before writing code.
