@@ -11,6 +11,12 @@ this note says **what you actually build** for each one.
 Written to be picked up cold. Every entry names files, components or style rules — not reasoning.
 The reasoning lives in [[Design system]]; the rules you must satisfy are the seven in `CLAUDE.md`.
 
+> [!important] One fact, one place
+> **Status lives only in [[Sprint plan]]** — never add checkboxes here, or the two will disagree
+> about what is built and neither will be trustworthy. **Spec lives only here** — the sprint plan
+> names a task, it never re-describes it. **Rules live only in [[Design system]].**
+> Read this note when you pick up a task; read the sprint plan to know which task.
+
 **Order is by fan-in** — most-depended-upon first ([[Sprint plan]] §Conventions).
 
 ---

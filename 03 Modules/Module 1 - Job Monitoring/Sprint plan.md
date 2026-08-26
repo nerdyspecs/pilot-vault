@@ -202,7 +202,8 @@ no spacing value at all**.
 > foundation, and they come after this phase.
 
 **What each task builds — files, components, style names — is in [[UI rollout]].** This is the
-order and the ticks; that note is the spec.
+order and the ticks; that note is the spec. **One fact, one place:** status only here, spec only
+there. Do not re-describe a task in this file.
 
 **Ordered by fan-in** (§Conventions) — most-depended-upon first. `/design-preview` used to open this
 sprint and is now sixth: nothing depends on it, and it cannot render until the tokens exist.
