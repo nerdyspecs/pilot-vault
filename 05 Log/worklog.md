@@ -1,11 +1,81 @@
 ---
 type: log
-updated: 2026-08-25 (Session 36 — Sprint 5A (the UI phase) promoted and ordered by fan-in, a rule now in Sprint plan §Conventions; new note [[UI rollout]] specifying what each task builds; Sprint plan cleanup; layout archetypes recorded (app page + the gate) and seven design rules moved into CLAUDE.md after a sign-in mock broke five of them; sizing/spacing/type ruled onto Bootstrap's ladder via an A/B mock; accent reversed to #2727D9, --brand retired; canvas corrected to white; desktop-only scope; reference implementation in 08 Experiments; design consolidated into [[Design system]], renamed from Visual theme and now the single source of truth (tokens + components + the whole plan); verified against the live Bay prototype — type scale, elevation and the border/ink ramps corrected; Visual theme RE-LOCKED on the Bay system's visual language (type, neutrals, geometry, status chips re-derived); new note [[Bay system reference — external comparison]]; UI law 9 found broken app-wide; UI design plan: clean-slate rulings + build order, plan of record [[Design system]]; intake brief's Q1 premise corrected as false; intake narrowed to happy path, vehicles get a CRUD screen; the two-branch mismatch confirm re-scoped as a sub-screen of a three-choice surface; prior: Session 35 — jobsheet backend built (S5.1a–d core): catalog + migration + models + model-core tests; two build-time footnotes narrowing ADR-015; R11 net clarified as a deploy-time check; prior: Session 34 — jobsheet storage decided, ADR-015; prior: Session 33 — jobsheet reversed to fixed/product-defined, ADR-014; EAV branch discarded; storage chipped out; prior: 2026-08-17 Session 32 — Sprint 5 ↔ 6 swapped)
+updated: 2026-08-26 (Session 37 — Bootstrap compiles from Sass, the no-build-step rule reversed; the shell built empty; CLAUDE.md untracked)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-26 · Session 37 — Bootstrap moves to Sass, and the shell goes up empty
+
+**Summary.** First build session of Sprint 5A. Coherence check clean. Ended with six app commits on
+branch `s5a-sass` (unpushed) and the suite green at 154 throughout. The headline is a **reversal**:
+Bootstrap now compiles from Sass source instead of being vendored, so the "no build step" rule is
+dead — footnoted in [[Tech stack]] and [[Design system]], neither of which is edited in place.
+
+**The reversal, and how it was decided.** The session opened intending S5A.1 against the vendored
+file. The builder asked whether a Bootstrap gem existed; checking turned the question into a real
+fork, and it was settled with a measurement rather than an argument. Bootstrap's blue is hardcoded
+**29 times** in the compiled file, but **20 of those sit inside `--bs-*` variables** — reachable at
+runtime. Only **6 are raw properties**, in three components, and we use exactly one:
+`.form-check-input:checked`. So the vendored route's real gap was four lines, not a class of
+problems — and the closed component inventory in [[UI rollout]] caps the unknown tail. On that
+evidence the recommendation was *stay vendored*; the builder chose Sass anyway, partly to learn it.
+**That call then paid off in a way the measurement had missed**: at the *source*, those six raw
+values are `$primary` flowing through `$component-active-bg`, so setting one variable fixes the
+exact gap that needed a hand-written rule. Measuring compiled output and reading source are not the
+same thing.
+
+**Two things Bootstrap does not let you theme from outside**, both found by reading its source
+rather than guessing. `$enable-rounded: false` is **not sufficient** — `_root.scss` emits
+`--bs-border-radius*` regardless of that flag and `.form-control` reads the property directly, so
+all six radius values must be set. And `.btn-primary`/`.btn-outline-primary` **hardcode `#0d6efd`**;
+they never read `--bs-primary-rgb`. `.form-control` likewise hardcodes `font-size: 1rem` and ignores
+`--bs-body-font-size`.
+
+**`--action-hover` ruled.** Bootstrap derives button states inside `button-variant()` from
+percentage shade amounts, turning one action blue into three — `#2121B8` on hover, `#1F1FAE` on the
+hover border, another again when active. None is a design-system colour. The builder ruled the
+system colour wins as a whole, tweakable later, so `.btn-primary` overrides those four states back
+to `--action-hover`. Links needed no override: `$link-hover-color` is a real variable.
+
+**The shell went up empty, after going up too full.** S5A.3 was built with sidebar contents, the
+twelve-screen law-9 dedent and all of S5A.2 folded in — because [[UI rollout]] lists those under the
+same task. The builder had scoped the step to *"an empty topbar and sidebar"*. **The spec says where
+a task ends up; the builder says what this step is, and the builder wins.** Reverted to the frame
+alone, then the topbar was built as its own agreed step.
+
+**Three layouts, because one was serving three things.** The gate is authentication only; the
+signed-out marketing page became its own layout and its own design track (builder's call — marketing
+and the system are separate flows); everything signed in gets the shell. The
+signed-in-but-no-workshop state stays inside the shell rather than becoming a fourth archetype,
+since [[Design system]] already rules workshop selection out of the gate.
+
+**`WorkshopStaff#titles`.** Roles are genuinely plural — the towkay owns the shop and works the
+floor — so it returns a list and leaves precedence to the caller. Owner is a boolean, not a role
+enum value, so it is added separately. The topbar renders `Owner · Technician`, which the static
+reference mock could never have shown.
+
+**A rule earned the hard way.** Driving the in-app browser to check a layout put two stray
+`WorkshopStaffRole` rows on a seeded persona — element refs went stale after the sidebar collapsed
+and the clicks landed on the Crew screen — and twice left an orphaned server holding the port.
+[[Agent guide]] §Hard rules now says **running the app is the builder's call, not the agent's**. The
+two stray rows are left in place for now, by ruling.
+
+**CLAUDE.md is no longer tracked.** It was slimmed first — reading lists removed (they duplicate
+this vault and had already gone stale once), vault citations cut from 29 to one, machine-local facts
+moved to an untracked `CLAUDE.local.md` — then committed and untracked. Recoverable at
+`git show 31c36ef:CLAUDE.md`. **Consequence worth holding:** durable rules must live in the vault
+now, because the file that auto-loads them has no history and dies with the machine.
+
+**Open, carried forward.** `--sidebar-collapsed` is a **seventh** component dimension where
+[[Design system]] records six — flagged in the stylesheet, not quietly adopted. `p-3` leaves only
+24px of content in a 56px collapsed rail. Four names exist for one screen (Dashboard / the board /
+`/workshop` / `workshops#show`) and the sidebar nav will have to pick one. And **one board vs a
+dashboard per role** remains unruled, which is what actually decides where sign-in lands.
 
 ---
 

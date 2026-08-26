@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-25 (Session 36 — §The order now points at the fan-in sequencing rule; sizing/spacing/type ruled onto BOOTSTRAP's ladder after a side-by-side A/B; accent reversed to #2727D9 and --brand retired; canvas corrected to white; two border weights; desktop-only scope; page template added; reference implementation at 08 Experiments/knot-board-desktop.html; renamed from 'Visual theme' and made the SINGLE SOURCE OF TRUTH for design: absorbs the component inventory, navigation/IA, posture, journey and build order from [[Screen map]]; type scale, elevation and the border/ink ramps corrected against the live Bay prototype; RE-LOCKED on the Bay system's visual language: Helvetica/Arial, ink #101010, warm-neutral canvas, square corners + visible 1px borders, status chips re-derived as border/fill/text, new interaction + accessibility rules; Knot's brand and action colours retained; prior: 2026-07-28 waiting-pin ageing bands — ADR-011)
+updated: 2026-08-26 (Session 37 — Bootstrap now compiles from Sass; the no-build-step rule is reversed, token values unchanged)
 ---
 # Design system
 
@@ -13,7 +13,7 @@ updated: 2026-08-25 (Session 36 — §The order now points at the fan-in sequenc
 >
 > A document alone drifts, so the truth is **three layers that must agree**:
 > 1. **This note** — authoritative. Values here win on any conflict.
-> 2. **`app/assets/stylesheets/application.css`** — the tokens as CSS custom properties,
+> 2. **`app/assets/stylesheets/application.scss`** — the tokens as CSS custom properties,
 >    implementing it.
 > 3. **`/design-preview`** — renders every component from those tokens, so drift becomes
 >    *visible* instead of a doc-versus-code guess.
@@ -357,7 +357,7 @@ and the five components Bootstrap has no equivalent for — panel, list row, met
 side-nav item.
 
 **Spacing never appears in our CSS.** It comes from Bootstrap utility classes in the Slim templates.
-If a padding or gap value is written in `application.css`, that is the smell.
+If a padding or gap value is written in `application.scss`, that is the smell.
 
 ## Components
 
@@ -495,7 +495,7 @@ code at `2c5816f`:
    styling drift — it means those screens never decided what their one next step is.
 4. **UI law 2 is broken in the layout, therefore on every page.** Flash messages render as
    `.alert-info` (Bootstrap cyan) and `.alert-warning` (Bootstrap yellow). Neither is remapped in
-   `app/assets/stylesheets/application.css`, and both wear hues the status vocabulary has reserved.
+   `app/assets/stylesheets/application.scss`, and both wear hues the status vocabulary has reserved.
    The status *badges* are implemented correctly (`.stage-badge`, the sacred palette, read from one
    partial) — so the single violation sits at the one place that touches all 27 templates.
 5. **UI law 7 is broken concretely.** `app/views/intakes/_blocker_item.html.slim` and
@@ -776,14 +776,34 @@ not by `customer:`.
 - Animation rules — v1 has essentially none; Turbo defaults are fine.
 
 ## Implementation
-All tokens are CSS custom properties in `app/assets/stylesheets/application.css` — the single
+All tokens are CSS custom properties in `app/assets/stylesheets/application.scss` — the single
 source of visual truth. ~~Plain CSS, no framework~~ **Changed 2026-07-06:** looking at where the
-project is heading, the base is **Bootstrap 5.3.3** (vendored `bootstrap.min.css`, no build step,
-no CDN) with `application.css` as a **brand layer** on top — it maps Bootstrap's CSS variables
+project is heading, the base is **Bootstrap 5.3.3** (~~vendored `bootstrap.min.css`, no build
+step~~, no CDN) with `application.scss` as a **brand layer** on top — it maps Bootstrap's CSS variables
 (`--bs-body-bg`, `--bs-btn-*`, links) to the tokens above and holds branding-only classes
-(`.wordmark`, `.text-brand`, `.hero*`, `.prop-num`). Rules: theme through Bootstrap variables,
-never fork `bootstrap.min.css`; new screens compose Bootstrap utilities + brand classes, no
+(`.wordmark`, `.text-action`, `.hero*`, `.prop-num`). Rules: theme through Bootstrap variables,
+never redefine a Bootstrap rule wholesale; new screens compose Bootstrap utilities + brand classes, no
 inline styles. Token values in this note still win if anything differs.
+
+> [!warning] **2026-08-26 (Session 37): the vendoring and the no-build-step rule are REVERSED.**
+> Bootstrap compiles from Sass source — the `bootstrap` gem (pinned 5.3.3) plus `dartsass-rails`.
+> `application.css` is now `application.scss`, and the compiled output lives in
+> `app/assets/builds/application.css`, gitignored. **This narrows nothing above except the
+> delivery mechanism** — every token value in this note still stands.
+>
+> What it changes for anyone writing styles: **there are now two places to theme, and the Sass one
+> is preferred.** Sass variables set *before* the `@import` (`$primary`, `$border-radius`,
+> `$font-size-base`, `$display-font-weight`) regenerate every rule Bootstrap derives from them;
+> `--bs-*` custom properties after it are for what Sass cannot reach. Six hardcoded values had no
+> variable behind them at all — `.form-check-input:checked` among them — and now derive correctly
+> from `$primary` with no rule of ours.
+>
+> Two consequences recorded rather than discovered later. **`$enable-rounded: false` is not
+> sufficient** — `_root.scss` emits `--bs-border-radius*` regardless of that flag and
+> `.form-control` reads the property directly, so all six radius values must be set. And
+> **Bootstrap derives button hover/active as percentage shades of `$primary`**, landing on colours
+> this note does not contain; the builder ruled the system colour wins, so `.btn-primary` overrides
+> those four states back to `--action-hover`.
 
 **What the brand layer holds after the 2026-08-25 ruling** — and nothing else: the colour tokens ·
 `--bs-border-radius: 0` (squares buttons, cards, inputs, badges in one line) ·
@@ -797,7 +817,7 @@ so no padding or gap number lives in our CSS at all.
 three floating-layer shadows. The type scale is `--font-sans` sizes with proportional negative
 tracking; nothing here needs a build step.
 
-**What the 2026-08-25 re-lock costs in `application.css`** (all through Bootstrap variables, still
+**What the 2026-08-25 re-lock costs in `application.scss`** (all through Bootstrap variables, still
 never forking the vendored file): `--font-sans` → Helvetica/Arial · the neutral tokens re-pointed
 (`--page`, `--border`, `--text`, `--text-muted`) · `--bs-border-radius` family → `0` · card and
 button borders made visible at 1px · `.stage-badge` re-cut from two-part to **border + fill + text**

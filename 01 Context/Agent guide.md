@@ -15,8 +15,6 @@ Read in this order:
 4. [[Tech stack]]
 5. [[Decisions]]
 6. [[Design laws]] — the invariants every decision must obey
-7. **Building UI (a Sprint 5A task)?** Also read [[UI rollout]] — it names the files, components
-   and style rules each task builds.
 7. [[Design system]] — **the single source of truth for design**: tokens, type scale, geometry,
    elevation, components, UI laws, and the UI build order *(renamed from `Visual theme` 2026-08-25;
    it also absorbed the design plan that lived in [[Screen map]])*
@@ -24,6 +22,9 @@ Read in this order:
 9. [[Roadmap]] — what's designed vs left to build
 10. [[Sprint plan]] — task-level build order and progress ticks
 11. [[worklog]] — the latest entry: recent discussions, decisions, and what's next
+
+**Building UI (a Sprint 5A task)?** Also read [[UI rollout]] — it names the files, components and
+style rules each task builds. Status lives in [[Sprint plan]], spec lives there; never both.
 
 ## Reading list — branding / marketing
 1. [[Positioning]] — the anchor: name story (Knot), audience, message hierarchy, pricing posture

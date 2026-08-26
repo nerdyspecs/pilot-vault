@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-07-06
+updated: 2026-08-26 (Session 37 — the no-build-step rule is reversed; Bootstrap compiles from Sass)
 ---
 # Tech Stack
 Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at the start of every Claude session.
@@ -21,8 +21,18 @@ Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at th
   ERB until restyled) — no separate frontend build step
 - Owner-facing job status page — lightweight, mobile-friendly, no login required
 - Visual system (palette, typography, UI laws): [[Design system]] — **Bootstrap 5.3.3** base
-  (vendored CSS, no build step, Bootstrap JS not loaded) + a brand layer of CSS custom
+  (~~vendored CSS, no build step~~, Bootstrap JS not loaded) + a brand layer of CSS custom
   properties; chosen 2026-07-06 for expansion speed over the earlier no-framework stance
+  - **⚠ 2026-08-26 (Session 37): "no build step" is REVERSED, not narrowed.** Bootstrap now
+    compiles from Sass source — the `bootstrap` gem (pinned 5.3.3, the same version) plus
+    `dartsass-rails`, building `app/assets/stylesheets/application.scss` into
+    `app/assets/builds/application.css`, which is gitignored. `bin/setup` builds it and
+    `assets:precompile` runs it on deploy, so no new deploy step is needed; `dartsass-rails`
+    ships its own Dart Sass binary, so **no Node**. Why: theming through `--bs-*` custom
+    properties only reaches what Bootstrap chose to expose, and six of the hardcoded values
+    have no variable behind them — `.form-check-input:checked` among them, which we use.
+    Setting Sass variables before the import reaches all of them, so the brand layer stops
+    patching Bootstrap after the fact. Cost: seven gems (two direct, five transitive).
 
 ## Device posture (per role) — v1
 Web app, standard login (Devise) on whatever device — phone browser or PC. No native app, no
