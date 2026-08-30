@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-08-25
-updated: 2026-08-25
+updated: 2026-08-27 (S5A.3a; page head is a pattern; S5A.9 first cut spec — TBD)
 ---
 # UI rollout — what each task builds
 
@@ -28,8 +28,8 @@ first.
 
 | Component | Partial | Used on |
 |---|---|---|
-| Page head | `layouts/_page_head` | every app screen |
-| Panel | `.panel` (CSS) | every app screen |
+| Page head | **pattern, not a partial** — see S5A.4 | every app screen |
+| Panel | Bootstrap `.card` *(2026-08-27: not a hand-rolled `.panel` — rule 1)* | every app screen |
 | List row | `shared/_list_row` | board, customers, visit, repair |
 | Metric strip | `shared/_metric_strip` | board, home |
 | Status chip | `jobs/_stage_badge` | board, visit, repair |
@@ -72,10 +72,51 @@ misleads.
 **Also fixes:** the `col-12 col-md-8 col-lg-6` on every screen (UI law 9 — content uses the canvas).
 **Done when:** one page renders with sidebar + topbar + full-width content, and no `col-lg-6` remains.
 
+### S5A.3a — Sidebar contents
+**Builds:** the inside of `layouts/_sidebar.html.slim` (the frame ships empty from S5A.3).
+**Nav — one board for everyone, four items, in this order:**
+
+| Item | Path | Shown to |
+|---|---|---|
+| **Board** | `workshop_path` | every active staff member |
+| Customers | `customers_path` | `counter_staff?` |
+| Crew | `workshop_staff_index_path` | `Current.owner? \|\| Current.workshop_manager?` |
+| Blocker types | `blockers_path` | `Current.owner? \|\| Current.workshop_manager?` |
+
+**Gating:** reuse the predicates `workshops/show` already uses — same helpers, same conditions.
+Do not write a new permission query in the sidebar ([[Agent guide]]; `PermissionsHelper` delegates
+to `Permissions` so the page can't offer what the controller refuses).
+**Label:** the top item reads **Board**, never "Dashboard" ([[Design system]] §L1).
+**Removes:** the three outline buttons in the header row of `workshops/show` — they become nav.
+**Style:** 42px rows · selected = full-bleed solid `--action`, not a tint · account chip pinned to
+the bottom.
+**Carries the open call:** the icon source for the collapsed rail (UI law 6 — a rail of unlabelled
+glyphs needs real icons, or the collapse gives up its labels for nothing).
+**Done when:** every app screen is reachable from the sidebar · a technician sees one item, an
+owner four · no `link_to "Customers"` remains in `workshops/show`.
+
 ### S5A.4 — Page head
-**Builds:** `layouts/_page_head.html.slim`.
-**Takes:** eyebrow, title, optional primary action. Bottom-aligned.
-**Done when:** at least one screen renders through it.
+**Builds: nothing.** *(Ruled 2026-08-27, builder: **not a partial.** It is written inline in each
+page, for developer readability — a maintainer opening `workshops/show.html.slim` sees the whole
+page in one file. It was briefly `layouts/_page_head`, then `shared/_page_head`, then inlined.)*
+
+**So this block is the canonical source — copy it.** Duplicated markup with no single source is
+how ten screens ended up with two different column widths; the source of truth is here instead of
+in a file.
+
+```slim
+.d-flex.justify-content-between.align-items-end.pb-3
+  div
+    .eyebrow= <eyebrow>
+    h1.display-6.mb-0 <title>
+  div
+    / optional action — omit the div entirely on a monitoring screen
+```
+
+**The two details that drift if hand-typed:** `align-items-end` is a **spec** — the action sits
+level with the title's *baseline*, not its cap — and the title is `.display-6` at **weight 400**,
+never bold.
+**Done when:** at least one screen renders it, and this block matches that screen.
 
 ---
 
@@ -118,6 +159,23 @@ Each is a **re-cut**, not a rebuild: same controller, same data, new layout and 
 **Page:** `workshops/show`.
 **Components:** page head · metric strip · panel · list row · status chip · waiting pin.
 **Reference:** `08 Experiments/knot-board-desktop.html`.
+
+> [!warning] **A first cut is built and is TBD** *(2026-08-27, branch `s5a-sass`, uncommitted)*
+> Spec below describes what exists so it can be reacted to. Reasoning and what is deliberately
+> missing: [[Board]].
+
+**Structure:** `page head → .d-flex.flex-column.gap-3 → metric strip → .split.gap-3(main, aside)`.
+**New CSS — the only rule added:** `.split { display: grid; grid-template-columns: minmax(0,1fr)
+var(--rail) }`. Every gap and padding is a utility in the template.
+**Metric strip:** one `.d-flex.border`, tiles `.flex-fill.p-3` sharing rules via `.border-start` —
+not a gapped grid. Number `.fs-3`, label `.small.text-secondary`.
+**Row:** `intakes/_board_row` — the row is the **car**, so there is no single stage: it renders one
+`jobs/_stage_badge` per repair, plus `jobs/_waiting_pin`. Replaces `jobs/_board_row`, now dead.
+**Rail:** needs-attention (two groups, disjoint by construction) then crew load.
+**Controller provides:** `@intakes` · `@ready` · `@waiting` · `@pending_acknowledgements` ·
+`@job_counts` · `@crew_load`.
+**Panel is Bootstrap's `.card`**, not a hand-rolled `.panel` — with radius 0 and no shadow it
+already is the panel, and rule 1 forbids hand-rolling a Bootstrap equivalent.
 
 ### S5A.10 — The visit and the repair
 **Pages:** `intakes/show` · `jobs/show`.

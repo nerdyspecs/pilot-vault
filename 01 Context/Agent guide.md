@@ -1,6 +1,6 @@
 ---
 type: agent-guide
-updated: 2026-08-26 (Session 37 — running the app is the builder's call, not the agent's)
+updated: 2026-08-27 (Session 38 — screen-decision notes in the build list; hard rule: propose before writing into model/service/migration)
 ---
 # Agent Guide
 Instructions for Claude. At the start of every session, pick the reading list that matches the
@@ -25,6 +25,11 @@ Read in this order:
 
 **Building UI (a Sprint 5A task)?** Also read [[UI rollout]] — it names the files, components and
 style rules each task builds. Status lives in [[Sprint plan]], spec lives there; never both.
+
+**Working on one specific screen?** Also read its note in [[Screen decisions]] — one per screen,
+holding *why the screen is the way it is*: what was settled, what is open, and what was rejected
+and why. Read the *Rejected* section before proposing a change to that screen; it exists so the
+same option is not re-argued. Reasoning only — never a tick, a file list, or a rule.
 
 ## Reading list — branding / marketing
 1. [[Positioning]] — the anchor: name story (Knot), audience, message hierarchy, pricing posture
@@ -83,6 +88,17 @@ explain, it belongs in an ADR or the module note, not inlined.
 - Never suggest a gem without explaining why the Rails built-in isn't enough.
 - Never rewrite working code into a "better pattern" unless I ask.
 - Never give me three versions — pick the best one and explain why.
+- **Reason before writing into a deeper layer, and wait for a yes.** A view or a controller is
+  cheap to redo and I can review it by looking at the screen. A **model, a door, a concern or a
+  migration is shared API** — a change there changes every caller, including the ones not in front
+  of us. Before adding to or altering anything under `app/models`, `app/services` or `db/migrate`,
+  say **what** you want to add or change, **why the shallower layer can't carry it**, and **who
+  already calls it**. Then stop and wait. Reporting it afterwards is not the same thing.
+  *(Session 38: asked to fix `workshops#show`, the agent also added two `Job` class methods and
+  changed `Intake#ready?` from `jobs.exists?` to `jobs.any?` in the same pass. Both were sound,
+  the N+1 reasoning was real, and both were disclosed straight after — but `ready?` guards
+  `IntakeActions`' refusal to deliver a car with unfinished repairs, and is read by three views.
+  A depth boundary crossed quietly is the one I cannot catch by reading the page.)*
 - **Never start the dev server or drive the in-app browser unless I ask.** Verify by reading
   the code and running the test suite; if seeing it rendered is the only way to be sure, say
   so and wait. *(Session 37: driving the browser to check a layout put two stray

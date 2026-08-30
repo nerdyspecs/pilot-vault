@@ -1,11 +1,129 @@
 ---
 type: log
-updated: 2026-08-26 (Session 37 — Bootstrap compiles from Sass, the no-build-step rule reversed; the shell built empty; CLAUDE.md untracked)
+updated: 2026-08-27 (Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-27 · Session 38 — the L1 fork is ruled: one board, and it is called the Board
+
+**Summary.** Documentation only, no app code. Ruled the open fork in [[Design system]] §L1 —
+**one board for everyone vs a dashboard per role** — which had sat unruled *and* unscheduled
+upstream of the shell work already in flight. One board wins. The screen's four competing names
+collapse to **Board**. Added **S5A.3a** (sidebar contents) so the sidebar's top item has something
+to build against. App branch `s5a-sass` unchanged at six commits; suite green at 154.
+
+**Why one board, given that law #3 makes role dashboards cheap.** Cost was never the question, so
+the argument had to come from somewhere else, and it came from the schema. `WorkshopStaff#titles`
+returns a **list** and deliberately leaves precedence to the caller — the topbar already renders
+`Owner · Technician`. A dashboard per role needs a function *role → screen*, so adopting it would
+force us to invent a precedence order the edge-collapse schema refuses to hold, and the towkay who
+owns the shop and works the floor is the normal case in a small workshop, not an edge case. The
+laws point the same way: #3 licenses a new **scope**, and UI law 7 says a new viewpoint is a
+recomposition, never a second screen set — so a per-role dashboard is the one reading of #3 that
+UI law 7 forbids.
+
+**The reference's role matrix is adopted, not rejected.** Knot's nav is *already* role-scoped, by
+gating rather than by forking — `workshops#show` gates Customers behind counter staff, Crew and
+Blocker types behind owner-or-manager. So the matrix lands as gated nav items, plus the screen's
+one primary action chosen for the viewer's role, which UI law 3 already licenses in its own
+wording. Only the extra screens are dropped.
+
+**The technician's cost, named so it cannot be quietly banked.** Under one shared board a
+technician must find themselves in a shop-wide list — a genuine glance-test failure and a genuine
+miss on the attention-item test's *who owns the next action*. That is **deferred with the floor
+posture, by ruling and not by finding**, and when the floor posture is drawn the fix is a
+mine-first **scope on this board**, never a technician dashboard.
+
+**The Board's content rule, added by the builder once the fork was settled.** *Everything on the
+board is safe for every role, so nothing on it is hidden per role.* It sharpens the ruling rather
+than qualifying it, and it needed two clarifications to be checkable: **data is uniform, actions
+stay gated** (otherwise "all roles see it" gets read as "all roles do it", which would contradict
+both `PermissionsHelper` and the role-varying primary action ruled above), and **a scope may
+reorder, never conceal** (so the deferred mine-first technician scope stays inside the rule instead
+of becoming its first exception). Its real force is the second clause: what is *not* safe for
+everyone does not become a per-role panel here, it becomes its own screen — which is exactly the
+shape Sprint 8 already plans for attribution and health reporting, so the rule predicts existing
+structure rather than fighting it. The cost was accepted out loud: pricing, margin or per-person
+throughput can never live on this screen. Checked against code — after S5A.3a moves the three
+outline buttons into the sidebar, `workshops#show` has **zero** role-conditional content.
+
+**The board was built, and the row became the car.** The session moved from ruling to Slim: the
+layout gained one owned element (`main.px-5.py-4` — it cannot sit on `.app-main`, which holds the
+sticky topbar and its full-width rule), the page head went in **inline** rather than as a partial on
+the builder's call (canonical markup moved into [[UI rollout]] instead, so duplicated markup still
+has a single source), and `workshops#show` was rewritten around **intakes**. That last part pulled
+S6.1a partly forward, on the builder's own cost-of-late-change criterion: styling a job row about to
+become a car row is work done twice. Consequence worth seeing — a car has no single stage, so the
+row renders **one badge per repair**, and the two-level aggregate becomes visible on screen for the
+first time. Measured flat at **9 queries for 6 cars and 9 for 18**. Everything is marked **TBD** in
+[[Board]] — a shape to react to, not a decision.
+
+**Two model methods were written, rejected, and recorded as rejected.** `Job.crew_load` and
+`Job.last_moved_at_by_job` both copied the *form* of `pending_acknowledgements_by_job` without its
+justification. The builder's read was right on both counts: `crew_load`'s receiver is wrong (the
+answer is about the person, not the job), and `last_moved_at_by_job` turned a per-job property into
+a class-level hash to dodge an N+1 — the stuttering name announcing the deformation. Backed out;
+crew load now shapes loaded rows in the controller, ageing waits for S6.7 to set its thresholds.
+
+**A hard rule earned the hard way: propose before writing into a deeper layer.** Asked to fix
+`workshops#show`, the agent also added two `Job` class methods and changed `Intake#ready?` from
+`jobs.exists?` to `jobs.any?` — all defensible (preloaded associations still query on `exists?`,
+and the board calls it once per car, so it was 18 queries), all disclosed immediately after. The
+builder's correction: **afterwards is the wrong order.** A view or controller is reviewable by
+looking at the screen; a model method is shared API, and `ready?` in particular guards
+`IntakeActions`' delivery refusal and is read by three views. Recorded in [[Agent guide]]
+§Hard rules with the incident attached, in the same style as the dev-server rule from Session 37.
+
+**A new note type: [[Screen decisions]].** The builder asked for a place to keep the discussion and
+conclusions per screen, and the ask was well-timed — by then the Board's reasoning was spread across
+[[Design system]], [[Screen flow]], [[Sprint plan]] and this log, findable only by date. One note
+per screen now holds **why the screen is the way it is**: settled calls, open questions, and
+**rejected alternatives with reasons** — the section that stops an option being re-argued. The
+boundary is the whole point, so it is stated in the hub: rules stay in [[Design system]], spec in
+[[UI rollout]], status in [[Sprint plan]], what-exists in [[Screen map]]. A screen note never
+carries a tick, a file list, or a rule other screens must obey. Added to the build reading list in
+[[Agent guide]], since a note nothing points at is a note nobody reads.
+
+**Two footnotes the Board note forced.** The builder cut *Check in a vehicle*, *stage filter* and
+*search plate* from the board's head — filters and search have a better recorded home anyway (the
+list toolbar), but the front door **reverses** L1, which explicitly put it on the board and argued
+law 1 against a nav item. Taking it off is the stronger call: check-in starting from a found vehicle
+makes the search-first rule *enforced* rather than advisory, which is exactly the step-6 dedup trap.
+That leaves the board with no primary action at all, which contradicts the page pattern's "every
+screen, without exception" — recorded as a **narrowing**: one is a ceiling, not a quota, and a
+monitoring screen may carry none.
+
+**The route was argued to a move and back.** `/board` with its own `BoardController` was proposed on
+a settings collision and a naming argument, then dropped on the builder's objection that a
+controller earns its keep through *actions* and the board has none — the queries are model scopes
+under law #9, so `workshops#show` stays thin, and splitting it would be rewriting working code into
+a better pattern. `/workshop/board` was also weighed and rejected: no id in the path, so it implies
+a hierarchy the app does not have. **Nothing changed**, which means the morning's ruling was right as
+written and needed no footnote. A tripwire was recorded instead — revisit if the board grows its own
+verbs.
+
+**The name.** Four names for one screen — *Dashboard*, *the board*, `/workshop`, `workshops#show`.
+It is the **Board**: the whiteboard is the artefact Knot replaces, the code already says it
+(`_board_row`, `knot-board-desktop.html`), and it survives the ADR-012 regroup, since a board of
+cars is still a board. *Dashboard* is retired for two reasons at once — nobody at a workshop says
+it, and it is now the name of the design just ruled against. **The URL and the controller do not
+move:** the name settled is a UI-surface fact, and renaming `workshop_path` across nine call sites
+would buy nothing a user sees.
+
+**S5A.3a, lettered rather than numbered.** The sidebar contents had no task at all: S5A.3 shipped
+the frame empty when the builder scoped it that way, and [[UI rollout]] listed the contents under a
+task that had already closed. Numbering it `S5A.4` would renumber nine live ids — the exact rot the
+5↔6 swap caused — so it takes a letter, the same move Sprint 5A itself made.
+
+**One open call narrowed by build rather than by argument.** The sidebar's dependency was recorded
+as "Stimulus *plus* an icon source". Session 37 shipped `sidebar_controller.js`, so only the icon
+source is open — and it is inseparable from the collapse, because UI law 6 (words over icons) means
+a collapsed rail without icons gives up its labels for nothing.
 
 ---
 

@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-25 (Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)
+updated: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -216,7 +216,10 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 
 ### 2 · Shell — fan-in: all twelve app screens
 - [ ] **S5A.3** The frame — `application.html.slim` · `_sidebar` · `_topbar` (+ the law-9 width fix)
-- [ ] **S5A.4** `_page_head` partial
+- [ ] **S5A.3a** Sidebar contents — nav items + account chip *(added 2026-08-27; lettered, not
+  renumbered — `S5A.4`–`S5A.14` are live ids. It is the half of S5A.3's spec the builder chipped
+  off when the frame went up empty, and it was unbuildable until the one-board fork was ruled)*
+- [ ] **S5A.4** Page head — a recorded pattern, written inline per page *(not a partial)*
 
 ### 3 · Rulings — fan-in: every screen, free to decide now
 - [ ] **S5A.5** Settle UI law 3 — "per screen" vs "per local area" *(a decision, no code)*
@@ -229,7 +232,8 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 - [ ] **S5A.8** Forgot + reset password
 
 ### 6 · Screens into the shell — each a re-cut, not a rebuild
-- [ ] **S5A.9** The board
+- [ ] **S5A.9** The board — *first cut built 2026-08-27 on `s5a-sass`, uncommitted and **TBD**;
+  structure only, renders green. Not ticked: ageing, filters and the law-3 pass are absent*
 - [ ] **S5A.10** The visit and the repair
 - [ ] **S5A.11** Customers
 - [ ] **S5A.12** Crew and blocker types
@@ -238,8 +242,10 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 ### 7 · Tests
 - [ ] **S5A.14** System-test layer ⚠ *open call — un-suspend Capybara?*
 
-**Three open calls carried, not decided:** the sidebar's Stimulus + icon-source dependency (S5A.3),
-UI law 3's wording (S5A.5), and un-suspending Capybara (S5A.14).
+**Three open calls carried, not decided:** the sidebar's ~~Stimulus +~~ icon-source dependency
+(~~S5A.3~~ **S5A.3a** — the Stimulus half is settled by build), UI law 3's wording (S5A.5), and
+un-suspending Capybara (S5A.14). *(2026-08-27: the one-board vs dashboard-per-role fork, which was
+open and unscheduled upstream of all of these, is **ruled** — [[Design system]] §L1.)*
 
 ---
 
@@ -391,8 +397,10 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 - [ ] **S6.1** Jobs index: active jobs for `Current.workshop` (`Job.active` — `unassigned`/
       `assigned`/`in_progress`; **`delivered` is no longer a Job stage to exclude**, ADR-012), showing
       stage, crew, active blockers.
-- [ ] **S6.1a** *(re-pointed 2026-08-14, ADR-012 — not in the original plan)* **Group the index by
-      Intake**, not a flat job list — the whiteboard's row was always the car, and a car can now have
+- [ ] **S6.1a** ⏩ *partially pulled forward 2026-08-27 — the board's row is already the car
+      (`intakes/_board_row`), on cost-of-late-change; the batched `Intake.ready` scope and the
+      blocker roll-up are still here.* *(re-pointed 2026-08-14, ADR-012 — not in the original plan)*
+      **Group the index by Intake**, not a flat job list — the whiteboard's row was always the car, and a car can now have
       several jobs. A **"Done — awaiting delivery"** group for intakes where `ready?` (every job
       terminal, ≥1 done) — the founding-pain surface, now car-level. See [[Intake]].
 - [ ] **S6.2** Filters: by stage, by technician (crew), by blocker.
@@ -441,6 +449,9 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       rows as `Job#timeline`, purely a second rendering — no data work needed.)*
 - [ ] **S8.2** Scopes/queries per metric — **queries, not tables** ([[Design laws]] #3).
 - [ ] **S8.3** Manager dashboard (PC); owner mobile health summary ([[Tech stack]] device posture).
+      *(2026-08-27: these are **reporting screens of their own**, not the Board and not a reopening
+      of the one-board ruling — they are where role-sensitive information belongs, per the Board's
+      content rule in [[Design system]] §L1.)*
 - [ ] **S8.4** Tests: each metric query is correct against seed data.
 
 ## Related

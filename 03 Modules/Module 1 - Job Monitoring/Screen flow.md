@@ -1,7 +1,7 @@
 ---
 type: reference
 module: M1
-updated: 2026-08-25 (Session 36 — flows 6 and 7 re-shaped: vehicles get their own create screen, intake ships happy path only; plan of record [[Design system]]; prior: flow 7 chipped out)
+updated: 2026-08-27 (Session 38 — the landing screen is named the Board, not Dashboard; prior: 2026-08-25 Session 36 — flows 6 and 7 re-shaped: vehicles get their own create screen, intake ships happy path only; plan of record [[Design system]]; prior: flow 7 chipped out)
 ---
 # Screen flow
 
@@ -15,13 +15,16 @@ Cross-cutting flows (Monitor, Owner status) are parked for now — this covers *
 
 **Legend:** ✅ built · ⚠️ endpoint exists, no UI yet · ❌ not built · 🔒 Devise (exempt from redesign)
 
+*(2026-08-27: the two **Dashboard** landings above now read **Board** — one screen had four names
+and this note held the retired one. Ruling and reasoning: [[Design system]] §L1.)*
+
 ## Setup
 | # | Flow | Screen | Api | Components (C) | Actions (A) | → triggers |
 |-|-|-|-|-|-|-|
 | 1 | Sign up | Sign up 🔒 | `GET /users/sign_up` · `POST /users` | email + password | Create account | → **Landing** → *Workshop reg* / *Team accept* |
-| 2 | Workshop registration | Create workshop ✅ | `GET /workshop/new` · `POST /workshop` | workshop name | Create workshop | → **Dashboard** (now owner) → *Team invitation* |
+| 2 | Workshop registration | Create workshop ✅ | `GET /workshop/new` · `POST /workshop` | workshop name | Create workshop | → **Board** (now owner) → *Team invitation* |
 | 3 | Team invitation | Add crew ✅ | `GET /invitations/new` · `POST /invitations` | email · role | Add to crew `[mgmt]` · Invite again `…/refire` · Remove `DELETE` | → **Crew list** → *Team accept* |
-| 4 | Team accept | Landing (invite card) ✅ | `POST /invitations/:id/accept` · `…/decline` | invite card (workshop · role) | Accept · Decline | Accept → **Dashboard** (now crew) · Decline → *stays* |
+| 4 | Team accept | Landing (invite card) ✅ | `POST /invitations/:id/accept` · `…/decline` | invite card (workshop · role) | Accept · Decline | Accept → **Board** (now crew) · Decline → *stays* |
 
 ## Records
 | # | Flow | Screen | Api | Components (C) | Actions (A) | → triggers |

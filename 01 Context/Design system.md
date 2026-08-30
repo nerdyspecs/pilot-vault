@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-26 (Session 37 — Bootstrap now compiles from Sass; the no-build-step rule is reversed, token values unchanged)
+updated: 2026-08-27 (Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
 ---
 # Design system
 
@@ -369,6 +369,13 @@ evidence. `/design-preview` renders each of these once, in every state.
 Every screen, without exception: **eyebrow → display heading → one primary action, top right.**
 On mobile the primary action becomes a **full-width bar** below the heading instead.
 
+> [!note] **Narrowed 2026-08-27 — "one" is a ceiling, not a quota.**
+> A screen whose job is to *monitor* may carry **none**. The Board is the first: its front door
+> moved to the vehicle (L1), leaving the head with an eyebrow and a title and nothing else. This
+> **narrows** the rule, it does not reverse it — no screen may still carry two. Worth saying
+> because a deliberately empty top-right corner otherwise reads as something failing to load, the
+> same way a non-counter role's blank slot does. See [[Board]].
+
 ### Structure
 
 | Component | Spec |
@@ -622,11 +629,17 @@ The layer nothing else can be designed without. What must be settled:
   wordings exist for the same affordance.
 - **How a screen is reached without going through the board.** Customers, Crew, and Blocker types
   are currently a row of outline buttons on `workshops#show` and exist nowhere else.
-- **Where the front door lives.** `app/views/workshops/show.html.slim` already carries a reserved
+- ~~**Where the front door lives.** `app/views/workshops/show.html.slim` already carries a reserved
   slot — *"Restore a button here once intakes#new exists."* Every sibling control in that row is
   `btn-outline-secondary`, so a single solid `--action` button there **satisfies** law 3 rather
   than straining it, and law 1 argues against a persistent nav item (the header is chrome, and
-  chrome whispers).
+  chrome whispers).~~
+  > **REVERSED 2026-08-27 (builder).** The front door leaves the board: **check-in starts from the
+  > vehicle.** The board becomes a monitoring surface with no create path. The reasoning is not
+  > cosmetic — starting from a found vehicle makes the **search-first rule enforced rather than
+  > advisory**, which is exactly the trap named under L3 step 6 (a standalone add-vehicle path
+  > makes duplicate customers cheap). The reserved slot in `workshops/show` is now dead and should
+  > go when the screen is re-cut. Full context: [[Board]].
 - **Page width.** Finding 6: twelve screens are `col-lg-6`. Whatever the shell becomes, content
   uses the available canvas and responds to it — law 9 is not optional.
 
@@ -649,18 +662,96 @@ The layer nothing else can be designed without. What must be settled:
   it has been waiting · the fastest safe action the viewer can take.** Knot's waiting pin and
   ageing bands already answer the third from the *stalled state* rather than creation date, which
   is the same conclusion [[ADR-011 Acknowledgement as stored visibility]] reached independently.
-- **Still open, and it is a real fork:** Bay gives every role its own dashboard with a role-scoped
-  attention queue and destinations. Knot has **one board for everyone** with per-control gating.
-  [[Design laws]] #3 ("dashboards are queries, not tables — new viewpoint = new scope, never a new
-  model") makes role-scoped views *cheap*, so this is a genuine choice rather than a cost question.
-  Not ruled.
+- **Ruled 2026-08-27: one board for everyone. A viewpoint is a *scope* on it, never a screen of
+  its own.** Bay gives every role its own dashboard with a role-scoped attention queue and
+  destinations; Knot does not fork the landing surface. [[Design laws]] #3 ("dashboards are queries,
+  not tables — new viewpoint = new scope, never a new model") makes role-scoped views *cheap*, so
+  cost was never the argument on either side. Three things decided it:
+    - **Roles here are plural and simultaneous.** `WorkshopStaff#titles` returns a *list* and leaves
+      precedence to the caller; the topbar already renders `Owner · Technician`. A dashboard per
+      role needs a function role → screen, so it would force us to invent a precedence order the
+      schema deliberately refuses to hold — and the towkay who owns the shop and works the floor is
+      the normal case in a small workshop, not an edge case.
+    - **The laws already say "scope, not screen".** Law #3 licenses a new *scope*; UI law 7 says a
+      new viewpoint is a recomposition of the same components, never a second screen set. A
+      per-role dashboard is the one reading of #3 that UI law 7 forbids.
+    - **Knot's nav is already role-scoped — by gating, not by forking.** `workshops#show` hides
+      Customers behind counter staff, and Crew and Blocker types behind owner-or-manager. So the
+      reference's role matrix is **adopted, not rejected**: it lands as (a) gated nav items under
+      the durable-work-areas rule, (b) the screen's one primary action chosen for the viewer's role
+      — which UI law 3 already licenses, "the most likely next step *for that role* there" — and
+      (c) scopes on the board's content. Only the extra *screens* are rejected.
+
+  **What this does not settle, and must never be read as settling.** Under one shared board a
+  technician still has to find themselves in a shop-wide list. That is a real glance-test failure
+  (UI law 4) and a real miss on the attention-item test's second question — *who owns the next
+  action*. It is **deferred with the floor posture (L2), by ruling and not by finding.** When that
+  posture is drawn the fix is a **mine-first scope on this board** at a different density; a
+  technician dashboard would reopen this ruling, not implement it.
+
+  **Consequence for the landing page: none.** `HomeController#index` auto-routes a single-workshop
+  user with no pending invitation straight to the board, and that stands — under this ruling there
+  is nowhere else it could land.
+
+#### The board's content rule — **safe for everyone, or not on the board** *(builder, 2026-08-27)*
+
+Everything the board shows is safe for **every** role to see, so **nothing on it is hidden per
+role**. Role-segregated information on this screen is to be avoided, not managed. Four parts, all
+checkable:
+
+- **Data is uniform; actions are gated.** This rule governs *information*, never *permission*. Who
+  may move a job, raise a blocker or deliver a car is still `Permissions`' call, and the view still
+  hides a control the controller would refuse (`PermissionsHelper` delegates so the two cannot
+  drift). The board's **one primary action stays role-varying** under UI law 3 — that is an action,
+  not content, so it does not contradict this.
+- **What is not safe for everyone is not board content.** It does not become a per-role panel on
+  the board; it becomes **its own screen**, reached through the gated nav. This is what stops the
+  rule eroding one exception at a time — the first genuinely role-sensitive information in the
+  product is Sprint 8's attribution and health reporting, and it is already planned as separate
+  surfaces rather than as blocks on this one.
+- **A scope may reorder, never conceal.** The technician's deferred mine-first scope (L2) sorts or
+  defaults the same rows; it must never remove a row the viewer is not allowed to see, **because
+  there is no such row**, and the whole board stays reachable to the same person.
+- **True in code today.** `workshops#show` loads `@active_jobs`, `@done_jobs` and
+  `@pending_acknowledgements` scoped to `Current.workshop` alone — no role filter anywhere. The
+  only role-conditional markup on the page is the three outline buttons, and S5A.3a moves those
+  into the sidebar. After that task the board has **zero** role-conditional content, which is the
+  state this rule holds it at.
+
+**The cost, accepted rather than hidden:** this caps what the board may ever carry. The day pricing,
+margin, or per-person throughput becomes daily-loop information, it cannot go here — it needs a
+screen of its own. That is the rule working, not the rule failing.
+
+**Worth naming, and not a role problem:** the waiting pin renders `event.receiver.user.email`,
+because `User` carries no name. It is the only personal datum on the board and it is shop-internal,
+so it passes — but it is an *identity* shown where everything else is *work*, and it is where a
+staff-name field would first pay off.
+
+#### The screen's name — **Board** *(ruled 2026-08-27)*
+
+One screen carried four names: *Dashboard* ([[Screen flow]]), *the board* ([[Screen map]]),
+`/workshop`, and `workshops#show`. It is **the Board** — the nav label, the page title, and the
+word every note uses from here.
+
+- **"Dashboard" is retired.** It is the abstract word, nobody at a workshop says it, and it now
+  names the very thing ruled against above. Keeping it would leave the rejected design sitting in
+  the nav label.
+- **"Board" is the concrete domain word.** The whiteboard is the artefact Knot replaces
+  ([[Product overview]]), and the code already speaks it (`jobs/_board_row`,
+  `08 Experiments/knot-board-desktop.html`). It also survives the ADR-012 regroup — a board of cars
+  is still a board.
+- **The URL and the controller do not change.** `/workshop` is the tenant root and `workshops#show`
+  is honest REST. What is settled here is a **UI-surface** name — nav label, page title, page head
+  — not a routing one; renaming the route would churn `workshop_path` across nine call sites to buy
+  nothing a user ever sees.
 
 #### The role matrix *(measured from the live prototype, 2026-08-25)*
 
 The reference implementation's nav is **a shared spine plus role-specific additions, and exactly one
 role-specific primary action.** Recorded because it is the concrete form of the "durable work areas
 only" rule, and because Knot's equivalent question — one board for everyone vs a dashboard per role
-— is still open (below).
+— ~~is still open (below)~~ *(2026-08-27: **ruled above** — one board. The matrix is adopted as
+gating plus a role-varying primary action, not as four screens.)*
 
 | Role | Nav beyond the shared spine | Primary action |
 |---|---|---|
@@ -757,10 +848,14 @@ not by `customer:`.
 - **No vehicle-type column exists** (`vehicles` has only `vin`), so `inspection_type` can never be
   inferred from a plate. Whenever the intake screen carries the type picker, it is a real question
   to a human.
-- **One board vs a dashboard per role** — the L1 fork above. Design law #3 makes role-scoped views
-  cheap, so this is a design choice, not a cost one.
-- **The sidebar, and what it drags in** — Stimulus (or a CSS-only pattern) for collapse and drawer,
-  since no Bootstrap JS is loaded, plus an icon source for the rail. One coupled decision, not three.
+- ~~**One board vs a dashboard per role**~~ — **ruled 2026-08-27**, L1 above: one board, viewpoints
+  are scopes on it. What stays open is the **technician's mine-first scope**, deferred with the
+  floor posture.
+- **The sidebar, and what it drags in** — ~~Stimulus (or a CSS-only pattern) for collapse and
+  drawer~~, plus an icon source for the rail. *(2026-08-27: the Stimulus half is **settled by
+  build** — `sidebar_controller.js` ships the collapse. What remains is the **icon source**, and it
+  is inseparable from the collapse: UI law 6 says words over icons, so a collapsed rail with no
+  icons is unreadable. Belongs to S5A.3a.)*
 - **UI law 3: "per screen" or "per local area"** — settle it with X4, not before
   ([[Design system]] UI laws).
 - **The re-derived status chips have not been sample-compared.** [[Design system]] flags this; the
