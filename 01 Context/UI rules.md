@@ -1,14 +1,19 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — forks ruled as 22–23: narrow red exemption on form controls, no icons; prior: rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
+updated: 2026-08-31 (Session 39 — authority split clarified: 1–7 derive from the book, 8–23 originate here; forks ruled as 22–23: narrow red exemption on form controls, no icons; prior: rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
 ---
 # UI rules — the card
 
-> **Working summary, held open *during* UI work.** [[Design system]] is authoritative; if this
-> card disagrees with it, **the card is wrong — fix the card.** The reasoning behind every rule
-> lives there; nothing here is new. The seven rules were written (2026-08-25) after a screen was
-> built that broke five of them at once. They are checkable — check them.
+> **Working summary, held open *during* UI work.** All rules are checkable — check them.
+> Authority is split by origin *(clarified 2026-08-31, Session 39)*:
+> - **Rules 1–7** derive from [[Design system]] — the book is authoritative; if the card
+>   disagrees, **the card is wrong — fix the card.** They were written (2026-08-25) after a
+>   screen was built that broke five of them at once.
+> - **Rules 8–23** originate **here** (captured 2026-08-31, Session 39) — the card is their
+>   home; the reasoning and the mocks that tested them are in [[worklog]] S39 and
+>   [[UI experiments]] 4–6. If one of them ever conflicts with the book, that is a real fork to
+>   rule, not a transcription error.
 
 1. **Bootstrap is the default answer.** If Bootstrap ships it — `.form-control`, `.form-label`,
    `.form-check-input`, `.form-select`, `.btn`, `.table`, focus rings — **use it and theme through
