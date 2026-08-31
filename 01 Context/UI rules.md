@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — created; extracted from [[Design system]] and the repo's CLAUDE.md design rules)
+updated: 2026-08-31 (Session 39 — rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
 ---
 # UI rules — the card
 
@@ -33,6 +33,57 @@ updated: 2026-08-31 (Session 39 — created; extracted from [[Design system]] an
 *first*, then built.
 
 **Scope: desktop only, for now** *(2026-08-25, builder)* — thumb-first is dormant, not deleted.
+
+## Composition *(8–12 captured 2026-08-31, Session 39 — demonstrated in the mocks; discussion in [[worklog]] S39)*
+
+8. **One grid.** Page head, section heads, panels and table text share the same left edges. An
+   element whose left edge aligns with nothing is wrong.
+9. **One rhythm per level, off the ladder.** Sections separate by `1.5rem`, panels pad `1rem`,
+   component internals `.5/.25rem` — the same value for the same job everywhere on the page.
+10. **One section anatomy.** Every section is *head (title + optional right-side note or action)
+    → body*. A screen never contains two differently-shaped sections.
+11. **One focal point.** One display-size element, one solid primary — the weight budget is
+    spent once per screen. *(Extends rule 6 from buttons to everything.)*
+12. **Whitespace before boxes.** Separate with space first, a hairline second, a bordered panel
+    last. Never border-in-border-in-border.
+
+## Ink and colour *(13–15, same capture)*
+
+13. **The grey ramp has fixed jobs.** `--text-muted` = row body copy · `--text-quiet` = counts
+    and secondary labels · `--text-faint` = micro-type (eyebrows, timestamps, ages) ·
+    `--placeholder` = inputs only, never copy. A grey chosen by eye instead of by job is the smell.
+14. **Indigo means interactive — and only interactive.** `--action` colour ⇔ clicking it does
+    something (or it's a whole-row target, rule 16). No decorative indigo.
+15. **One dark block per screen, and it must inform.** The inverted panel carries the single
+    most consequential computed statement, never mood copy. No urgent statement → no dark block.
+
+## Behaviour *(16–19, same capture)*
+
+16. **Every interactive element has its states.** Hover is `--hover` grey and nothing else;
+    focus is the visible ring, never a shadow; rows that open something are whole-row targets
+    with a hover affordance. State is never conveyed by colour alone.
+17. **Empty is a state, not an absence.** A section with no data renders a quiet one-line
+    message; it never disappears. An empty board is the first thing every new workshop sees.
+18. **Numbers align right, in tabular figures.** Durations, counts, money — always. Ragged
+    numerals kill glanceability, and glanceability is the product.
+19. **Motion is feedback only.** ~150ms, state changes only, `prefers-reduced-motion` respected.
+    No decorative animation — the one reserved exception is the acknowledge knot-tie, if it
+    ever ships.
+
+## Layout and forms *(20–21, same capture)*
+
+20. **Full canvas.** Desktop content uses the available width; density (columns, a rail) absorbs
+    wide screens, margins never do. A centred content column on an app screen is a bug. The
+    **gate archetype is the exception** — it centres by design: `--hover` ground, 400px box,
+    the 52px K badge, display-type greeting (anatomy lives in `application.scss` §auth).
+21. **Form anatomy.** Label `.75rem` bold above the field, `.25rem` label gap, hint text in
+    `--text-quiet` below, controls at `--control` height. Square checkboxes; radios keep their
+    circle — the one deliberate radius in the system.
+
+## Open forks — unruled, do not improvise *(2026-08-31)*
+- **Form-validation colour**: Bootstrap's red-invalid vs *red is sacred to blockers*. Needs a
+  builder ruling (narrow exemption for form controls, or ink-and-text-only errors).
+- **Icons**: none exist, none ruled. Until ruled, the rule in force is **text labels only**.
 
 ## While working
 - Keep `bin/rails dartsass:watch` running; spacing goes in the template's utility classes,

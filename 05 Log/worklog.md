@@ -66,9 +66,24 @@ per level · same section anatomy · one focal point · whitespace before boxes 
 information) demonstrated in a standalone mock — offered for the [[UI rules]] card, **not yet
 captured**; the builder is sitting with the mock first.
 
+**Addendum 2 (same day) — rules 8–21 captured onto [[UI rules]].** The composition discussion
+became fourteen new card rules, argued and *demonstrated* before capture: three standalone mocks
+(composition sample → the all-components "ideal state" page → a login gate built from rules
+alone) each exposed gaps that were promoted — including two violations the agent itself made
+while knowing the rules (a `max-width` cap against full-canvas; a second solid primary), which
+settled the case for writing them down. New: composition 8–12 (one grid · one rhythm · one
+section anatomy · one focal point · whitespace before boxes), ink 13–15 (grey-ramp jobs ·
+indigo = interactive only · the dark block must inform), behaviour 16–19 (states · empty is a
+state · tabular right-aligned numbers · motion is feedback), layout/forms 20–21 (full canvas,
+gate excepted · form anatomy). Two forks recorded on the card as **unruled**: form-validation
+colour (red-sacred tension) and icons (text labels only until ruled). The gate's anatomy
+(`.auth-*`) noted on the card so decisions living only in the Sass stop being invisible. Mocks
+remain in the session scratchpad — not yet moved to [[UI experiments]].
+
 **Next:** continue Sprint 5A on `s5a-sass` (six commits, plus uncommitted board work, all
 pre-dating this session). First session under the new structure should road-test the lanes and
-[[Home]] — friction found is §Rule capture material.
+[[Home]] — friction found is §Rule capture material. Two one-line builder rulings pending:
+form-validation colour, icons.
 
 ---
 
