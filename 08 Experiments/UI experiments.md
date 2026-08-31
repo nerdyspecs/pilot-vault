@@ -1,10 +1,10 @@
 ---
 type: experiment
 created: 2026-07-07
-updated: 2026-08-25 (Session 36 — added knot-board-desktop.html, the reference implementation of [[Design system]] with the Bay-vs-Bootstrap scale switch)
+updated: 2026-08-31 (Session 39 — added the three rule-test mocks (4–6): composition sample, all-components ideal page, login gate; icons question closed by [[UI rules]] 23; prior: Session 36 — added knot-board-desktop.html, the reference implementation of [[Design system]] with the Bay-vs-Bootstrap scale switch)
 ---
 # UI experiments
-Two standalone HTML mocks, both fully self-contained (open in any browser, no server, no
+Standalone HTML mocks, fully self-contained (open in any browser, no server, no
 network). All state is in-memory — **reload = reset**. Role switching is a navbar dropdown,
 no auth. Same model spine as the vault: [[Stage model]], [[Blocker]] overlay, acknowledged
 handoffs ([[ADR-005 Acknowledged handoffs in V1]]), theme tokens from [[Design system]].
@@ -63,7 +63,30 @@ Its `:root` block is deliberately written as a preview of what `application.css`
 **What it deliberately does not show:** the amber Waiting/ageing band (deferred to S6.7 — the pin
 ships muted per [[ADR-011 Acknowledgement as stored visibility]]), and any phone layout (desktop-only
 by ruling). Its icons are hand-vendored inline SVG, not a gem — the `lucide-rails` question stays
-open.
+open. *(2026-08-31, Session 39: closed — [[UI rules]] 23 rules **no icons, text labels only**;
+this mock's icons are pre-rule and do not transfer. Reopens only on a label that cannot fit.)*
+
+## 4–6 · The rule-test mocks *(2026-08-31, Session 39)*
+
+Three mocks from the session that captured [[UI rules]] 8–23 — each built to *test* the rules
+before they were written down, in the Bay-exclusive language ([[Design system]], the 2026-08-31
+exclusivity ruling). Tokens verbatim from `application.scss`; **no icons** (rule 23); the login
+gate reuses the app's committed `.auth-*` anatomy.
+
+- **`knot-composition-sample.html`** — the composition rules (8–12) demonstrated in isolation:
+  sidebar, topbar, metric strip, filtered table, two panel sections. One grid, one rhythm, one
+  section anatomy, one focal point.
+- **`knot-ideal-page.html`** — **every component of the system on one page**: all five status
+  chip families in habitat, the waiting pin, both hairline logics (grid vs list), full form
+  controls, an empty state, the informing inverted panel, whole-row hover targets, tabular
+  numerals. Built as the motivational "glimpse of the finished product"; also the closest thing
+  to a `/design-preview` preview until S5.5a ships.
+- **`knot-login.html`** — the gate archetype from the rules alone. Its audit found the two gaps
+  that became rules 21 (form anatomy) and 22 (validation red), which is the §Rule capture loop
+  working as designed.
+
+**Not ruled screens.** The board layout in the ideal page, the sidebar contents and the intake
+form are sketches; [[Screen decisions]] notes stay authoritative per screen.
 
 ## Judgment calls embedded (not settled by the vault — candidates for [[Open questions]])
 - **Deliver is gated on active blockers** (Hold for payment blocks Delivered) — gives the

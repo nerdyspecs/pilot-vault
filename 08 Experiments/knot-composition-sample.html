@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Composition rules — on Knot's real tokens (teaching mock, not a ruled screen)</title>
+<style>
+  /* Tokens — verbatim from app/assets/stylesheets/application.scss (2026-08-31). */
+  :root{
+    --action:#2727D9; --action-hover:#1F1FB0;
+    --page:#FFFFFF; --surface:#FFFFFF; --hover:#F4F4F2; --inverse:#FFFFFF;
+    --border:#D8D8D4; --rule:#E5E5E1;
+    --ink:#101010; --text-muted:#55554F; --text-quiet:#6D6D68; --text-faint:#777773;
+    --nav-ink:#4E4E49; --placeholder:#A9A9A4;
+    --st-neutral-border:#D8D6CE; --st-neutral-fill:#F6F5F1; --st-neutral-text:#3A3A37;
+    --st-info-border:#A9C7E6;    --st-info-fill:#EDF4FB;    --st-info-text:#0A3A6B;
+    --st-aging-border:#E2C68C;   --st-aging-fill:#FBF3E4;   --st-aging-text:#5A3105;
+    --st-danger-border:#E8B4B4;  --st-danger-fill:#FCEFEF;  --st-danger-text:#6E1A1A;
+    --st-success-border:#C4DA9F; --st-success-fill:#F1F7E8; --st-success-text:#21450A;
+    --sidebar:14rem; --topbar:4.5rem; --control:2.5rem;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font:.875rem/1.5 Helvetica, Arial, sans-serif;
+    color:var(--ink); background:var(--page);
+    display:grid; grid-template-columns:var(--sidebar) minmax(0,1fr); min-height:100vh;
+  }
+  .eyebrow{font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    line-height:1.2; color:var(--text-faint);}
+  /* ————— sidebar (contents are TBD in the app — S5A.3a) ————— */
+  aside{background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:1rem 0;}
+  .wordmark{display:flex; align-items:center; gap:.5rem; padding:0 1rem 1rem; font-weight:600;
+    font-size:1rem; color:var(--action); border-bottom:1px solid var(--rule);}
+  .wordmark .k{width:22px; height:22px; display:grid; place-items:center;
+    background:var(--action); color:var(--inverse); font-weight:700; font-size:.75rem;}
+  nav{padding-top:1rem; display:flex; flex-direction:column;}
+  nav a{display:flex; justify-content:space-between; align-items:center;
+    padding:.5rem 1rem; color:var(--nav-ink); text-decoration:none; min-height:var(--control);}
+  nav a:hover{background:var(--hover);}
+  nav a.active{background:var(--action); color:var(--inverse); font-weight:700;}
+  nav .count{font-size:.75rem; color:var(--text-quiet);}
+  nav a.active .count{color:var(--inverse);}
+  /* ————— topbar (anatomy mirrors layouts/_topbar) ————— */
+  .shell{display:flex; flex-direction:column; min-width:0;}
+  header{height:var(--topbar); background:var(--surface); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; padding:0 3rem;}
+  header .titles{font-weight:700; font-size:.875rem;}
+  .avatar{width:2rem; height:2rem; display:inline-flex; align-items:center; justify-content:center;
+    font-size:.75rem; font-weight:700; background:var(--ink); color:var(--inverse);}
+  /* ————— main: one grid (3rem page edges), one rhythm ————— */
+  main{padding:3rem; display:flex; flex-direction:column; gap:1.5rem; max-width:72rem;}
+  .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:1rem;}
+  .page-head h1{font-size:2.5rem; font-weight:400; line-height:1; letter-spacing:-.05em;
+    margin-top:.5rem;}
+  .btn{font:inherit; font-weight:700; border:1px solid var(--action); background:var(--surface);
+    color:var(--action); padding:0 1rem; height:var(--control); cursor:pointer;}
+  .btn.primary{background:var(--action); color:var(--inverse);}
+  .btn.primary:hover{background:var(--action-hover); border-color:var(--action-hover);}
+  /* section anatomy — identical every time */
+  section{display:flex; flex-direction:column; gap:.5rem;}
+  .sec-head{display:flex; align-items:baseline; justify-content:space-between;}
+  .sec-head h2{font-size:1rem; font-weight:700;}
+  .panel{background:var(--surface); border:1px solid var(--border); padding:1rem;}
+  a.quiet{color:var(--action); text-decoration:none; font-weight:700; font-size:.75rem;}
+  /* metric strip — one container, full-border internal dividers: reads as a GRID */
+  .metrics{display:grid; grid-template-columns:repeat(4,1fr);
+    border:1px solid var(--border); background:var(--surface);}
+  .metrics>div{padding:1rem; display:flex; flex-direction:column; gap:.25rem;}
+  .metrics>div+div{border-left:1px solid var(--border);}
+  .metrics .n{font-size:1.25rem; line-height:1.2; letter-spacing:-.03em;}
+  /* filters */
+  .filters{display:flex; gap:.5rem; align-items:center;}
+  .filters select,.filters input{font:inherit; border:1px solid var(--border);
+    background:var(--surface); padding:0 .5rem; height:var(--control); color:var(--ink);}
+  .filters input{flex:1; max-width:16rem;}
+  .filters input::placeholder{color:var(--placeholder);}
+  .filters .spacer{flex:1;}
+  /* table — row dividers use --rule so a dense list reads as a LIST */
+  table{width:100%; border-collapse:collapse; background:var(--surface);
+    border:1px solid var(--border);}
+  th{font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-faint); text-align:left; padding:.5rem 1rem;
+    border-bottom:1px solid var(--border);}
+  td{padding:.5rem 1rem; border-bottom:1px solid var(--rule);}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--hover);}
+  .plate{font-family:ui-monospace,Menlo,monospace; font-size:.75rem;
+    border:1px solid var(--border); padding:0 .25rem;}
+  /* status chips — 1px border + pale fill + dark text. SACRED: amber = aging only,
+     red = blockers only; stages use neutral / info / success. */
+  .chip{display:inline-block; font-size:.75rem; font-weight:600; padding:0 .5rem;
+    border:1px solid; white-space:nowrap;}
+  .chip.neutral{color:var(--st-neutral-text); background:var(--st-neutral-fill); border-color:var(--st-neutral-border);}
+  .chip.info{color:var(--st-info-text); background:var(--st-info-fill); border-color:var(--st-info-border);}
+  .chip.aging{color:var(--st-aging-text); background:var(--st-aging-fill); border-color:var(--st-aging-border);}
+  .chip.danger{color:var(--st-danger-text); background:var(--st-danger-fill); border-color:var(--st-danger-border);}
+  .chip.success{color:var(--st-success-text); background:var(--st-success-fill); border-color:var(--st-success-border);}
+  .muted{color:var(--text-muted);} .quiet{color:var(--text-quiet); font-size:.75rem;}
+  .faint{color:var(--text-faint); font-size:.75rem;}
+  /* two-column sections */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;}
+  .list{display:flex; flex-direction:column;}
+  .list>div{display:flex; justify-content:space-between; align-items:baseline; gap:1rem;
+    padding:.5rem 0; border-bottom:1px solid var(--rule);}
+  .list>div:last-child{border-bottom:none;}
+  /* inverted panel — ink ground, the one allowed dark block */
+  .panel.invert{background:var(--ink); color:var(--inverse); border-color:var(--ink);}
+  .panel.invert .eyebrow{color:var(--inverse); opacity:.7;}
+</style>
+</head>
+<body>
+  <aside>
+    <div class="wordmark"><span class="k">K</span>Knot</div>
+    <nav>
+      <a class="active" href="#">Board</a>
+      <a href="#">Intakes <span class="count">4</span></a>
+      <a href="#">Blockers <span class="count">2</span></a>
+      <a href="#">Customers</a>
+      <a href="#">Crew</a>
+    </nav>
+  </aside>
+
+  <div class="shell">
+    <header>
+      <div>
+        <div class="eyebrow">Today · Hin Seng Motor Works</div>
+        <div class="titles">Owner · Technician</div>
+      </div>
+      <span class="avatar">AS</span>
+    </header>
+
+    <main>
+      <!-- page head: the ONE display-size element, the ONE solid primary -->
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Board · Saturday 31 Aug</div>
+          <h1>What needs a move.</h1>
+        </div>
+        <button class="btn primary">New intake</button>
+      </div>
+
+      <!-- section 1: metric strip — full-border dividers, reads as a grid -->
+      <section>
+        <div class="metrics">
+          <div><span class="eyebrow">In progress</span><span class="n">6</span></div>
+          <div><span class="eyebrow">Unassigned</span><span class="n">3</span></div>
+          <div><span class="eyebrow">Blocked</span><span class="n">2</span></div>
+          <div><span class="eyebrow">Done today</span><span class="n">5</span></div>
+        </div>
+      </section>
+
+      <!-- section 2: filters + table -->
+      <section>
+        <div class="sec-head">
+          <h2>Open repairs</h2>
+          <span class="quiet">11 of 16</span>
+        </div>
+        <div class="filters">
+          <select><option>All stages</option><option>Unassigned</option><option>In progress</option><option>Done</option></select>
+          <select><option>All crew</option><option>Mine</option></select>
+          <input type="search" placeholder="Plate or customer…">
+          <span class="spacer"></span>
+          <button class="btn">Clear</button>
+        </div>
+        <table>
+          <thead><tr><th>Vehicle</th><th>Customer</th><th>Job</th><th>Stage</th><th>Crew</th><th>In stage</th></tr></thead>
+          <tbody>
+            <tr><td><span class="plate">WXY 4821</span></td><td>Lim T.H.</td><td>Gearbox overhaul</td><td><span class="chip info">In progress</span></td><td>Ah Hock</td><td class="quiet">2h 10m</td></tr>
+            <tr><td><span class="plate">BKV 902</span></td><td>Sara Tan</td><td>Brake pads + discs</td><td><span class="chip neutral">Unassigned</span></td><td>—</td><td class="quiet">45m</td></tr>
+            <tr><td><span class="plate">PJN 3377</span></td><td>Encik Rosli</td><td>Aircond regas <span class="chip danger">Blocked · parts</span></td><td><span class="chip info">In progress</span></td><td>Mei Ling</td><td><span class="chip aging">1d 3h</span></td></tr>
+            <tr><td><span class="plate">WA 55 Q</span></td><td>Kavitha R.</td><td>Routine service</td><td><span class="chip info">In progress</span></td><td>Ah Hock</td><td class="quiet">30m</td></tr>
+            <tr><td><span class="plate">JDT 118</span></td><td>Mr. Wong</td><td>Alignment + balance</td><td><span class="chip success">Done</span></td><td>Faizal</td><td class="quiet">—</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- sections 3+4: two columns, SAME anatomy as every other section -->
+      <div class="cols">
+        <section>
+          <div class="sec-head"><h2>Blockers</h2><span class="quiet">2 open</span></div>
+          <div class="panel list">
+            <div><span><span class="chip danger">Parts</span>&nbsp; Compressor for PJN 3377</span><span class="faint">since 9:40am</span></div>
+            <div><span><span class="chip danger">Approval</span>&nbsp; Quote pending, BKV 902</span><span class="faint">since 11:15am</span></div>
+          </div>
+        </section>
+        <section>
+          <div class="sec-head"><h2>Today</h2><a class="quiet" href="#">All →</a></div>
+          <div class="panel invert">
+            <div class="eyebrow">Keep the hand-offs moving</div>
+            <div style="margin-top:.5rem">JDT 118 is done and unacknowledged — the fastest safe
+            move is yours: acknowledge, then call Mr. Wong for collection.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

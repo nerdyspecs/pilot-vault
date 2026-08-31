@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knot — sign in (gate archetype, rules only)</title>
+<style>
+  /* Tokens verbatim from application.scss. Gate archetype: rule 20's exception — centres by design. */
+  :root{
+    --action:#2727D9; --action-hover:#1F1FB0;
+    --surface:#FFFFFF; --hover:#F4F4F2; --inverse:#FFFFFF;
+    --border:#D8D8D4; --rule:#E5E5E1;
+    --ink:#101010; --text-muted:#55554F; --text-quiet:#6D6D68; --text-faint:#777773;
+    --placeholder:#A9A9A4; --control:2.5rem;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font:.875rem/1.5 Helvetica,Arial,sans-serif; color:var(--ink);
+    background:var(--hover);              /* the auth shell's recorded ground */
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem;}
+  .box{width:100%; max-width:400px; display:flex; flex-direction:column; gap:1.5rem;}
+  /* identity — the K badge, from the app's own .auth-badge */
+  .badge{width:52px; height:52px; display:grid; place-items:center;
+    background:var(--action); color:var(--inverse); font-weight:800; font-size:1.75rem;}
+  .head{display:flex; flex-direction:column; gap:.5rem;}
+  .eyebrow{font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    line-height:1.2; color:var(--text-faint);}
+  /* the gate is where display type belongs — rule 11: this is the screen's one display element */
+  h1{font-size:2.5rem; font-weight:400; line-height:1; letter-spacing:-.05em;}
+  .sub{color:var(--text-muted);}                            /* rule 13: muted = body copy */
+  .panel{background:var(--surface); border:1px solid var(--border); padding:1.5rem;}
+  form{display:flex; flex-direction:column; gap:1rem;}
+  .field{display:flex; flex-direction:column; gap:.25rem;}
+  .field label{font-size:.75rem; font-weight:700;}
+  input[type=email],input[type=password]{font:inherit; width:100%; height:var(--control);
+    padding:0 .5rem; border:1px solid var(--border); background:var(--surface); color:var(--ink);
+    transition:border-color .15s ease;}                     /* rule 19: feedback only */
+  input::placeholder{color:var(--placeholder);}             /* rule 13: placeholder grey, inputs only */
+  input:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--action); outline-offset:1px;} /* rule 16 */
+  .row{display:flex; align-items:center; justify-content:space-between; gap:1rem;}
+  .check{display:flex; align-items:center; gap:.5rem;}
+  .check input{appearance:none; width:1rem; height:1rem; border:1px solid var(--border);
+    display:grid; place-items:center; background:var(--surface);}
+  .check input:checked{background:var(--action); border-color:var(--action);}
+  .check input:checked::before{content:"✓"; color:var(--inverse); font-size:.65rem; font-weight:700;}
+  a{color:var(--action); font-weight:700; text-decoration:none;}   /* rule 14: indigo = interactive */
+  a:hover{color:var(--action-hover);}
+  .btn{font:inherit; font-weight:700; height:var(--control); width:100%; cursor:pointer;
+    border:1px solid var(--action); background:var(--action); color:var(--inverse);
+    transition:background-color .15s ease;}                 /* rule 11: the ONE solid primary */
+  .btn:hover{background:var(--action-hover); border-color:var(--action-hover);}
+  .foot{display:flex; justify-content:space-between; align-items:baseline;
+    border-top:1px solid var(--rule); padding-top:1rem;}    /* rule 12: hairline, not a box */
+  .foot span{color:var(--text-quiet); font-size:.75rem;}    /* rule 13: quiet = secondary label */
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="head">
+      <span class="badge">K</span>
+      <div>
+        <div class="eyebrow">Knot · Workshop sign-in</div>
+        <h1>Back to the floor.</h1>
+      </div>
+      <p class="sub">Sign in to see what needs a move.</p>
+    </div>
+
+    <div class="panel">
+      <form>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@workshop.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="pw">Password</label>
+          <input id="pw" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="row">
+          <label class="check" for="rm"><input id="rm" type="checkbox" checked>
+            <span style="font-size:.875rem">Remember me</span></label>
+          <a href="#" style="font-size:.75rem">Forgot password?</a>
+        </div>
+        <button class="btn" type="button">Sign in</button>
+        <div class="foot">
+          <span>New workshop?</span>
+          <a href="#" style="font-size:.75rem">Create an account →</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

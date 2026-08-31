@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
+updated: 2026-08-31 (Session 39 — forks ruled as 22–23: narrow red exemption on form controls, no icons; prior: rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
 ---
 # UI rules — the card
 
@@ -80,10 +80,18 @@ updated: 2026-08-31 (Session 39 — rules 8–21 captured: composition, ink jobs
     `--text-quiet` below, controls at `--control` height. Square checkboxes; radios keep their
     circle — the one deliberate radius in the system.
 
-## Open forks — unruled, do not improvise *(2026-08-31)*
-- **Form-validation colour**: Bootstrap's red-invalid vs *red is sacred to blockers*. Needs a
-  builder ruling (narrow exemption for form controls, or ink-and-text-only errors).
-- **Icons**: none exist, none ruled. Until ruled, the rule in force is **text labels only**.
+## The forks, ruled *(2026-08-31, Session 39 — delegated to the agent by the builder, "do what you think is best")*
+
+22. **Form-validation red is a narrow exemption to the sacred palette.** On **form controls
+    only** — invalid border + error line in the danger family — because users' red-means-error
+    instinct is stronger than any internal vocabulary, and fighting it costs failed intakes.
+    The exemption is *narrow*: chips, rows, panels and everything outside a form control keep
+    red = blockers, exclusively. Bootstrap's `is-invalid` mechanics are the implementation
+    (rule 1), themed to `--st-danger-*`.
+23. **No icons — text labels only.** Now a rule, not a pending question. An icon set is a
+    dependency by another name, every icon is a vocabulary the crew must learn, and the system's
+    density comes from type doing the work. Revisit only if a real screen produces a label that
+    cannot fit — that trigger, not taste, reopens this.
 
 ## While working
 - Keep `bin/rails dartsass:watch` running; spacing goes in the template's utility classes,
