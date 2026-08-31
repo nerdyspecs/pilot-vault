@@ -16,7 +16,7 @@ decisions — they're details of how a feature behaves.
   "mechanic"/`JobMechanic`; renamed **technician**/`JobTechnician` 2026-07-17 — code uses
   technician throughout. Same rename banner as [[M1-F1 Status flow and transitions]].)*
   When helpers arrive the flag lands as **`lead`**
-  (not `primary` — naming settled to avoid re-litigation). See [[Deferred design]] (crew entry) +
+  (not `primary` — naming settled to avoid re-litigation). See [[Deferred decisions]] (crew entry) +
   [[M1-F1 Status flow and transitions]] Settled 2026-07-16.
 - **One active job per vehicle** — ✅ resolved 2026-07-15 ([[Risk ledger]] R5, commit `2c5ca91`),
   **the other way from the old leaning**: active = per-visit — the *original* shipped partial

@@ -128,7 +128,7 @@ done jobs in their own **"Done — awaiting delivery"** group; only delivered/ca
 ## Colour — deferred, not decided here
 The pin ships **muted, never coloured** in Sprint 4. Ageing colour (amber/red at a threshold) is
 **S5.7**, on the chip and never the row (a red row is indistinguishable from a blocked job). The
-2026-07-24 draft's colour-band table moved to [[Deferred design]] with the overnight-hours wart.
+2026-07-24 draft's colour-band table moved to [[Deferred decisions]] with the overnight-hours wart.
 
 ## Consequences
 - **The derived classifier is deleted.** No `.pending_ack`, no per-row role comparison at read time.
@@ -168,7 +168,7 @@ The pin ships **muted, never coloured** in Sprint 4. Ageing colour (amber/red at
   starts. Thresholds survive as S5.7 presentation on a model already correct.
 - **A universal "Got it" button.** Would let someone signal "seen, not yet actionable" — a state the
   two-column schema can't represent (it measures "has acted"). Deferred as not-important-now, parked
-  in [[Deferred design]].
+  in [[Deferred decisions]].
 - **Acknowledgements as their own INSERT-only event rows** (the purist append-only alternative, a DB
   trigger enforcing no UPDATE). Rejected: costs a `NOT EXISTS` subquery on every board read and
   doubles the rows, to protect a mutation that is already monotonic, two-column, and serialized under
@@ -200,4 +200,4 @@ The pin ships **muted, never coloured** in Sprint 4. Ageing colour (amber/red at
 ## Related
 - [[ADR-005 Acknowledged handoffs in V1]] (extended by this) · [[Product gaps]] #5 ·
   [[Event log]] · [[M1-F1 Status flow and transitions]] · [[Blocker]] ·
-  [[Design laws]] · [[Design system]] · [[ADR-002 V1 scope]] · [[Sprint plan]] · [[Deferred design]]
+  [[Architecture laws]] · [[Design system]] · [[ADR-002 V1 scope]] · [[Sprint plan]] · [[Deferred decisions]]

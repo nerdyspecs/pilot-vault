@@ -286,7 +286,7 @@ URL to be true.
       creation-time must-equal-vehicle's-customer validation; [[Data model]] §Resolved, the
       sold-vehicle decision.)* *(2026-07-15: the match **validation** deferred at plan review —
       too rigid without a recovery path (payer≠file cases are legitimate); stamp + default-copy
-      stand; circle back at the intake UI — [[Deferred design]].)* **Kickoff gate — both ruled 2026-07-15:**
+      stand; circle back at the intake UI — [[Deferred decisions]].)* **Kickoff gate — both ruled 2026-07-15:**
       [[Risk ledger]] R5 → **refuse** (per-visit definition; partial unique index on
       `jobs(vehicle_id) WHERE stage IN (0,1,2)`); customer stamp **confirmed** on
       strengthened reasoning (persons query jobs through the frozen stamp, never through
@@ -307,7 +307,7 @@ URL to be true.
       2026-07-16, builder ruling: entity + event log, replacing the settled single-table
       shape — see [[Event log]] and worklog Session 17)*: **JobMechanic** (engagement):
       `workshop_id, job_id, user_id` — no ack columns, **no `primary`/`lead` flag in v1**
-      (deferred entirely, [[Deferred design]]). **JobMechanicTransition** (events):
+      (deferred entirely, [[Deferred decisions]]). **JobMechanicTransition** (events):
       `workshop_id, job_mechanic_id, action:integer(joined/left), created_by_id,
       acknowledged_at, acknowledged_by_id`. Old columns dissolve into events: `assigned_by`
       → the joined row's `created_by`; `removed_at`/`removed_by` → the `left` row. Current
@@ -350,7 +350,7 @@ URL to be true.
       StandardError` with a human message; bang methods commit or raise (controllers rescue
       into flash). Every verb uniformly: stage-legality first → role gate →
       **`job.with_lock`** transaction *(the row-lock deferral **woken** 2026-07-16 —
-      [[Deferred design]])* → state write + event row together → `created_by = acting_user`,
+      [[Deferred decisions]])* → state write + event row together → `created_by = acting_user`,
       `workshop_id` from the job. *(Settled 2026-07-12, stands: job **creation** goes through
       the door too.)* *(2026-07-16: built, commit `045f5c1`. One plan-review refinement: the
       stage/role checks run **inside** `job.with_lock` — the lock reloads the row, so a check
@@ -391,7 +391,7 @@ URL to be true.
       move.)* *(2026-07-16 Phase 3: the **`registered ↔ assigned` moves are
       crew-method-private** — written only inside these two verbs' transactions, so
       "`assigned` ⟺ crew exists" is unbreakable. `swap_mechanic!` **dropped** for v1 —
-      no crew motion on a started job; escape hatch + trigger in [[Deferred design]].
+      no crew motion on a started job; escape hatch + trigger in [[Deferred decisions]].
       Crew freezes on terminal stages: `cancel!`/`deliver!` write no synthetic `left`
       events.)* *(2026-07-16: built, commit `36bb90e`. Console-verified: 3 rows one txn;
       removal at untouched-assigned writes `left` + compensating rollback; refused after
@@ -414,7 +414,7 @@ URL to be true.
 - [x] **S2.10** `JobActions.register_job!(vehicle:, customer: nil, acting_user:)` — creates
       the Job **and** logs the `nil → registered` birth transition, one transaction (clean
       entry timestamp). Counter-gated (`ensure_counter!`); `customer` defaults to
-      `vehicle.customer` (the door's default-copy — [[Deferred design]] match-validation
+      `vehicle.customer` (the door's default-copy — [[Deferred decisions]] match-validation
       entry; an explicit different customer is legal, the two-branch confirm is Sprint 6 UI).
       *(respecified 2026-07-16 — creation was always through the door (Settled 2026-07-12);
       this names the verb.)* *(2026-07-16: built, commit `5592291`. Plain
@@ -441,7 +441,7 @@ URL to be true.
       (SA / technician / parts advisor) incl. forged-POST refusal → flash not 500,
       `turbo_confirm` on mark-done, full register→assign→start→done→deliver lifecycle,
       375px mobile check. JSON responses for door mutations consciously deferred —
-      [[Deferred design]].)*
+      [[Deferred decisions]].)*
 - [x] **S2.12** Tests *(respecified 2026-07-17, Session 21 — the ruled ten cases, written
       against the post-Design-B/post-rename shape)*: (1) full legal path
       register→assign→start→done→deliver asserting exact stage rows incl. the
@@ -488,7 +488,7 @@ vehicles — from 0 rows it's a dead end. This slice adds the create surface. **
 fuller slice** (customer CRUD + intake motion), not a minimal create-only path; **new
 "Sprint 2.5"** — Sprint 2 stays closed (exit met, `bee2c2a`), Sprint 3 keeps its number.
 
-> **⚠ ARCHITECTURE BOUNDARY — read before building.** [[Design laws]] #7 ONE DOOR governs
+> **⚠ ARCHITECTURE BOUNDARY — read before building.** [[Architecture laws]] #7 ONE DOOR governs
 > **job state only**. Customer and Vehicle create/edit are **ordinary Rails CRUD** (plain
 > controllers + AR models) — **not** through `JobActions`. Only the job-creation step goes
 > through the door (`register_job!`, already built). This slice is *forms*, no new engine.
@@ -506,7 +506,7 @@ has NO "who's paying?" override** — the stamp defaults silently to `vehicle.cu
 hit, to the just-created customer on a miss. So `job.customer == vehicle.customer` at birth in
 **both** branches → a mismatch is structurally unrepresentable in 2.5, which is exactly why
 the deferred match-validation / two-branch confirm stays cleanly parked until the plate-first
-override lands in S6 ([[Deferred design]]).
+override lands in S6 ([[Deferred decisions]]).
 
 - [x] **S2.5.1** `CustomersController` + `resources :customers` (new/create): `kind` toggle
       (person | company), flat fields, `for_current_workshop`-scoped, counter-gated at the
@@ -596,7 +596,7 @@ guard; and raise refused past the guarded stage. 89 unit + 9 system green.
 - [x] **S3.3** Extend `JobActions`: `raise_blocker!` / `resolve_blocker!` / `note_blocker!` + the
       stage veto. *(2026-07-24, `9fe5156`.)* Role check is **crew-aware** (a `technician` side needs
       *this job's* crew; manager/owner override); the veto lives once in `transition!`.
-- [x] **S3.4** `Job#active_blockers` scope: items with no `resolved` event (a query, [[Design laws]] #3). *(2026-07-24, `4009792` — also spliced blocker events into `Job#timeline`.)*
+- [x] **S3.4** `Job#active_blockers` scope: items with no `resolved` event (a query, [[Architecture laws]] #3). *(2026-07-24, `4009792` — also spliced blocker events into `Job#timeline`.)*
 - [x] **S3.5** Controller + views: the Blockers card — raise from catalog + note, resolve, add-note,
       show active blockers; tech raise flow mobile-friendly. *(2026-07-24, `0ae84c2` wiring +
       `eb377d0` views + `7273db9` system tests.)*
@@ -643,7 +643,7 @@ model was studied and dropped (ADR-011 Rejected alternatives).
       375px. There is no receiver "inbox" and no sender-side view — one board, read by the manager.
 - [ ] **S4.5** ~~Ageing colour~~ — **moved to S5.7** *(deferred 2026-07-28)*. The pin ships muted;
       amber/red at a threshold, on the chip never the row, is a styling pass after real use. Bands +
-      the overnight-hours wart parked in [[Deferred design]].
+      the overnight-hours wart parked in [[Deferred decisions]].
 - [x] **S4.6** *(Product-gap #5 — the mechanisms)* satisfied by the above: **stored receiver read**
       (S4.3) · **board surface** (S4.4) · **acting confirms** (S4.1) · colour deferred (S5.7).
       **Surviving law: never deleted, never faked** — no auto-ack, no expiry, no purge; a terminal
@@ -655,6 +655,6 @@ model was studied and dropped (ADR-011 Rejected alternatives).
       Product-gap #5 proof, executable).
 - [ ] ~~**S4.8** Directed blocker notes (B2)~~ — **deferred again** (ADR-011). Still additive (one
       nullable `directed_to_role`, no rework), and `raise` pins nobody precisely so a second traffic
-      generator waits for a real workshop. See [[Blocker]] B1/B2 split · [[Deferred design]].
+      generator waits for a real workshop. See [[Blocker]] B1/B2 split · [[Deferred decisions]].
 
 ---

@@ -39,7 +39,7 @@ per-request re-verification) is unchanged.
    has two sources: **active Employment OR Ownership**. This resolution lives in exactly one
    method that every controller/query path calls — never sprinkled as separate checks, or a
    screen will eventually forget one. Same spirit as ONE DOOR for job state
-   ([[Design laws]] #7).
+   ([[Architecture laws]] #7).
 
 4. **Landing routes by edge count** (not a personal dashboard by default):
    `0` edges → personal home, primary action "Create your workshop" / "ask your boss to add
@@ -75,7 +75,7 @@ per-request re-verification) is unchanged.
   Accept/Decline card must be seen on the personal home, not skipped past. Built in S1.15c.
 
 ## Related
-- [[ADR-004 Multi-tenant foundation]] · [[ADR-008 Crew joining requires acceptance]] · [[Design laws]] · [[Positioning]] · [[Sprint plan]]
+- [[ADR-004 Multi-tenant foundation]] · [[ADR-008 Crew joining requires acceptance]] · [[Architecture laws]] · [[Positioning]] · [[Sprint plan]]
 
 ---
 **Footnote 2026-07-17 (Session 21) — edge models renamed, decision unchanged.** `Employment` →

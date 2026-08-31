@@ -72,7 +72,7 @@ Each catalog type names, in `blocks`, the **one forward stage it vetoes**. The 2
 `CHECK` + model validation, so the veto — which lives **once per level**, in `Job#transition!` for
 work blockers and intake `deliver!` for HFP — can never bite `send_back!` / `cancel!` / `assign` /
 `remove`. A blocked job therefore stays cancellable. "Currently blocked by" = items with no
-`resolved` event — a **query, not a column** ([[Design laws]] #3); `noted` events are ignored. Rows
+`resolved` event — a **query, not a column** ([[Architecture laws]] #3); `noted` events are ignored. Rows
 are never deleted; the rows ARE the history.
 
 ## Design B — the long-lived thread *(2026-07-17, built Sprint 3)*
@@ -124,7 +124,7 @@ mid-thread, which is why Sprint 4 pins **nobody** on `raised`. No rework when it
 `receiver_id` column already exists; the verbs just start stamping it, old rows reading as neutral.
 *(**B2 deferred again, past Sprint 4** — ADR-011. Still additive, so nothing is lost by waiting; the
 base acknowledgement loop should meet a real workshop before a second traffic generator is added.
-Now parked in [[Deferred design]] rather than scheduled.)*
+Now parked in [[Deferred decisions]] rather than scheduled.)*
 
 **The resolve echo sweeps like everything else** *(reshaped 2026-07-28, [[ADR-011 Acknowledgement as stored visibility]])*.
 A `resolved` event pins the **raiser** as receiver; the raiser acting on the job acknowledges it. The
@@ -145,7 +145,7 @@ surface as "waiting on" anyone yet — purely additive if it's ever needed (two 
 Acknowledgeable`, no prod data cost).
 
 ## Related
-- [[Job]] · [[Intake]] · [[Stage model]] · [[Event log]] · [[Design laws]] ·
+- [[Job]] · [[Intake]] · [[Stage model]] · [[Event log]] · [[Architecture laws]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-010 WorkshopStaff supersedes the edge split]] ·
   [[ADR-011 Acknowledgement as stored visibility]] · [[ADR-012 Intake-Job two-level aggregate]] ·
   [[ADR-013 The door decomposed]]

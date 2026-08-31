@@ -10,7 +10,7 @@ Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at th
 ## Backend
 - Ruby on Rails (primary framework) — **vanilla MVC**: models / controllers / views / routes, no
   extra layers. The one exception is a **service object** for all job state changes (ONE DOOR,
-  a plain PORO) — see [[Design laws]] #7.
+  a plain PORO) — see [[Architecture laws]] #7.
 - PostgreSQL — relational data, need joins and structured relationships
 - Devise — authentication for internal workshop users
 - Rails API mode aware — controllers should be structured to serve both HTML views and JSON responses cleanly

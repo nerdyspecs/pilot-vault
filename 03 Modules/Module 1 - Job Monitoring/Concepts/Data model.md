@@ -8,7 +8,7 @@ Customers, vehicles, jobs, and who's allowed to touch them.
 
 **The shape: a routing problem, not a customer database.** Every entity answers, per job,
 *"who's responsible and who do we talk to?"* — see [[Product overview]]. Tenancy + user rules
-live in [[ADR-004 Multi-tenant foundation]] and [[Design laws]]; this note is the entity map.
+live in [[ADR-004 Multi-tenant foundation]] and [[Architecture laws]]; this note is the entity map.
 
 > [!warning] The entity map below predates [[ADR-010 WorkshopStaff supersedes the edge split]] (2026-07-21)
 > The `WorkshopEmployment` / `WorkshopOwnership` edges shown below **no longer exist** — they
@@ -66,8 +66,8 @@ Workshop ─*─ Blocker                            (workshop's blocker catalog 
 membership + self-contained events, technician vocabulary; a stale `owner` in the role
 list above was also dropped, removed by ADR-006 long before.)*
 
-- **User** — global, thin Devise login. No role, no org. Roles live on **Employment** ([[Design laws]] #1).
-- **Workshop** — the tenant. Every tenant row carries `workshop_id`, queried via `Current.workshop` ([[Design laws]] #2).
+- **User** — global, thin Devise login. No role, no org. Roles live on **Employment** ([[Architecture laws]] #1).
+- **Workshop** — the tenant. Every tenant row carries `workshop_id`, queried via `Current.workshop` ([[Architecture laws]] #2).
 - **WorkshopEmployment** — User↔Workshop edge + role + `ended_at` (renamed from `Employment`
   2026-07-17; `WorkshopOwnership` likewise from `Ownership`). See [[ADR-004 Multi-tenant foundation]].
 - **Customer** — tenant-scoped owner *record* (not a login). `kind: person | company`; holds `name, phone, email` directly.
@@ -153,7 +153,7 @@ exception — see ADR-015) stamps each row with who actually recorded that findi
   is not edited; this is the dated footnote. Also corrected in [[Intake]] §Associations.)*
 
 **The freeze rule, answered:** a filled sheet becomes **read-only once its Intake reaches a
-terminal state** (`delivered`/`cancelled`) — [[Design laws]] #8 (*a Done job is immutable*)
+terminal state** (`delivered`/`cancelled`) — [[Architecture laws]] #8 (*a Done job is immutable*)
 applied to this aggregate. `ready?` was considered as the cutoff and rejected — a ready intake is
 still `open` and still legitimately editable before delivery. There is no template-drift-under-an-
 old-answer problem to defend against at freeze time either: `item_keys` already pins what a sheet
@@ -174,14 +174,14 @@ asked, independent of whatever the live template looks like by the time it's fro
   reaches its customer through its intake, never directly.** Vehicles change owners: if a job's customer is only reachable through
   `job.vehicle.customer`, selling the car retroactively rewrites who every past job was for —
   history derived through a **mutable pointer** violates the same append-only principle behind
-  [[Design laws]] #8 (frozen answers) and ADR-009's leaning. So `jobs.customer_id` is written
+  [[Architecture laws]] #8 (frozen answers) and ADR-009's leaning. So `jobs.customer_id` is written
   **once at registration** (fact at the moment it was true): `job.customer` = who brought the
   car in and pays (immutable history); `vehicle.customer` = who owns it *now* (mutable
   present). They legitimately diverge after a sale — that divergence is the correct answer.
   One creation-time validation: the stamped customer must equal the vehicle's customer at
   registration (divergence may only arise later, by reassignment — never at birth).
   *(2026-07-15: the match **validation** is deferred — too rigid without a recovery path;
-  legitimate payer≠file cases exist. The stamp + default-copy stand; see [[Deferred design]].)* Also pins
+  legitimate payer≠file cases exist. The stamp + default-copy stand; see [[Deferred decisions]].)* Also pins
   the job's notification target ("External" side) against mid-job reassignment. A
   `VehicleOwnership` period-edge table was considered and rejected for v1 (over-engineering).
 - **Who tracker rows point at — the actor/holder split** *(2026-07-16, builder ruling,
@@ -252,7 +252,7 @@ asked, independent of whatever the live template looks like by the time it's fro
 
 ## Related
 - [[Job]] · [[Intake]] · [[Job visibility]] · [[Intake flow]] · [[Overview]] ·
-  [[ADR-004 Multi-tenant foundation]] · [[Design laws]] · [[ADR-003 Digitized jobsheet in V1]] ·
+  [[ADR-004 Multi-tenant foundation]] · [[Architecture laws]] · [[ADR-003 Digitized jobsheet in V1]] ·
   [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
   [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
   [[ADR-015 Jobsheet answers are rows against a frozen question set]] ·

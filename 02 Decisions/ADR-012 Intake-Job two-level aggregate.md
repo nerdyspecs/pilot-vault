@@ -28,7 +28,7 @@ built on the wrong unit and rebuilt.
 confusion): **"intake" = the car's visit** (one drop-off, one collection); **"job" = one repair** on
 that visit. "Visit" and "service" are avoided in code — *service* is the repair itself in shop
 language, *job* stays the repair. The single service object stays **`JobActions`** (ONE DOOR,
-[[Design laws]] #7); intake verbs are added there rather than a parallel `IntakeActions`.
+[[Architecture laws]] #7); intake verbs are added there rather than a parallel `IntakeActions`.
 
 ## The lighter alternatives, ruled out first
 The split carries the weight of a new aggregate, so it must beat the cheaper options — recorded so
@@ -59,7 +59,7 @@ A new model **`Intake`** sits between `Vehicle` and `Job`. One `Intake` is one c
 :customer` (the customer frozen at intake, per [[Data model]]); a `Job` reaches customer/vehicle
 through its intake.
 
-### 2. The intake's terminal position is stored; `ready` is derived ([[Design laws]] #3)
+### 2. The intake's terminal position is stored; `ready` is derived ([[Architecture laws]] #3)
 An Intake carries a **stored `status` enum `{ open, delivered, cancelled }`** — exactly parallel to
 how a `Job` stores `stage`. **`ready` is the one derived reading**, a query over its jobs:
 
@@ -101,7 +101,7 @@ of truth: nothing outside ONE DOOR can move it, so it cannot drift from the jobs
 ### 4. Every backward move lives on Job; the Intake only steps forward
 `send_back!`, `cancel!`, and `remove_technician!` are all **Job** moves. The **Intake only ever steps
 `open → delivered`** — one forward step to a boundary, never backward. A returning delivered car is a
-**new Intake** with new Jobs ([[Design laws]] #6/#8, restated below). **"Defer to next week" is not a
+**new Intake** with new Jobs ([[Architecture laws]] #6/#8, restated below). **"Defer to next week" is not a
 hanging job** — it is `cancel!` the unfinished job now + rebook it as a **new job on a new intake**
 next week. This keeps *"delivered ⟺ every job terminal, ≥1 done"* a hard rule and never leaves a
 zombie job open across visits.
@@ -164,7 +164,7 @@ whom" board query stay **purely job-level** and never touch intake blockers.
    job is done** — it means strictly "a car with real work done was collected." The physical
    hand-back of an unrepaired car needs no delivery act; the cancellations already say "nothing
    happened here."
-2. **Cancel-the-car cascade = cancel the remaining *open* jobs; done work survives** ([[Design laws]]
+2. **Cancel-the-car cascade = cancel the remaining *open* jobs; done work survives** ([[Architecture laws]]
    #8). The verb does **not** choose the terminal — it falls out of the jobs, via the same
    reconcile: 0 done → `cancelled`; ≥1 done → the intake stays `open` and reads **`ready`** (the
    customer still collects the completed repairs, via an explicit `deliver!`). The confirm UX must therefore
@@ -180,7 +180,7 @@ whom" board query stay **purely job-level** and never touch intake blockers.
 - **The Intake is the visit made first-class.** It is the honest anchor for the three things bare
   many-jobs loses: **collection** (one delivery act), the **release-hold** (HFP), and the **board's
   grouping unit** (the car). The whiteboard's row was always the car; `Intake` is that row.
-- **`ready?` obeys [[Design laws]] #3** without weakening acknowledgement: what's *derived* is a
+- **`ready?` obeys [[Architecture laws]] #3** without weakening acknowledgement: what's *derived* is a
   read (the car's readiness), what's *stored* is an intent (each event's receiver, and the terminal
   the door writes). Keeping those two separate is exactly what ADR-011 established; this ADR carries
   it across a second level.
@@ -254,6 +254,6 @@ whom" board query stay **purely job-level** and never touch intake blockers.
 ## Related
 - [[ADR-011 Acknowledgement as stored visibility]] (extended by this) ·
   [[ADR-010 WorkshopStaff supersedes the edge split]] · [[ADR-002 V1 scope]] ·
-  [[ADR-003 Digitized jobsheet in V1]] · [[Design laws]] · [[Stage model]] · [[Job]] ·
+  [[ADR-003 Digitized jobsheet in V1]] · [[Architecture laws]] · [[Stage model]] · [[Job]] ·
   [[Blocker]] · [[Event log]] · [[M1-F1 Status flow and transitions]] · [[Intake flow]] ·
-  [[Sprint plan]] · [[Deferred design]]
+  [[Sprint plan]] · [[Deferred decisions]]

@@ -40,7 +40,7 @@ first-visit dedup traps. **That note is the behaviour spec.** This session desig
 that carry it, not the behaviour itself.
 
 **The mismatch confirm is designed in prose** and explicitly waiting on this moment.
-[[Deferred design]] records it (2026-07-15, with the builder): on mismatch, show *"vehicle filed
+[[Deferred decisions]] records it (2026-07-15, with the builder): on mismatch, show *"vehicle filed
 under Lim, billing Tan"* with **two explicit choices** — `[Just this visit]` (stamp only, file
 untouched — borrower or third-party payer) vs `[Vehicle changed hands]` (also
 `vehicle.update!(customer:)` in the same transaction — informal sale). **Two buttons because the
@@ -50,7 +50,7 @@ click-through.** That entry says it circles back "when the intake UI exists (Pha
 
 **The create path** *(decided 2026-08-25 with the builder)*: plate/phone lookup as model class
 methods (extending the existing `Vehicle.canonicalize` and `Customer.search`, per
-[[Design laws]] #9 — logic you can't call without a request is misplaced); the SA's branch tree
+[[Architecture laws]] #9 — logic you can't call without a request is misplaced); the SA's branch tree
 resolves in the UI flow; the two mutating branches (§1b-iii vehicle changed hands, §1b-iv correct
 the card's phone) run as explicit CRUD; `CreateIntake` widens by `complaint:` only.
 *Rejected: find-or-create in the controller (law #9); a fat `CreateIntake` absorbing the tree
@@ -151,7 +151,7 @@ Bound by: ~90% of visits are §1a (plate hit, phone matches) and must clear in *
 buys density not size (law 9); exactly one primary action per screen (law 3).
 
 ### Q3 — The mismatch confirm as a screen
-Turn [[Deferred design]]'s two-branch prose into a real surface. Note law 2: **a mismatch is not
+Turn [[Deferred decisions]]'s two-branch prose into a real surface. Note law 2: **a mismatch is not
 an error** — status colours are reserved words, so no red. [[Intake flow]] principle 3:
 "mismatches are decisions, not errors."
 
@@ -200,12 +200,12 @@ this interacts with Q1 (if a list ships, the list is probably the home for "New 
 ## 6. Read before designing
 
 `CLAUDE.md` · [[Intake flow]] (the behaviour spec — read in full, the forks are easy to
-under-read) · [[Deferred design]] §the job↔vehicle customer-match entry (the two-branch confirm)
+under-read) · [[Deferred decisions]] §the job↔vehicle customer-match entry (the two-branch confirm)
 · [[Design system]] §UI laws · [[User stories]] §Design constraints · [[Screen map]] ·
 [[Screen flow]] · [[Sprint plan]] Sprint 5 · [[Data model]]
 
 ## Related
 [[Intake flow]] · [[Inspection jobsheet — design brief]] (the pattern this follows) ·
-[[Sprint plan]] S5.5 · [[Screen map]] · [[Screen flow]] · [[Design laws]] · [[Design system]] ·
+[[Sprint plan]] S5.5 · [[Screen map]] · [[Screen flow]] · [[Architecture laws]] · [[Design system]] ·
 [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
 [[ADR-015 Jobsheet answers are rows against a frozen question set]]

@@ -283,5 +283,5 @@ Knot. Company → different product wearing Knot's clothes.
 
 ## Related
 - [[Data model]] (§v2 schema seeds, §Resolved frozen stamp) · [[Intake flow]] · [[Job visibility]] ·
-  [[Deferred design]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-006 Ownership separate from Employment]] ·
+  [[Deferred decisions]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-006 Ownership separate from Employment]] ·
   [[ADR-008 Crew joining requires acceptance]] (§QR self-enrollment — flagged for reopening)

@@ -42,7 +42,7 @@ terminal with none done. See [[Intake]].)*
   veto guards its own door's boundary.
 - Stage changes are **acknowledged** by the service advisor — see
   [[ADR-005 Acknowledged handoffs in V1]]. **Done freezes the job** — corrections open a new job
-  ([[Design laws]] #8).
+  ([[Architecture laws]] #8).
 
 ## V1 note
 Quality Check was considered and **dropped** — verification folds into In-Progress. Add it back
@@ -53,6 +53,6 @@ as its own stage if it ever earns one (cheap — just a new enum value).
 Current stage is a real column (fast for the live list); history lives in [[Event log]].
 
 ## Related
-- [[Job]] · [[Intake]] · [[Blocker]] · [[Event log]] · [[Design laws]] ·
+- [[Job]] · [[Intake]] · [[Blocker]] · [[Event log]] · [[Architecture laws]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-012 Intake-Job two-level aggregate]] ·
   [[ADR-013 The door decomposed]]

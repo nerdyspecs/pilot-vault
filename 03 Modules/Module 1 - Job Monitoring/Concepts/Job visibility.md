@@ -66,7 +66,7 @@ load-bearing for sign-in and claim-verification. Reasoned in
 
 Four keys, ORed. Only `tenant_isolation` opens writes (`FOR SELECT` policies are never
 consulted for writes) — and even then, state changes go through a **door**, per level
-([[Design laws]] #7, [[ADR-013 The door decomposed]]). Every read key resolves **from the
+([[Architecture laws]] #7, [[ADR-013 The door decomposed]]). Every read key resolves **from the
 person inward**: start at the `app.user_id` note, walk the claim (`customers.user_id` direct,
 or `customers.company_id` → membership), test the intake's frozen `customer_id` stamp. The
 stamp is the *anchor*, never the identity — identity lives on User/Company; the claim column on
@@ -93,7 +93,7 @@ question, asked inside the workshop — same tables, different perspective, both
 
 ## Open (deliberately unbuilt)
 - **Sprint 7:** how the token note reaches Postgres (a `SET app.intake_token` before lookup vs
-  a `SECURITY DEFINER` function) — flagged in [[Deferred design]].
+  a `SECURITY DEFINER` function) — flagged in [[Deferred decisions]].
 - **v2 design pass:** the `USING` subqueries read other *policed* tables (policy-chasing-
   policy: SECURITY DEFINER helper vs denormalizing the claim), and the projection question —
   companies likely get a thin slice (stage/ETA/vehicle) across all their jobs, not `SELECT
@@ -101,4 +101,4 @@ question, asked inside the workshop — same tables, different perspective, both
 
 ## Related
 - [[Data model]] · [[Job]] · [[Intake]] · [[ADR-007 Row-Level Security pulled into Sprint 1]] ·
-  [[Design laws]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-012 Intake-Job two-level aggregate]]
+  [[Architecture laws]] · [[ADR-004 Multi-tenant foundation]] · [[ADR-012 Intake-Job two-level aggregate]]

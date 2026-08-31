@@ -49,9 +49,9 @@ From the 2026-07-03 foundation session. Resolves the open "User model + tenancy"
 - Session re-verification makes staff offboarding instant.
 
 ## Consequences
-- Every tenant model carries `workshop_id`; every query goes through `Current.workshop` ([[Design laws]] #2).
+- Every tenant model carries `workshop_id`; every query goes through `Current.workshop` ([[Architecture laws]] #2).
 - Jobs are double-stamped (`workshop_id` + `vehicle_id`) — whose board + whose history.
-- **v1 is single-actor** (no handshake — see [[Deferred design]]); all state changes flow through ONE DOOR.
+- **v1 is single-actor** (no handshake — see [[Deferred decisions]]); all state changes flow through ONE DOOR.
 - v2 adds `CompanyEmployment` (roles: `owner / fleet_manager / driver`) as a parallel edge.
 - RLS gotchas for later: transaction-local `set_config`, non-owner DB role / `FORCE ROW LEVEL SECURITY`.
 
@@ -60,7 +60,7 @@ See [[Rejected alternatives]] — STI users, universal accounts table, schema-pe
 RLS-first, and more.
 
 ## Related
-- [[ADR-001 Core stack]] · [[Design laws]] · [[Rejected alternatives]] · [[Data model]]
+- [[ADR-001 Core stack]] · [[Architecture laws]] · [[Rejected alternatives]] · [[Data model]]
 
 ---
 **Footnote 2026-07-17 (Session 21) — edge models renamed, decision unchanged.** `Employment` →

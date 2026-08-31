@@ -1,11 +1,62 @@
 ---
 type: log
-updated: 2026-08-27 (Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)
+updated: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-08-31 · Session 39 — the vault gets a door: reorganized for the builder, not the agent
+
+**Summary.** Documentation only, no app code. The builder couldn't navigate the vault, and the
+diagnosis landed on four causes, none of them "the folders are wrong": (1) the word **"design"
+meant three disciplines across four locations** — architecture invariants, visual/UI, and parked
+solution decisions all shared the word; (2) the vault had an entry point for the agent
+([[Agent guide]]) and **none for the builder**; (3) the rules needed *during* work were fused
+into long reasoning documents — the builder's own coding rules sat inside a note addressed to
+Claude; (4) the working procedures existed only as habit. Fixed by renames and extraction, not
+restructure — the numbered folder skeleton is unchanged, no reasoning content was reworded.
+
+**Renames** *(each renamed note carries a dated rename header; all wiki-links updated
+vault-wide, including link text inside ADRs and the archive)*:
+- *Design laws* → **[[Architecture laws]]** — it holds software-architecture invariants, zero UI.
+- `06 Design/` → **`06 Screens/`** — per-screen reasoning and rollout spec.
+- *Deferred design* → **[[Deferred decisions]]** — parked solution/schema decisions, not visuals.
+
+**New notes:**
+- **[[Home]]** (vault root) — the builder's entry point: route by activity, one table.
+- **[[UI rules]]** — the UI *card*: the seven rules with their values, extracted from
+  [[Design system]] + the repo's CLAUDE.md. The card/book split is explicit: the book stays
+  authoritative; a disagreeing card is a bug in the card.
+- **[[Conventions]]** — the coding *card*: §Naming and §Comments moved verbatim from
+  [[Agent guide]], the change-discipline hard rules with their Session 37/38 provenance, the
+  `def`/`end` rule from CLAUDE.md, and the DRY-vs-flatten criteria stated from
+  [[Architecture laws]] law 9 + ADR-013 (laws keep their text; the card states and links).
+- **[[Workflows]]** — four procedures: **§UI** (the five-home table *moved* here from
+  [[Screen decisions]], plus the working loop), **§Solution** (the existing ADR practice written
+  down), **§Rule capture** (new rules land on the cards, dated — never in the Agent guide or
+  CLAUDE.md again), **§Session close** (the closing checklist gathered from CLAUDE.md's tracking
+  conventions + the worklog header; includes the first written procedure for *producing* a
+  carry-back — the verify-on-receipt rule already existed).
+
+**Edited:** [[Agent guide]] slimmed to agent-facing mechanics — reading lists reorganized into
+**three lanes** (solution/backend · UI · business/brand) with a classify-the-session instruction;
+the moved rule sections replaced by pointers to the cards. [[Screen decisions]] links to the
+moved table. [[Design system]] header gains the card pointer. The repo's `CLAUDE.md` (untracked):
+lane instruction added, design-rules section marked as the compressed copy of [[UI rules]],
+rule-capture line added under tracking conventions.
+
+**Also surfaced, parked:** a `bin/code-check` — the textual sibling of `/design-preview`
+(S5.5a): grep-able rule checks (raw hex, `px` tracking, inline styles, off-ladder spacing in the
+Sass, endless methods). Deliberately **not** built this session — verification tooling earns
+early, never first ([[Sprint plan]] §Conventions), and it's app-side work the builder drives.
+
+**Next:** continue Sprint 5A on `s5a-sass` (six commits, plus uncommitted board work, all
+pre-dating this session). First session under the new structure should road-test the lanes and
+[[Home]] — friction found is §Rule capture material.
 
 ---
 
@@ -271,7 +322,7 @@ discovered later:
   and take the SA to add-vehicle (UI law 8). And `IntakesController#create` stays narrow: widened by
   `complaint:` only, not by `customer:`.
 
-**A real finding against the recorded mismatch design.** [[Deferred design]]'s two-branch confirm
+**A real finding against the recorded mismatch design.** [[Deferred decisions]]'s two-branch confirm
 (`[Just this visit]` / `[Vehicle changed hands]`) answers only the *payer* question, but
 [[Intake flow]] §1b has **four** forks. A screen showing just those two silently drops **1b-i**
 (bill the file as usual) and **1b-iv** ("that's my old number" — the dedup trap that splits one
@@ -627,7 +678,7 @@ record, and added a drift banner covering five corrections since (ADR-010 killed
 `WorkshopEmployment`/`WorkshopOwnership` naming its down-payment argument rested on; ADR-012 moved
 the token and the frozen stamp to Intake; sprint numbers predate the 5↔6 swap; the one down-payment
 it asked for — canonicalizing `vehicle.vin` like the plate — is still undone). Linked from
-[[Deferred design]], and gave [[ADR-008 Crew joining requires acceptance]] a forward-pointer
+[[Deferred decisions]], and gave [[ADR-008 Crew joining requires acceptance]] a forward-pointer
 footnote so its QR-reopen flag isn't dangling. **Nothing was lost, and nothing v1 built depends on
 it** — the note's own §"What v1 should do NOW" asked for *"Schema: nothing."*
 
@@ -672,7 +723,7 @@ configurability ADR-014 rejected for print-control and drift reasons. Re-examine
 not dismissed on sight; re-rejected for the same reasons. Two pieces were worth keeping: `enum`
 as a genuinely distinct answer type (folded into this ADR's `choice` column, which generalizes
 rating/boolean/enum together), and photos attached to a *finding* rather than the whole sheet
-(adopted as the deferred photo design — [[Deferred design]]).
+(adopted as the deferred photo design — [[Deferred decisions]]).
 
 **The SA/technician fill flow killed per-section state, and simplified the answer shape.** An
 intermediate design gave each *section* its own stateful row (who signed it off, when), reasoning
@@ -715,7 +766,7 @@ fix for drift. Re-examined against the concrete printing requirement: a usable l
 across ~39 rows × every intake × every workshop, forever — the exact per-answer-snapshot cost
 ADR-014 had already priced as not worth paying. `item_keys` + an append-only catalog gets the same
 fidelity for one array column, because the catalog lives in git, which already preserves label
-history for free. The [[Deferred design]] entry marking this "moot" (2026-08-19, ADR-014) is
+history for free. The [[Deferred decisions]] entry marking this "moot" (2026-08-19, ADR-014) is
 footnoted rather than rewritten — moot for the old reason, re-rejected here for a new one.
 
 **The complaint separated cleanly from the inspection.** Working through what a jobsheet answer
@@ -731,7 +782,7 @@ have forced free text into a form built for fixed answer types.
 (annotated per house pattern, not rewritten), [[Data model]], [[Sprint plan]] (S5.1 (rev) split
 into S5.1a–d, the four-layer build; S5.5 split to separate the complaint from the inspection
 fill), [[Intake]] (stale association + gloss corrected), [[Roadmap]], [[Features overview]],
-[[Overview]], [[Deferred design]] (four new entries: photos, an answer edit activity log, multiple
+[[Overview]], [[Deferred decisions]] (four new entries: photos, an answer edit activity log, multiple
 inspection types, the damage diagram), [[Risk ledger]] (new R11 — the `item_key` code↔data
 handshake has no FK behind it, held by discipline not the database), and [[Product gaps]] (#7's
 EAV-era description corrected, photos now have a designed home). ADR-014, ADR-012, ADR-003 not
@@ -792,7 +843,7 @@ pattern, keyed on `intake_id`).
 **Housekeeping.** [[Decisions]], [[Data model]], [[Sprint plan]] reconciled to stop describing
 the EAV design as current/upcoming; old S5.1–S5.4 struck and replaced with a single
 S5.1 (rev) task pointing at the chip. A stale-reference sweep caught [[Features overview]] (F6),
-[[Roadmap]] (slice 6), [[Deferred design]] (the now-moot per-answer-snapshot note), and
+[[Roadmap]] (slice 6), [[Deferred decisions]] (the now-moot per-answer-snapshot note), and
 [[Open questions]] — reconciled or footnoted, not left describing the abandoned model as live.
 
 ---
@@ -1011,7 +1062,7 @@ split the migration/model/service layers back out for review.
 `raise`/`note` blockers have no receiver because the target is a role, not a person, and worked out
 a real rule mid-session (*address a request by capability, a reply by identity*) plus a possible
 free lunch (`cleared_by_role` may already carry it, as a board query rather than a schema change).
-Folded into the existing **B2** entry in [[Deferred design]] rather than left loose or duplicated —
+Folded into the existing **B2** entry in [[Deferred decisions]] rather than left loose or duplicated —
 still parked pending a real workshop, per B2's original trigger. *The Intake timeline* — the
 original ask that opened this whole reconciliation thread (trace one intake's history, or the deep
 trace including all its jobs) — got designed (`Intake#timeline` / `Intake#timeline_with_jobs`, the

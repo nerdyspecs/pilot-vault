@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-08-27
-updated: 2026-08-27 (created — the Board is the first note)
+updated: 2026-08-31 (Session 39 — the five-home table moved to [[Workflows]] §UI, its content unchanged; prior: 2026-08-27 created — the Board is the first note)
 ---
 # Screen decisions
 
@@ -13,15 +13,10 @@ Created 2026-08-27 (Session 38) after ruling the Board, when the reasoning for o
 landed in four places at once and none of them was findable from the screen.
 
 > [!important] One fact, one place — where this fits
-> There are now **five** homes, and the boundary matters more than the content:
->
-> | Note | Holds | Example |
-> |---|---|---|
-> | [[Design system]] | **Rules** binding every screen | "status colours are reserved words" |
-> | [[UI rollout]] | **Spec** — files, components, style names | "`_page_head` takes eyebrow, title, action" |
-> | [[Sprint plan]] | **Status** — tasks and ticks | "S5A.3a not started" |
-> | [[Screen map]] | **What exists** — a reflection of code | "the board's Customers link is counter-only" |
-> | **These notes** | **Why this screen is like this** | "the board has no primary action, because…" |
+> The **five-home table** — which note holds rules, spec, status, what-exists, and why — lives in
+> [[Workflows]] §UI *(moved there 2026-08-31, Session 39, so the whole UI flow reads in one
+> place; the table's content is unchanged)*. These notes are the **"why this screen is like
+> this"** home.
 >
 > A screen note **never** carries a tick, a file list, or a rule other screens must obey. If a
 > decision here binds every screen, it belongs in [[Design system]] and this note links to it.

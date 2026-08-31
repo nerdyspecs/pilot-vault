@@ -1,8 +1,14 @@
 ---
 type: context
-updated: 2026-08-14 (law #7 restated, law #9 footnoted — ADR-013, the door decomposed)
+updated: 2026-08-31 (Session 39 — renamed from *Design laws*; prior: 2026-08-14 law #7 restated, law #9 footnoted — ADR-013, the door decomposed)
 ---
-# Design laws
+# Architecture laws
+
+> Renamed from *Design laws* on 2026-08-31 (Session 39). These laws are **software-architecture
+> invariants** — tenancy, ONE DOOR, the thin User — and the old name collided with [[Design system]]
+> and the screen notes, which are about design-as-UI. In this vault, "design" now means UI;
+> architecture rules live here. Content unchanged.
+
 Invariants — never violate. Adopted from the 2026-07-03 foundation session.
 ADRs record *choices*; these are the *rules* every choice must obey.
 

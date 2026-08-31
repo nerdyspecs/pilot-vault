@@ -5,7 +5,7 @@ updated: 2026-08-14 (intake event tables added — ADR-012; per-level door — A
 ---
 # Event log
 The immutable, timestamped history that powers all the time math. **Append-only — never edited.**
-Written **only via a door** ([[Design laws]] #7) — nothing changes a job's or an intake's state
+Written **only via a door** ([[Architecture laws]] #7) — nothing changes a job's or an intake's state
 without also logging it. One door per level since [[ADR-013 The door decomposed]]: `JobActions`
 for a repair's events, `IntakeActions` for the visit's.
 
@@ -137,7 +137,7 @@ queries flat regardless of job count, the same batching idiom as
   `to_stage, created_by, created_at, acknowledged_at, acknowledged_by`.
 - `JobTechnician` (membership): `workshop_id, job_id, workshop_employment_id, created_at` —
   unique `(job_id, workshop_employment_id)`; **no ack columns; no `lead` flag in v1**
-  (deferred with helpers, [[Deferred design]]). **Current crew = the table itself** — rows
+  (deferred with helpers, [[Deferred decisions]]). **Current crew = the table itself** — rows
   are created on assign and deleted on remove (Design B, 2026-07-17; replaced the
   no-`left`-event `.current` subquery). Points at the **stint** (`workshop_employment_id`,
   not `user_id` — the actor/holder split, [[Data model]] §Resolved); actor columns
@@ -175,7 +175,7 @@ queries flat regardless of job count, the same batching idiom as
 The **"waiting on whom" board read** = one query across the event tables:
 `receiver_id IS NOT NULL AND acknowledged_at IS NULL`, grouped by job
 (`Job.pending_acknowledgements_by_job`) or filtered to a person
-(`WorkshopStaff#pending_acknowledgements`). A query, not a table ([[Design laws]] #3), and there is
+(`WorkshopStaff#pending_acknowledgements`). A query, not a table ([[Architecture laws]] #3), and there is
 no inbox — the board is the only surface.
 *(2026-07-28, [[ADR-011 Acknowledgement as stored visibility]]: the earlier `.pending_ack`
 handoff predicate is **deleted**. It solved the "a bare
@@ -185,6 +185,6 @@ structurally: `receiver_id IS NULL` **is** "never was a handoff", so the two-col
 with no classification. Everything is still ONE shared read so board and per-person agree.)*
 
 ## Related
-- [[Job]] · [[Intake]] · [[Stage model]] · [[Blocker]] · [[Design laws]] ·
+- [[Job]] · [[Intake]] · [[Stage model]] · [[Blocker]] · [[Architecture laws]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-012 Intake-Job two-level aggregate]] ·
   [[ADR-013 The door decomposed]]

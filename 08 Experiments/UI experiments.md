@@ -69,7 +69,7 @@ open.
 - **Deliver is gated on active blockers** (Hold for payment blocks Delivered) — gives the
   payment hold teeth, but bends "acks never block" in spirit.
 - **Hold for payment can be raised on a Done job** — rubs against "Done freezes the job"
-  ([[Design laws]] #8); payment holds naturally happen *at* Done.
+  ([[Architecture laws]] #8); payment holds naturally happen *at* Done.
 - **Starting work implicitly accepts the assignment**; handoffs on closed jobs drop out of
   inbox/loose-ends.
 - **Vision only: owner Approve button** — resolving a `cust_approval` blocker from the
@@ -77,5 +77,5 @@ open.
   addressed to them", not editing the job. Needs an ADR if ever adopted.
 
 ## Related
-- [[Design system]] · [[Design laws]] · [[M1-F1 Status flow and transitions]] ·
+- [[Design system]] · [[Architecture laws]] · [[M1-F1 Status flow and transitions]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[Positioning]]

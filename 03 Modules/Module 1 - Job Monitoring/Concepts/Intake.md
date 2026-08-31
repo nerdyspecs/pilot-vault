@@ -22,7 +22,7 @@ one or more repairs, each with its own stage, crew, and blockers. See [[Job]].
 
 ## Stored status, derived `ready?`
 `status` is a **stored** enum (`open`/`delivered`/`cancelled`), written only by the doors
-([[Design laws]] #7). This looks like it should be derived — [[Design laws]] #3 says
+([[Architecture laws]] #7). This looks like it should be derived — [[Architecture laws]] #3 says
 dashboards are queries, not tables — and the first design pass agreed, storing only
 `delivered_at` and deriving `cancelled` from the jobs. That broke on the **busy-vehicle
 guard**: it's enforced by a Postgres *partial unique index*
@@ -97,6 +97,6 @@ history — has no Intake equivalent yet. Designed but unbuilt:
 Tracked as **S4.5.10** in [[Sprint plan]].
 
 ## Related
-- [[Job]] · [[Event log]] · [[Blocker]] · [[Stage model]] · [[Data model]] · [[Design laws]] ·
+- [[Job]] · [[Event log]] · [[Blocker]] · [[Stage model]] · [[Data model]] · [[Architecture laws]] ·
   [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]] ·
   [[ADR-015 Jobsheet answers are rows against a frozen question set]]

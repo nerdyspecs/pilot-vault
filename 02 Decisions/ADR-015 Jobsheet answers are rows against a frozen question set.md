@@ -134,12 +134,12 @@ footnote — not a silent assumption.
   in the house uses `created_by` because the actor is audit metadata on a log row. Here the actor
   *is* a first-class domain fact — the inspector of record for that finding — so it gets the
   domain name. Deliberate, reasoned exception; not a drift from convention.
-- **Freeze-on-terminal is [[Design laws]] #8 applied, not a new rule.** *"A Done job is
+- **Freeze-on-terminal is [[Architecture laws]] #8 applied, not a new rule.** *"A Done job is
   immutable"* already states the principle; a jobsheet going read-only once its Intake reaches
   `delivered`/`cancelled` is the same law at a different aggregate. `ready?` was considered as the
   freeze point and rejected — a ready intake is still `open` and still legitimately editable
   (a technician may yet correct a finding before delivery).
-- **Derived completion is [[Design laws]] #3 applied** (*"dashboards are queries, not tables"*) —
+- **Derived completion is [[Architecture laws]] #3 applied** (*"dashboards are queries, not tables"*) —
   no stored completion flag, a scope over `item_keys` vs. answered rows.
 - **[[ADR-014 Jobsheet is a fixed product-defined inspection]]'s "no drift because the form is
   code-defined" claim is narrowed, not wrong.** It correctly ruled out drift from *removal/rename*
@@ -155,7 +155,7 @@ footnote — not a silent assumption.
   change — the anticipated expansion [[Inspection jobsheet — design brief]] §5 flagged is honored
   without being built.
 - **Photos, an answer edit activity log, and the exterior damage diagram remain explicitly
-  deferred** — see [[Deferred design]]. The model is shaped to not preclude any of them
+  deferred** — see [[Deferred decisions]]. The model is shaped to not preclude any of them
   (photos anchor to `jobsheet_answers`, not `jobsheets`, so they organize per finding) but none is
   built by this ADR.
 
@@ -184,7 +184,7 @@ footnote — not a silent assumption.
   fact — section ownership — that turned out not to exist.
 - **Label snapshot on the answer row** (freeze `label`/`section`/`unit` onto each
   `jobsheet_answer`, an idea the builder proposed independently). Re-examined on new grounds
-  (not the old EAV-era reasoning in [[Deferred design]], already moot): printing a line needs
+  (not the old EAV-era reasoning in [[Deferred decisions]], already moot): printing a line needs
   label *and* section *and* position *and* unit, so one column grows to four or five, duplicated
   across ~39 rows × every intake × every workshop, forever — the exact "per-answer-label-snapshot
   mechanism" ADR-014 already priced as a real ongoing cost. `item_keys` + append-only catalog gets
@@ -207,4 +207,4 @@ footnote — not a silent assumption.
   `intake_id`) ·
   [[ADR-013 The door decomposed]] (the contrast this ADR draws against — no veto, no door) ·
   [[Inspection jobsheet — design brief]] (the entry point this ADR resolves) · [[Data model]] ·
-  [[Design laws]] · [[Deferred design]] · [[Risk ledger]] · [[Sprint plan]]
+  [[Architecture laws]] · [[Deferred decisions]] · [[Risk ledger]] · [[Sprint plan]]

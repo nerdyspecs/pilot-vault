@@ -1,8 +1,13 @@
 ---
 type: reference
-updated: 2026-08-25 (Session 36 — job↔vehicle customer-match: the recorded two-branch confirm re-scoped as a sub-screen of a three-choice mismatch surface (§1b has four forks), and deferred past intake's first cut; prior: Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-08-31 (Session 39 — renamed from *Deferred design*; prior: Session 36 — job↔vehicle customer-match: the recorded two-branch confirm re-scoped as a sub-screen of a three-choice mismatch surface (§1b has four forks), and deferred past intake's first cut; prior: Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
-# Deferred design
+# Deferred decisions
+
+> Renamed from *Deferred design* on 2026-08-31 (Session 39): the entries are parked
+> **solution/schema decisions**, not visual design — the old name collided with the UI notes.
+> Content unchanged.
+
 Consciously parked — **revisit later**, not dropped. Each is additive (won't require rewriting v1).
 
 - ~~**Jobsheet per-answer snapshot (level-3)** — freeze `label`/`kind` onto each

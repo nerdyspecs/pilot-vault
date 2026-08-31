@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-27 (Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
+updated: 2026-08-31 (Session 39 — [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
 ---
 # Design system
 
@@ -19,6 +19,10 @@ updated: 2026-08-27 (Session 38 — L1 fork ruled: one board for everyone, viewp
 >    *visible* instead of a doc-versus-code guess.
 >
 > Layer 3 is the one that makes the other two honest. It is [[Sprint plan]] **S5.5a**.
+>
+> **The working card is [[UI rules]]** *(2026-08-31, Session 39)* — the seven rules with their
+> values, held open during UI work so this 900-line book doesn't have to be. This note stays
+> authoritative: if the card disagrees, the card is wrong.
 >
 > **Scope: desktop only, for now** *(2026-08-25, builder — "for simplicity and sanity, everything on
 > monitor screens first")*. This does **not** reverse the three-posture commitment; it confirms the
@@ -421,7 +425,7 @@ Its attention rows also **drop the owner and waiting columns on mobile**, which 
 four questions the component exists to answer.
 
 ## UI laws
-Invariants for every screen, in the spirit of [[Design laws]].
+Invariants for every screen, in the spirit of [[Architecture laws]].
 
 1. **Chrome whispers, status shouts.** The interface stays neutral and quiet; if something draws
    the eye it must be information (status, aging, pending ack), never decoration. Master rule.
@@ -664,7 +668,7 @@ The layer nothing else can be designed without. What must be settled:
   is the same conclusion [[ADR-011 Acknowledgement as stored visibility]] reached independently.
 - **Ruled 2026-08-27: one board for everyone. A viewpoint is a *scope* on it, never a screen of
   its own.** Bay gives every role its own dashboard with a role-scoped attention queue and
-  destinations; Knot does not fork the landing surface. [[Design laws]] #3 ("dashboards are queries,
+  destinations; Knot does not fork the landing surface. [[Architecture laws]] #3 ("dashboards are queries,
   not tables — new viewpoint = new scope, never a new model") makes role-scoped views *cheap*, so
   cost was never the argument on either side. Three things decided it:
     - **Roles here are plural and simultaneous.** `WorkshopStaff#titles` returns a *list* and leaves
@@ -839,7 +843,7 @@ not by `customer:`.
 
 - **Floor and owner postures** — deferred by ruling, not by finding (L2).
 - **The §1b mismatch tree and §2a/§2b dedup forks** — deferred with step 7. [[Intake flow]] stays
-  the behaviour spec; [[Deferred design]] holds the payer-confirm design and its four-fork
+  the behaviour spec; [[Deferred decisions]] holds the payer-confirm design and its four-fork
   correction.
 - **Rebuild-or-keep per screen** — by ruling, taken at each L3 step, not now.
 - **Add a repair to an open intake**, the **jobsheet fill screen**, and the **owner token page** —
@@ -865,7 +869,7 @@ not by `customer:`.
 
 ## Deferred
 - **Dark mode** — surfaces will derive from brand steel blue (the navy-chrome sample read as a
-  good dark theme and was liked for it). See [[Deferred design]].
+  good dark theme and was liked for it). See [[Deferred decisions]].
 - Devise views stay unstyled until the theme grows.
 - Spacing/grid system — extract later from real screens, like an abstraction from real code.
 - Animation rules — v1 has essentially none; Turbo defaults are fine.
@@ -922,7 +926,7 @@ template needs new markup except the badge and the flash. Bootstrap **JS is not
 loaded** — add via importmap only when a component (dropdown/modal) demands it.
 
 ## Related
-- [[Design laws]] · [[Tech stack]] · [[Product overview]] · [[Deferred design]] ·
+- [[Architecture laws]] · [[Tech stack]] · [[Product overview]] · [[Deferred decisions]] ·
   [[Bay system reference — external comparison]] (provenance for the 2026-08-25 re-lock, and the
   live-prototype verification behind the type scale, ramps and component specs) ·
   [[Screen map]] (what screens *exist* — the code reflection this note plans against) ·

@@ -10,7 +10,7 @@ superseded_by:
 # ADR-013 — The door, decomposed
 
 From building Sprint 4.5. ADR-012 §Vocabulary ruled: *"The single service object stays
-`JobActions` (ONE DOOR, [[Design laws]] #7); intake verbs are added there rather than a
+`JobActions` (ONE DOOR, [[Architecture laws]] #7); intake verbs are added there rather than a
 parallel `IntakeActions`."* Building it exposed three unrelated jobs crammed into one class,
 and a name that lied both ways: `JobActions.deliver!(intake)` names the whole after a part;
 `IntakeActions.start_work!(job)` would be equally wrong the other direction. An intake has no
@@ -114,5 +114,5 @@ a silent assumption.
 - **`ActionRefused`** replaces `JobActions::Refused` everywhere — controllers, views, tests.
 
 ## Related
-- [[ADR-012 Intake-Job two-level aggregate]] (extended by this) · [[Design laws]] ·
+- [[ADR-012 Intake-Job two-level aggregate]] (extended by this) · [[Architecture laws]] ·
   [[Job]] · [[Intake]] · [[Sprint plan]]

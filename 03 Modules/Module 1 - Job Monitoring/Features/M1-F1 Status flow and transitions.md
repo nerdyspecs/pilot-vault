@@ -9,7 +9,7 @@ updated: 2026-08-14 (read-against note for ADR-012/ADR-013 — the Intake split 
 
 ## Goal
 Move a job through its [[Stage model]] stages, each transition permitted only for the right
-role, **through a door per level** (`JobActions` for a repair — [[Design laws]] #7). Every
+role, **through a door per level** (`JobActions` for a repair — [[Architecture laws]] #7). Every
 ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged handoffs in V1]]).
 
 > [!warning] Read against [[ADR-012 Intake-Job two-level aggregate]] and [[ADR-013 The door decomposed]] (2026-08-14)
@@ -55,12 +55,12 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
 - **Assignment eligibility: active `technician` employment only; primary-only in v1.**
   The `primary` boolean column exists from day one but helpers stay dormant.
   *(2026-07-16 correction: the flag is **deferred entirely** — S2.6 ships without the column;
-  when helpers arrive it lands as **`lead`**. See Settled 2026-07-16 below + [[Deferred design]].)*
+  when helpers arrive it lands as **`lead`**. See Settled 2026-07-16 below + [[Deferred decisions]].)*
 - **No cancel from `done`.** Done is frozen, not active; its only exit is delivering its
   **intake**. *(⚠ 2026-08-14, ADR-012: `delivered` left Job's enum — a Job's own terminals are
   `done` and `cancelled` only. "Delivered" is the success outcome one level up, on Intake.)*
 - **Concurrency guards deferred** (stage-change race + `lock_version`) — see
-  [[Deferred design]]; failure mode is loud (double transitions visible in the log),
+  [[Deferred decisions]]; failure mode is loud (double transitions visible in the log),
   fix is one line in the one door. *(2026-07-16: the stage-change row lock was **woken**
   before Phase 3 was built — every verb wraps read-check-write in `job.with_lock`.
   `lock_version` stays deferred. See Settled 2026-07-16 (Phase 3) below.)*
@@ -78,7 +78,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   [[Event log]]'s supersession note.)*
 - **Only the counter touches crew in v1**: service_advisor + workshop_manager/owner
   assign/remove — one `ensure_counter!` guard in the door. Self-join/leave is
-  schema-supported but **capability-deferred** ([[Deferred design]]); waking it supersedes
+  schema-supported but **capability-deferred** ([[Deferred decisions]]); waking it supersedes
   this matrix with a dated note.
 - **Removal legality — the responsibility rule.** An engagement asserts **responsibility,
   not real-time presence** (same principle as "in_progress is a stage, not a
@@ -88,7 +88,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   mechanic is never removable — the only crew change is the reassignment swap (old `left` +
   new engagement/`joined`, one door call). *(2026-07-16 Phase 3 rulings: the swap itself was
   then **dropped for v1** — no crew motion at all on a started job; see Settled 2026-07-16
-  (Phase 3) below + [[Deferred design]].)* **Invariant: a job that has started work always
+  (Phase 3) below + [[Deferred decisions]].)* **Invariant: a job that has started work always
   names ≥1 responsible mechanic.** Sick tech with no replacement → the board keeps showing
   them, truthfully, as the responsible party until a swap. Time-in-stage deliberately does
   not split "worked slowly" from "responsible tech absent" in v1 *(soft note, non-binding:
@@ -110,7 +110,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   all v1 technicians on a job are treated the same. When helpers arrive it lands as
   **`lead`** (`default: true` honestly backfills v1 engagements — every v1 mechanic was the
   lead); named `lead` not `primary` (reserved SQL keyword — quoting tax on raw-psql audit
-  sweeps). Naming settled now so it isn't re-litigated ([[Deferred design]]).
+  sweeps). Naming settled now so it isn't re-litigated ([[Deferred decisions]]).
 
 ## Settled 2026-07-16 (Phase 3 design session, builder rulings)
 - **Named verbs, no generic `change_stage!`.** The door's public surface was **eight** bang
@@ -121,7 +121,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   the verb set: no verb accepts `done` except (at the time) `deliver!`, none accepts
   `delivered`/`cancelled` — the Done-freeze is structural, not a checked rule. Refusals raise a
   refusal error (human message); every verb wraps read-check-write in `job.with_lock` (the
-  row-lock deferral **woken** — [[Deferred design]]). *(⚠ 2026-08-14, ADR-012/ADR-013 — what
+  row-lock deferral **woken** — [[Deferred decisions]]). *(⚠ 2026-08-14, ADR-012/ADR-013 — what
   shipped is not this list. `register_job!` is **gone** (see the top callout); `deliver!` moved
   to `IntakeActions` (an Intake verb, since `delivered` left Job); `JobActions`'s surface today
   is `assign_technician!`, `remove_technician!`, `start_work!`, `mark_done!`, `send_back!`,
@@ -132,7 +132,7 @@ ownership handoff is **acknowledged** by the receiver ([[ADR-005 Acknowledged ha
   crew motion" — v1 has none). A started job's crew is fixed until done/cancelled; a sick
   tech shows truthfully as responsible. **Escape hatch:** the manager/owner exemption in the
   crew gate means a manager can still drive a stuck job to `done` — the workshop is never
-  trapped. Revisit at the first real mid-job handover need ([[Deferred design]]).
+  trapped. Revisit at the first real mid-job handover need ([[Deferred decisions]]).
 - **Tech moves are crew-gated.** `start_work!`/`mark_done!` require active `technician`
   employment **and** a current engagement on that job (manager/owner exempt) — being a
   technician somewhere isn't enough; you must be *this job's* mechanic.
@@ -172,7 +172,7 @@ checked moved to `Permissions` — [[ADR-013 The door decomposed]].)*
   (`raised_by_role` / `cleared_by_role`), not hardcoded here. `workshop_manager`/`owner` always
   override. The catalog is shared across both levels; `blocks` picks the table.
 - **Cancelled** reachable from any active stage (service_advisor / workshop_manager / owner).
-- **Vehicle owner** is **read-only** — no door access at all, either level ([[Design laws]] #8).
+- **Vehicle owner** is **read-only** — no door access at all, either level ([[Architecture laws]] #8).
 
 ## Acknowledgement (the handshake)
 The change takes effect immediately, but **ownership isn't transferred until acknowledged** — an
@@ -211,10 +211,10 @@ the manager's board as a muted *"Waiting on &lt;name&gt;"* line ([[Event log]]).
 ## State axis — before vs after Done
 - **Before Done:** workshop roles edit per the matrix above.
 - **At/after Done:** the job is **immutable** for everyone — answers and history frozen.
-  Corrections open a **new** job ([[Design laws]] #8).
+  Corrections open a **new** job ([[Architecture laws]] #8).
 
 ## Transition rules
-- Allow-list, enforced in the service ([[Design laws]] #7). Forward by default; backward only where
+- Allow-list, enforced in the service ([[Architecture laws]] #7). Forward by default; backward only where
   explicit (In-Progress → Assigned for reassignment / new fault) — **never** once Done.
 - Every change writes a [[Event log|JobStageTransition]] — no silent changes.
 
@@ -226,7 +226,7 @@ the manager's board as a muted *"Waiting on &lt;name&gt;"* line ([[Event log]]).
 - [ ] Every transition writes a `JobStageTransition`.
 
 ## Related
-- [[Stage model]] · [[Intake]] · [[Blocker]] · [[Event log]] · [[Design laws]] ·
+- [[Stage model]] · [[Intake]] · [[Blocker]] · [[Event log]] · [[Architecture laws]] ·
   [[ADR-005 Acknowledged handoffs in V1]] · [[ADR-004 Multi-tenant foundation]] ·
   [[ADR-010 WorkshopStaff supersedes the edge split]] ·
   [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]

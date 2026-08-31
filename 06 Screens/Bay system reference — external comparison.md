@@ -60,7 +60,7 @@ pending-sample-comparison caveat live in [[Design system]] §Status colors.
 
 *No footnote is owed against [[ADR-011 Acknowledgement as stored visibility]]:* that ADR says
 explicitly **"Colour — deferred, not decided here."** The ageing bands live in [[Design system]] and
-[[Deferred design]], so re-deriving the palette moves values the ADR never fixed.
+[[Deferred decisions]], so re-deriving the palette moves values the ADR never fixed.
 
 ---
 
@@ -130,7 +130,7 @@ four questions the component exists to answer.
   confirmation, no change.
 - **Intake under a minute** — the same budget [[User stories]] records.
 - **"Surface attention and exceptions rather than require staff to search every job."** Knot's
-  [[Design laws]] #3, "dashboards are queries, not tables", said the same thing structurally.
+  [[Architecture laws]] #3, "dashboards are queries, not tables", said the same thing structurally.
 
 ---
 
@@ -160,6 +160,6 @@ Bay and Knot use several of the same words for slightly different things. Kept a
 - **Foreman.** Bay folds it into `workshop_manager`. Knot's role enum is its own; no change implied.
 
 ## Related
-[[Design system]] · [[Screen map]] · [[Design laws]] · [[Tech stack]] · [[Deferred design]] ·
+[[Design system]] · [[Screen map]] · [[Architecture laws]] · [[Tech stack]] · [[Deferred decisions]] ·
 [[ADR-010 WorkshopStaff supersedes the edge split]] · [[ADR-011 Acknowledgement as stored visibility]] ·
 [[ADR-012 Intake-Job two-level aggregate]]

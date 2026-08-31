@@ -470,7 +470,7 @@ changed-hands reassignment). The structural tell: **2.5 has no "who's paying?" o
 the stamp defaults silently (`vehicle.customer` on a plate hit, the just-created customer on a
 miss), so `job.customer == vehicle.customer` at birth in *both* branches → a mismatch is
 **unrepresentable** in 2.5. That's *why* the deferred match-validation / confirm stays cleanly
-parked ([[Deferred design]]) until the plate-first override arrives at S6 — no contradiction,
+parked ([[Deferred decisions]]) until the plate-first override arrives at S6 — no contradiction,
 no rework. Dedup is the real v2-surprise-spoiler; plate-first screening + name/phone customer
 search are the cheap v1 mitigations, the full phone-first dedup tree is S6.
 
@@ -562,7 +562,7 @@ any app code (house discipline: the spec is true before the build starts). One c
   [[Data model]] entities + diagram; CLAUDE.md invariants. Design laws needed nothing —
   law #1 names no tables. **Pinned in [[Data model]] §Resolved: "holdings point at the
   stint, actions point at the person."**
-- Also landed: [[Deferred design]] crew entries updated (the `lead` flag lives on membership
+- Also landed: [[Deferred decisions]] crew entries updated (the `lead` flag lives on membership
   rows; swap verb names); Sprint plan — S2.6/S2.9 tick annotations get supersession pointers
   (history preserved, current truth linked), **S2.12 respecified to the ruled ten cases**,
   S4.1/S4.2 names + the new ⚠ S4 design-pass item (technician removed before acking their
@@ -623,7 +623,7 @@ caught a timeline wrap bug, fixed in `e2c30a0`.
 
 **Deferred:** JSON responses for the door mutations (ADR-001's "every mutation available as
 JSON") — builder ruling: HTML first; ~2 lines per action whenever a non-browser consumer
-appears. Entry in [[Deferred design]].
+appears. Entry in [[Deferred decisions]].
 
 **Next:** Sprint 2 completion review (aims vs built, how the engine carries the later
 sprints, v2/v3 receptiveness audit), then S2.12 scope + S0.8 deploy research.
@@ -730,7 +730,7 @@ Fixes applied, worst first:
   follow-up-after-done is legal and [[Intake flow]] 1c depends on it.
 - **[[Open questions]] · single-vs-multiple assignees**: "✅ resolved: multiple, one `primary`"
   rewritten to the superseding 2026-07-16 ruling — v1 single mechanic, no flag; future flag is
-  `lead`, not `primary` ([[Deferred design]] + M1-F1 Settled 2026-07-16).
+  `lead`, not `primary` ([[Deferred decisions]] + M1-F1 Settled 2026-07-16).
 - **[[Sprint plan]] S4.1**: ack columns corrected to event rows only —
   `JobStageTransition` / `JobMechanicTransition` / `JobBlockerTransition`; engagements
   (`JobMechanic`) carry no ack columns post-restructure. S4.2–S4.7 checked — S4.3 already
@@ -814,7 +814,7 @@ allow-list IS the verb set and the Done-freeze is structural (nothing accepts `d
 `deliver!`; nothing accepts the terminals). Refusals raise `JobActions::Refused` with a human
 message; every verb wraps read-check-write in `job.with_lock` — the **row-lock deferral
 woken** (one shared line, the "wait until it hurts" trade lost its upside) —
-[[Deferred design]] superseded with a dated note. Next: build S2.7–S2.10 against this spec, on the
+[[Deferred decisions]] superseded with a dated note. Next: build S2.7–S2.10 against this spec, on the
 builder's go.
 
 **The rulings, in brief** (full detail: [[M1-F1 Status flow and transitions]] Settled
@@ -823,7 +823,7 @@ builder's go.
   crew motion" — v1 now has none). Sick tech shows truthfully until done/cancelled.
   **Escape hatch, recorded explicitly:** the manager/owner exemption in the crew gate means
   a manager can still drive a stuck job to `done` — the workshop is never trapped, the job
-  just keeps naming the sick tech. New [[Deferred design]] entry; trigger = first real
+  just keeps naming the sick tech. New [[Deferred decisions]] entry; trigger = first real
   mid-job handover need.
 - **Tech moves crew-gated:** `start_work!`/`mark_done!` need active technician employment
   AND a current engagement on that job (manager/owner exempt).
@@ -843,7 +843,7 @@ builder's go.
   `in_progress` jobs per tech is normal, no pause/resume ever joins the stage axis; per-tech
   workload is a query feeding S5.2, zero Phase 3 work.
 
-**Sweep.** [[Deferred design]]: row-lock entry superseded (woken), new `swap_mechanic!`
+**Sweep.** [[Deferred decisions]]: row-lock entry superseded (woken), new `swap_mechanic!`
 entry, self-join entry's swap sentence dated-corrected.
 [[M1-F1 Status flow and transitions]]: new Settled 2026-07-16 (Phase 3) section + dated
 corrections on the
@@ -1023,7 +1023,7 @@ a different species — it crosses an org boundary, this doesn't).
    stage-it-guards field).
 3. **`primary`/`lead` flag: deferred entirely, not renamed.** S2.6 ships with no flag — v1
    crews are single-mechanic, so "primary" has nothing to distinguish yet. Recorded in
-   [[Deferred design]]: when helpers arrive, the flag lands as `lead` (unreserved SQL,
+   [[Deferred decisions]]: when helpers arrive, the flag lands as `lead` (unreserved SQL,
    genuine workshop vocabulary, no quoting tax on the project's habitual raw-`psql` audit
    sweeps) with `default: true` honestly backfilling every v1 engagement as having been the
    lead. Naming settled now so it isn't re-litigated when it actually ships.
@@ -1078,7 +1078,7 @@ unique index actually catch dupes); (3) the **customer↔vehicle match validatio
 — "pretty rigid… give it a recovery path… push it back, circle back": legitimate payer≠file
 cases exist (borrowed car, informal sale, third-party payer) and a hard block at intake is
 workflow poison. The stamp + the door's default-copy stand untouched; only the law forbidding
-an explicit different choice is parked ([[Deferred design]], revisit at intake UI with a
+an explicit different choice is parked ([[Deferred decisions]], revisit at intake UI with a
 soft-override shape). [[Data model]] amended with a dated note.
 
 **Addendum 2 — intake flow designed and documented ([[Intake flow]], new concept note).**
@@ -1171,7 +1171,7 @@ state* (unclaimed), not a query path — reached only via crew board + token lin
 way: permissive policies OR per command; `FOR SELECT` keys are never consulted for writes;
 every read key resolves from the person inward (`app.user_id` → claim → the job's frozen
 `customer_id` anchor). Sprint 7's token-page×RLS wrinkle (unauthenticated page can't even
-look up the job under fail-closed RLS) flagged in [[Deferred design]].
+look up the job under fail-closed RLS) flagged in [[Deferred decisions]].
 
 **Addendum 2 — audit pass + the risk ledger promoted to a file.** Re-ran the consistency
 ritual: vault clean (all wikilinks resolve — one false positive, a literal backticked
@@ -1192,12 +1192,12 @@ the invite flash messages. All backlog-grade; no code changed.
 (1) **trapped owner** → refusal itself settled (last owner can never delete while the
 workshop stands — derives from the lifetime invariant); the *escape routes*
 (add-owner-then-leave vs delete-workshop-first; real vs soft delete vs disable) are
-functional design, parked in [[Deferred design]] (`321bf26`). (2) **Placement** → the
+functional design, parked in [[Deferred decisions]] (`321bf26`). (2) **Placement** → the
 invariant "a workshop cannot exist without an Ownership" is a *design decision*, so it lives
 **inside ADR-009**, not Design laws (laws stay at 9); the [[Decisions]] index line names the
 invariant so it's findable without opening the ADR. (3) **PDPA** → the whole question waits
 for v1 to be up ("a decision is early only if something we're about to build could contradict
-it — nothing can; it's all additive"); parked in [[Deferred design]] with the trigger
+it — nothing can; it's all additive"); parked in [[Deferred decisions]] with the trigger
 (*anonymization must exist before the first real workshop's data enters — the moment Knot
 becomes a processor of someone else's customers*) plus the two preserved insights (data-user
 vs processor split; anonymization = two features, Knot-side for users + workshop-side for
@@ -1343,7 +1343,7 @@ produced two observations that became small fixes: a misleading predicate name b
   command–query separation) doesn't demand a new layer: in Rails, persistence *is* the model's
   job, and CQS is honored by **naming** — bang commands (`create_with_owner!`, `end!`,
   `accept!`) vs predicate/calculation queries (`employed_at?`, `active?`). The reusable door
-  test, now also footnoted on [[Design laws]] #9: a separate action class is justified only
+  test, now also footnoted on [[Architecture laws]] #9: a separate action class is justified only
   when **cross-model orchestration + must-not-drift permissions + a mandatory audit log
   co-occur** (JobActions: 3/3; workshop governance: 0/3 — stays on the model). Revisit trigger:
   governance gaining an audit requirement.
@@ -1400,7 +1400,7 @@ later outgrows the class.
    the model dissolves most of it: append-only trackers mean most edits are inserts into
    different tables, which can't collide; the mutable surface is basically the stage column;
    worst case is loud (double transition in the log), fix is one `with_lock` line in the one
-   door, cost of waiting doesn't compound. New dated entry in [[Deferred design]] with the
+   door, cost of waiting doesn't compound. New dated entry in [[Deferred decisions]] with the
    revisit trigger.
 
 **Open:** Sprint 2 plan drafting is next. `S1` tag still pending explicit builder confirmation.
@@ -1611,7 +1611,7 @@ updated.
 session, builder-drive mode. RLS work (S1.8–S1.9) should land before S1.10's create-workshop
 flow so the tenant tables are guarded from the first real write, not retrofitted after.
 
-**Also same day — testing philosophy locked + [[Design laws]] #9.** Builder set the test
+**Also same day — testing philosophy locked + [[Architecture laws]] #9.** Builder set the test
 strategy; corrected the literal wording (Capybara is a system/feature tool, not a unit-test
 tool) into **two layers, hollow middle**: Minitest **model unit tests** are the priority
 (calculations belong in models, so shared logic stays consistent and unit-testable), Capybara
@@ -1763,8 +1763,8 @@ note, [[Design system]]. Closed with a vault audit (connectivity + consistency).
 - **Status colors are sacred:** gray/blue/amber/red/green = job state only, identical everywhere.
 - **Typography: system font stack** (0KB, can't fail); Inter noted as the escape hatch.
 - **10 UI laws** + posture note (tech = phone, SA/manager = PC, owner = phone read-only) —
-  the UI twins of [[Design laws]].
-- **Dark mode deferred** → derive surfaces from brand steel blue ([[Deferred design]]).
+  the UI twins of [[Architecture laws]].
+- **Dark mode deferred** → derive surfaces from brand steel blue ([[Deferred decisions]]).
 
 **Vault audit:** 0 broken links · stale-term scan clean (persona/ADR-footnote hits legitimate) ·
 fixed: [[Design system]] orphan (now in [[Agent guide]] reading list + [[Tech stack]]),
@@ -1787,8 +1787,8 @@ most of Module 1's open questions.
 - Added [[ADR-005 Acknowledged handoffs in V1]] — every ownership handoff (stage change, blocker
   raised, mechanic added) is acknowledged by its receiver; ack lives as columns **on the event
   record** (`JobStageTransition`, `JobBlockerTransition`, `JobMechanic`) — no separate handoff
-  table (would double-record; the inbox is a query, per [[Design laws]] #3).
-- Added [[Design laws]] #8 — **a Done job is immutable**; corrections open a new job. Vehicle
+  table (would double-record; the inbox is a query, per [[Architecture laws]] #3).
+- Added [[Architecture laws]] #8 — **a Done job is immutable**; corrections open a new job. Vehicle
   owners are read-only everywhere.
 - **`Blocker` reshaped:** now a workshop-owned *catalog* (`label`, `raised_by_role`,
   `cleared_by_role`) — not a stateful row. All state moved to `JobBlockerTransition`, parallel to
@@ -1811,7 +1811,7 @@ most of Module 1's open questions.
 permissions via catalog), [[Blocker]], [[Event log]] (three trackers), [[Stage model]] (new stages,
 ack, lock-on-Done).
 **Edited:** [[Data model]] (new entities + JobSheet clarification), [[Job]] (crew, multiple
-blockers, immutable-on-Done), [[Deferred design]] (handshake removed → ADR-005; jobsheet snapshot
+blockers, immutable-on-Done), [[Deferred decisions]] (handshake removed → ADR-005; jobsheet snapshot
 added), [[Roadmap]] (slice 5 designed), [[Overview]] (roles, features), [[User stories]] (persona→role
 mapping), [[ADR-002 V1 scope]] (dated footnote only — accepted ADRs aren't rewritten).
 
@@ -1819,7 +1819,7 @@ mapping), [[ADR-002 V1 scope]] (dated footnote only — accepted ADRs aren't rew
 old role names + "handshakes backlogged", `Job` "Warehouse" role.
 
 **Open:** primary/helper `JobMechanic` permissions · owner notification channel (WhatsApp/email vs
-manual) · exact `Blocker` admin UI · paper_trail (later) — all in [[Open questions]] / [[Deferred design]].
+manual) · exact `Blocker` admin UI · paper_trail (later) — all in [[Open questions]] / [[Deferred decisions]].
 **Next:** resume slice 0/1 build on this model.
 
 ---
@@ -1833,11 +1833,11 @@ the v1 role set. Rewrote the affected concepts/feature so the vault has one cons
 
 **Decisions:**
 - Adopted [[ADR-004 Multi-tenant foundation]] — Workshop tenant, thin User, Employment edges, session re-verification every request.
-- Added [[Design laws]] (7 invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
+- Added [[Architecture laws]] (7 invariants) and [[Rejected alternatives]] (dead ends, do not re-propose).
 - **Jobsheet stays in v1** ([[ADR-003 Digitized jobsheet in V1]]), now tenant-scoped (`JobSheet belongs_to :workshop`).
 - **v1 role set:** technician / service_advisor / parts_advisor / workshop_manager / owner (on Employment). Foreman dropped, front_desk folded into service_advisor. Parts *role* is v1; parts *module* stays v2.
 - v2 Company roles: owner / fleet_manager / driver ([[Data model]]).
-- **Backlogged (not dropped):** the two-role handshake/confirmation pattern, and `lock_version` optimistic locking → [[Deferred design]].
+- **Backlogged (not dropped):** the two-role handshake/confirmation pattern, and `lock_version` optimistic locking → [[Deferred decisions]].
 - **Dropped from v1:** `Contact` + `Group` entities — folded into plain `Customer` fields; richer multiplicity deferred to v2 Company/Fleet.
 
 **Rewritten:** [[Data model]], [[Blocker]] (single-step lifecycle), [[M1-F1 Status flow and transitions]] (new role matrix, single-actor).

@@ -26,7 +26,7 @@ the event record itself** — there is **no separate handoff or notification tab
 - This **reverses** the Session-2 decision to backlog the handshake; it is now a v1 KEY feature.
 - A dedicated handoff table would **double-record** events already logged (a stage change would
   write a transition row *and* a handoff row — they can drift). The ack belongs **on** the event.
-  The "waiting on me" inbox is a **query**, per [[Design laws]] (dashboards/notifications are
+  The "waiting on me" inbox is a **query**, per [[Architecture laws]] (dashboards/notifications are
   queries, not tables).
 
 ## Model
@@ -50,7 +50,7 @@ Ack columns `acknowledged_at`, `acknowledged_by` on all three trackers:
 ## Consequences
 - Each event record carries two nullable ack columns.
 - Reporting gains time-to-acknowledge / dropped-handoff metrics for free.
-- Removes the "handshake backlogged" note from [[Deferred design]].
+- Removes the "handshake backlogged" note from [[Deferred decisions]].
 
 ---
 **Footnote 2026-07-16 (structure refined, decision unchanged).** The trackers were
@@ -68,7 +68,7 @@ exists, receivers are derived at read time, and the real query is Sprint 4's `.p
 handoff predicate (a bare NULL check overcounts; NULL also means "never was a handoff").
 
 ## Related
-- [[ADR-004 Multi-tenant foundation]] · [[M1-F1 Status flow and transitions]] · [[Event log]] · [[Blocker]] · [[Data model]] · [[Design laws]]
+- [[ADR-004 Multi-tenant foundation]] · [[M1-F1 Status flow and transitions]] · [[Event log]] · [[Blocker]] · [[Data model]] · [[Architecture laws]]
 
 **Footnote 2026-07-28 (Sessions 27–28) — extended, not superseded, by
 [[ADR-011 Acknowledgement as stored visibility]].** This ADR decided *that* handoffs are acknowledged

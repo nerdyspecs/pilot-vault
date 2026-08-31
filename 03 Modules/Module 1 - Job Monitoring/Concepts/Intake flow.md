@@ -8,7 +8,7 @@ Designed 2026-07-15 (worklog Session 16) from real-world cases; **build target: 
 Sprint 5 intake UI**. Schema-complete as of Phase 1 — nothing here needs columns beyond the
 spine. The compiled shape: **two lookup keys** (registration number → vehicles, phone →
 people), **one script question** ("whose file should this be under?"), and the **two-branch
-mismatch confirm** ([[Deferred design]]). Everything else is find-or-create.
+mismatch confirm** ([[Deferred decisions]]). Everything else is find-or-create.
 
 Cast for the cases: **Lim** (file-holder), **the wife** (household contact), **Eddie**
 (bought Lim's car), **Speedy** (company fleet).
@@ -76,8 +76,8 @@ cousin).
 2. **File under the responsible contact, once, consistently** — not necessarily the legal
    owner.
 3. **Mismatches are decisions, not errors** — every payer≠file case reaches a human
-   question with two honest answers ([[Deferred design]] two-branch confirm).
+   question with two honest answers ([[Deferred decisions]] two-branch confirm).
 
 ## Related
-- [[Deferred design]] (two-branch confirm — the mismatch half of this flow) ·
+- [[Deferred decisions]] (two-branch confirm — the mismatch half of this flow) ·
   [[Data model]] · [[Job visibility]] · [[Risk ledger]] (R5, R10)

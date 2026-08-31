@@ -21,7 +21,7 @@ through its intake, since several repairs on one visit share one car and one bil
 
 ## All changes go through ONE DOOR — per level
 Stage transitions, blocker raise/resolve, and assignment are never scattered updates — they all
-flow through `JobActions`, this level's door ([[Design laws]] #7). This is what makes the
+flow through `JobActions`, this level's door ([[Architecture laws]] #7). This is what makes the
 [[Event log]] trustworthy: nothing can change state without also logging it. `JobActions` no
 longer checks *who* may act, though — that moved to `Permissions`, checked at the controller
 boundary before a door verb is ever called ([[ADR-013 The door decomposed]]). The door still
@@ -44,14 +44,14 @@ without ever moving its stage.
 - `Job has_many :job_blockers` (+ their `job_blocker_transitions`) — blocker items + events
   (Sprint 3); **active blockers** = items with no resolve (a query, can be several)
 - `Job has_many :job_technicians` — the crew **right now** (membership rows, deleted on
-  remove — Design B 2026-07-17); no `lead` flag in v1 ([[Deferred design]])
+  remove — Design B 2026-07-17); no `lead` flag in v1 ([[Deferred decisions]])
 - `Job has_many :job_technician_transitions` — joined/left **history**, a direct
   association (events are self-contained; no longer reached `:through` membership)
 - `Job#timeline` — the event tables merged by timestamp (see [[Event log]])
-- **Immutable once Done** — answers/history frozen; corrections open a new job ([[Design laws]] #8)
+- **Immutable once Done** — answers/history frozen; corrections open a new job ([[Architecture laws]] #8)
 - **No price fields** in V1 — see [[ADR-002 V1 scope]]
-- `lock_version` (optimistic locking) — considered, **backlogged**: see [[Deferred design]]
+- `lock_version` (optimistic locking) — considered, **backlogged**: see [[Deferred decisions]]
 
 ## Related
 - [[Overview]] · [[Intake]] · [[Stage model]] · [[Blocker]] · [[Event log]] · [[Data model]] ·
-  [[Design laws]] · [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]
+  [[Architecture laws]] · [[ADR-012 Intake-Job two-level aggregate]] · [[ADR-013 The door decomposed]]

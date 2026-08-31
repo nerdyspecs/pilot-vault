@@ -44,7 +44,7 @@ tenancy model itself is unchanged and, if anything, reinforced.
   auditing and policy-writing across a much larger surface, under time pressure, instead of
   as a template repeated per new table from the start.
 - Defense in depth, not a replacement: app-level scoping (`Current.workshop`,
-  [[Design laws]] #2, the S1.11 scoping convention) still applies. RLS is the backstop for
+  [[Architecture laws]] #2, the S1.11 scoping convention) still applies. RLS is the backstop for
   the query someone eventually forgets to filter — it does not excuse writing bare queries.
 
 ## Consequences
@@ -61,7 +61,7 @@ tenancy model itself is unchanged and, if anything, reinforced.
 
 ## Related
 - [[ADR-004 Multi-tenant foundation]] · [[ADR-006 Ownership separate from Employment]] ·
-  [[Rejected alternatives]] · [[Design laws]] · [[Sprint plan]]
+  [[Rejected alternatives]] · [[Architecture laws]] · [[Sprint plan]]
 
 ---
 

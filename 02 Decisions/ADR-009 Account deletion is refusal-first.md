@@ -19,10 +19,10 @@ an FK crash on any fired invitation. This ADR decides it.
    strengthened it (Session 14) to hold for the workshop's whole life. Every future lifecycle
    feature — deletion, transfer, close, the v2 Company governance edge — must obey it.
    *(Placement ruled by the builder, Session 15: this is a design decision, so it lives here
-   in the ADR — not in [[Design laws]].)*
+   in the ADR — not in [[Architecture laws]].)*
 2. **History is append-only.** Employment rows (who worked where, when), ownership records,
    and — from Sprint 2 on — job/transition history are records of *what happened*, often
-   about people other than the account holder. [[Design laws]] #8 states this for jobs; the
+   about people other than the account holder. [[Architecture laws]] #8 states this for jobs; the
    same principle covers the edges.
 
 ## Decision
@@ -37,7 +37,7 @@ an FK crash on any fired invitation. This ADR decides it.
 - Immediate corollary: **the last owner of a workshop can never delete their account while
   the workshop stands.** The escape routes (add-another-owner-then-leave vs
   delete-workshop-first; real vs soft delete vs disable) are functional design, parked —
-  [[Deferred design]] (2026-07-14 entry). Pre-launch, "contact support" bridges.
+  [[Deferred decisions]] (2026-07-14 entry). Pre-launch, "contact support" bridges.
 
 ## What this replaces in code
 Devise's `registerable` destroy path (`DELETE /users` → `resource.destroy`) and the
@@ -48,7 +48,7 @@ refuse with the derived reason. (~10 lines; closes [[Risk ledger]] R1.)
 **PDPA / anonymization — the whole question — waits for v1 to be up** (builder ruling,
 Session 15). No anonymization code, no processor-role design now: zero real users means zero
 live obligation, and everything about it is additive (scrub columns, no schema change), so
-nothing v1 builds can contradict it. Parked with a dated trigger in [[Deferred design]]:
+nothing v1 builds can contradict it. Parked with a dated trigger in [[Deferred decisions]]:
 **anonymization must exist before the first real workshop's data enters the system** — the
 moment Knot becomes a *processor* of someone else's customers. The two insights worth not
 re-deriving live in that entry (data-user vs processor split; anonymization is two features —
@@ -72,8 +72,8 @@ Knot-side for users, workshop-side for customers).
 ## Related
 - [[ADR-006 Ownership separate from Employment]] (§2 birth-time rule this strengthens) ·
   [[ADR-008 Crew joining requires acceptance]] (the invitation FK that crashes stock destroy) ·
-  [[Risk ledger]] R1 · [[Deferred design]] (trapped-owner escape routes; PDPA trigger) ·
-  [[Design laws]] #8
+  [[Risk ledger]] R1 · [[Deferred decisions]] (trapped-owner escape routes; PDPA trigger) ·
+  [[Architecture laws]] #8
 
 **2026-07-14 (S2.0b implementation) — invitations don't block deletion.** The Decision
 above listed "no non-pending Invitations" as part of bare-ness; refined during

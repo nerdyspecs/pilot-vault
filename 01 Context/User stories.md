@@ -133,7 +133,7 @@ Who uses this app, what they need, and what they don't care about.
 ## Persona → Employment role mapping
 These personas are **floor research**, not the app's role enum — several map many-to-one, and
 "Foreman" has no dedicated role in v1. The actual permission roles live on **Employment**
-([[Design laws]] #1); see [[Data model]] and [[M1-F1 Status flow and transitions]].
+([[Architecture laws]] #1); see [[Data model]] and [[M1-F1 Status flow and transitions]].
 
 | Persona (this doc) | Employment role (v1) |
 |---|---|
@@ -142,7 +142,7 @@ These personas are **floor research**, not the app's role enum — several map m
 | Mechanic / Technician | `technician` |
 | Warehouse / Parts Staff | `parts_advisor` |
 | Workshop Supervisor / Foreman | no dedicated role — capability folded into `workshop_manager` |
-| Vehicle Owner | not an Employment role — read-only via token link, no login ([[Design laws]] #8) |
+| Vehicle Owner | not an Employment role — read-only via token link, no login ([[Architecture laws]] #8) |
 
 ## Design constraints from users
 - Mechanics and warehouse staff need minimal-click interfaces — they work on the floor, not at a desk

@@ -155,7 +155,7 @@ later.
 > on the jobsheet header), content added later with no schema change — the model doesn't hard-
 > assume a single universal sheet, as this section required. **Exterior damage diagram**: still
 > fully deferred, still its own design pass — not touched by ADR-015, tracked in
-> [[Deferred design]]. One design-for decision made in its favor: photos anchor to `jobsheet_
+> [[Deferred decisions]]. One design-for decision made in its favor: photos anchor to `jobsheet_
 > answers` (a finding), not to the jobsheet as a whole — so when the diagram is designed, it has
 > a per-item home to attach to rather than a flat pile.
 

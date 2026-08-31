@@ -20,7 +20,7 @@ that ends in something demoable.
   · views (ERB + Hotwire) · routes (RESTful). No extra layers.
 - **The one exception:** all state changes go through a **door** — `JobActions` for a repair,
   `IntakeActions` for the visit (`app/services/`), plain POROs. This is **ONE DOOR, per level**
-  ([[Design laws]] #7). *(Renamed from `JobService` 2026-07-12, before any code existed: in
+  ([[Architecture laws]] #7). *(Renamed from `JobService` 2026-07-12, before any code existed: in
   workshop language a "service" is the repair itself — the old name confused the builder, the
   domain expert, and collided with a likely future `Service` catalog entity. One class,
   granular verb methods — builder rejected a per-action class split to keep the shared guards
@@ -52,9 +52,9 @@ that ends in something demoable.
   urgent.
 - **No gem without justifying why Rails' built-in isn't enough** — currently Devise only ([[Agent guide]]).
 - **Tenancy:** every workshop-owned table has `workshop_id`; never query it bare — always scope by
-  `Current.workshop` ([[Design laws]] #2).
+  `Current.workshop` ([[Architecture laws]] #2).
 - **Tests (set 2026-07-08):** two layers, hollow middle. (1) **Minitest model unit tests** are
-  the *priority* — calculations live in models ([[Design laws]] #9), so they're fast, isolated,
+  the *priority* — calculations live in models ([[Architecture laws]] #9), so they're fast, isolated,
   and consistent everywhere reused. (2) **Capybara system tests** (`test/system/`, already
   gemmed) for end-to-end flows — written once the pages exist. Controller/request tests
   **deferred** (add when pages are present; low priority — pages are isolated, shared logic isn't).
@@ -128,7 +128,7 @@ first would mean rebuilding it.
 - [x] **S4.5.4** **Stored `status` + derived `ready?`** (ADR-012 §2): `status` enum
       `{open, delivered, cancelled}` written **only** by a door, which reconciles it after every
       job-terminal move (`reconcile_intake!`); **`Intake#ready?`** stays a pure query — still `open`,
-      all jobs terminal, ≥1 done ([[Design laws]] #3). Unit-tested in isolation. *(2026-08-14)*
+      all jobs terminal, ≥1 done ([[Architecture laws]] #3). Unit-tested in isolation. *(2026-08-14)*
 - [x] **S4.5.5** ~~`JobActions` intake verbs (ONE DOOR stays): `register_job!` opens-or-finds the
       vehicle's open intake then creates the Job~~ **⚠ built differently — see
       [[ADR-013 The door decomposed]].** Creation left the door entirely: **`CreateIntake`** opens a
@@ -159,7 +159,7 @@ first would mean rebuilding it.
       the backend split. *(2026-08-14)*
 - [x] **S4.5.9** *(not originally planned — discovered while building S4.5.5)* Authorization moved
       out of the door to a new **`Permissions`** class, checked at the controller boundary instead of
-      inside `JobActions`/`IntakeActions` → [[ADR-013 The door decomposed]]. [[Design laws]] #7
+      inside `JobActions`/`IntakeActions` → [[ADR-013 The door decomposed]]. [[Architecture laws]] #7
       reworded ("ONE DOOR" → "ONE DOOR per level"), #9 footnoted. Controllers that previously had
       **no controller-level gate at all** (blocker + technician controllers — authorization lived
       only inside the door) gained visible `before_action` authorization tables + named param
@@ -320,7 +320,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       CRUD under a customer. The smaller of the two new screens. **Depends on Sprint 5A** — it sits
       in the app shell and uses the archetype.
 - [ ] **S5.5g** **`Vehicle.find_by_plate`** + unit tests — the lookup Screen A needs, beside the
-      existing `Vehicle.canonicalize` ([[Design laws]] #9: logic you can't call without a request is
+      existing `Vehicle.canonicalize` ([[Architecture laws]] #9: logic you can't call without a request is
       misplaced). Absorbs the live half of S5.8 below. **No UI dependency** — can land any time.
 - [ ] **S5.5h** **Intake front door — NEW, happy path only.** `GET /intakes/new`: one autofocused
       monospace plate field, one primary "Look up", reached from the board's reserved front-door slot
@@ -345,7 +345,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       **prerequisite of the intake screen, not a follow-on** — folded into **S5.5g**. The phone
       side that once sat here — extracting the canonicalization duplicated between `Customer`'s
       `before_validation` and its `search` scope, plus a `Customer.find_by_phone` — is **not needed
-      for the happy path** and moves with the deferred §2a/§2b dedup tree ([[Deferred design]]).
+      for the happy path** and moves with the deferred §2a/§2b dedup tree ([[Deferred decisions]]).
       Extract it before a third caller lands.
 - [ ] **S5.9** Tests: intake creates the full graph (incl. its auto-created `Jobsheet`) · complaint
       saved on Intake · jobsheet answers saved (see S5.1d for the model-level answer tests) · ETA
@@ -420,7 +420,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       1h–1d amber (the palette's existing *Waiting / aging*) · over 1d red ("stuck, act now", whose
       two causes are a blocker and an unclaimed handoff — the chip text says which). **Colour the
       chip, never the row.** One workshop-wide constant, one place. Bands + the overnight-hours wart:
-      [[Deferred design]].
+      [[Deferred decisions]].
 
 ---
 
@@ -447,7 +447,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       workshop health). *(Candidate from 2026-07-12 timeline talk: per-job **parallel-lanes view** —
       stage/blocker/crew lanes on a proportional time axis, "where did the time go?" Same tracker
       rows as `Job#timeline`, purely a second rendering — no data work needed.)*
-- [ ] **S8.2** Scopes/queries per metric — **queries, not tables** ([[Design laws]] #3).
+- [ ] **S8.2** Scopes/queries per metric — **queries, not tables** ([[Architecture laws]] #3).
 - [ ] **S8.3** Manager dashboard (PC); owner mobile health summary ([[Tech stack]] device posture).
       *(2026-08-27: these are **reporting screens of their own**, not the Board and not a reopening
       of the one-board ruling — they are where role-sensitive information belongs, per the Board's
@@ -456,7 +456,7 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 
 ## Related
 - [[Roadmap]] · [[M1-F1 Status flow and transitions]] · [[Data model]] · [[Intake]] ·
-  [[Design laws]] · [[Product gaps]] · [[ADR-012 Intake-Job two-level aggregate]] ·
+  [[Architecture laws]] · [[Product gaps]] · [[ADR-012 Intake-Job two-level aggregate]] ·
   [[ADR-013 The door decomposed]] · [[ADR-014 Jobsheet is a fixed product-defined inspection]] ·
   [[ADR-015 Jobsheet answers are rows against a frozen question set]] ·
   [[Inspection jobsheet — design brief]]
