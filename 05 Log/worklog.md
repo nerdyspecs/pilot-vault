@@ -80,10 +80,18 @@ colour (red-sacred tension) and icons (text labels only until ruled). The gate's
 (`.auth-*`) noted on the card so decisions living only in the Sass stop being invisible. Mocks
 remain in the session scratchpad — not yet moved to [[UI experiments]].
 
+**Addendum 3 (same day) — the forks ruled, mocks archived, vault pushed.** The builder delegated
+both pending rulings ("do what you think is best"): **rule 22** — validation red is a *narrow*
+exemption on form controls only (user instinct beats internal vocabulary; everything outside a
+form control keeps red = blockers); **rule 23** — **no icons, text labels only** (an icon set is
+a dependency by another name; reopens only on a label that cannot fit — this also closes the
+`lucide-rails` open question in [[UI experiments]], footnoted there). The three rule-test mocks
+moved into `08 Experiments/` as experiments 4–6. All Session 39 commits pushed.
+
 **Next:** continue Sprint 5A on `s5a-sass` (six commits, plus uncommitted board work, all
-pre-dating this session). First session under the new structure should road-test the lanes and
-[[Home]] — friction found is §Rule capture material. Two one-line builder rulings pending:
-form-validation colour, icons.
+pre-dating this session). First session under the new structure should road-test the lanes,
+[[Home]], and the completed [[UI rules]] card (23 rules, no open forks) — friction found is
+§Rule capture material.
 
 ---
 
