@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-31 (Session 39 — [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
+updated: 2026-08-31 (Session 39 — ruled: Bay's design language is the ONLY design language, identity and status palette the two exceptions; [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
 ---
 # Design system
 
@@ -44,6 +44,17 @@ typeface, neutrals, geometry, and the shape of a status chip.
 **Knot's identity is NOT part of the adoption** — the wordmark, the K tile, and brand steel blue
 `#22456B` stay ours, and Bay's brand asset and the name "Bay blue" are deliberately not taken.
 Bay's accent `#2727D9` was offered and declined; `--action` stays Knot's `#2D5E94`.
+
+> [!important] Bay's design language is the **only** design language *(2026-08-31, Session 39, builder)*
+> The re-lock is now **exclusive**: layouts, colours, geometry, type — all of it is Bay's idiom,
+> and any surviving pre-Bay surface value found anywhere (a note, a mock, the app) is a **bug,
+> not a variant**. Two deliberate exceptions, both narrow:
+> 1. **Identity** — the product is **Knot**: the name, the wordmark and the K tile stay ours
+>    (they already share `--action`'s hue; the steel-blue retirement below stands).
+> 2. **The status palette** — Bay has no status colour system, so there is nothing of Bay's to
+>    use; Knot's five sacred families stay, re-derived in Bay's chip idiom (§Status colors).
+>
+> This **narrows** the paragraph above (identity kept, everything else Bay), it reverses nothing.
 
 One theme for **both** clients (workshop staff + vehicle owner) — one predictable feel, no split identity.
 Mood: **industrial & confident** · light · high-contrast. *(The mood is unchanged — Bay's

@@ -54,6 +54,18 @@ rule-capture line added under tracking conventions.
 Sass, endless methods). Deliberately **not** built this session — verification tooling earns
 early, never first ([[Sprint plan]] §Conventions), and it's app-side work the builder drives.
 
+**Addendum (same day) — Bay's design language ruled exclusive.** While reviewing a teaching mock
+of the composition rules (restyled onto the real tokens), the builder ruled: **Bay's design
+language is the only design language** — layouts, colours, geometry, type. Any surviving pre-Bay
+surface value anywhere is a bug, not a variant. Two narrow exceptions, both argued and accepted:
+the **identity** (the product is Knot — name, wordmark, K tile, already sharing `--action`'s hue)
+and the **status palette** (Bay has none to use; the five sacred families stay, in Bay's chip
+idiom). Recorded as a dated ruling in [[Design system]], narrowing the identity paragraph —
+nothing reversed. Also from the same discussion: six **composition rules** (one grid · one rhythm
+per level · same section anatomy · one focal point · whitespace before boxes · colour is
+information) demonstrated in a standalone mock — offered for the [[UI rules]] card, **not yet
+captured**; the builder is sitting with the mock first.
+
 **Next:** continue Sprint 5A on `s5a-sass` (six commits, plus uncommitted board work, all
 pre-dating this session). First session under the new structure should road-test the lanes and
 [[Home]] — friction found is §Rule capture material.
