@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-08-31 (Session 39 — ruled: Bay's design language is the ONLY design language, identity and status palette the two exceptions; [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
+updated: 2026-09-01 (Session 40 — §Layout archetypes flags the unruled gap-3 / 1.5rem fork with [[UI rules]] 9; prior: Session 39 — ruled: Bay's design language is the ONLY design language, identity and status palette the two exceptions; [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
 ---
 # Design system
 
@@ -315,7 +315,10 @@ Everything behind the sign-in wall. Four things, always in this order.
 2. **Topbar** — `--topbar` tall, sticky, eyebrow + context on the left, avatar right.
 3. **Page head** — eyebrow → page title, one primary action on the right, **bottom-aligned**
    (the button sits level with the title's baseline, not its cap), `p-3` below.
-4. **Section stack** — sections separated by `gap-3`. Only two section types exist:
+4. **Section stack** — sections separated by `gap-3` *(⚠ 2026-09-01: [[UI rules]] 9 says `1.5rem`.
+   Unruled fork — stated on the card, which is where rules 8–23 live. Also unruled: rule 10 says
+   every section is head → body, which the headless **metric strip** below contradicts.)* Only two
+   section types exist:
    - **Metric strip** — *n* equal columns, borders collapsed, `--border` between.
    - **Split** — `minmax(0,1fr)` + `--rail`, `gap-3`.
 

@@ -1,11 +1,46 @@
 ---
 type: log
-updated: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)
+updated: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-01 · Session 40 — first session under the new structure: the Board re-cut against the card
+
+**Summary.** App work only; no rulings taken. Reoriented onto the Session 39 vault (three lanes,
+[[Home]], the two cards), then re-cut `workshops/show` against [[UI rules]] **8–23**, which were
+captured *after* the board was first built. Renders green, suite 154, still uncommitted on
+`s5a-sass`. **Everything on the screen remains TBD** ([[Board]]).
+
+**What the card changed.** Every `.card` came off — rule 12 puts space first, hairline second,
+bordered panel last, and the board needs none. That cascaded: with the boxes gone, `ps-0`/`pe-0` on
+the outer table cells put the page head, both section heads and the table text on **one left edge**
+(rule 8), and the metric strip stopped being a headless section — it moved *inside* the *In the
+shop* body, where it summarises the table beneath it (rule 10). Counts moved to `--text-quiet` and
+micro-type to `--text-faint` (13), every count gained `.tabular` (18), and each empty state shrank
+to one quiet line (17).
+
+**Where two rules pulled against each other.** Rule 16 wants whole-row targets; the book's *Not to
+be copied* wants a real `<table>` rather than a div-grid, and a `<tr>` cannot be a link. Resolved
+Bootstrap-natively — `tr.position-relative` + `a.stretched-link` — so neither rule bent and no JS
+appeared. Recorded in [[UI rollout]] so it is not re-derived.
+
+**Road-test friction, per Session 39's ask** — the card mostly held; two conflicts with the book
+surfaced, both now flagged on [[UI rules]] under rule 9 and pointed at from [[Design system]]:
+**(1)** rule 9 says sections separate by `1.5rem`, the book says `gap-3` in two places — the code
+currently follows the card, and one note will need a dated correction whichever way it rules;
+**(2)** the archetype lists **metric strip** as a headless section type, which rule 10 forbids —
+resolved here by nesting, worth confirming as the general answer. Also: rules 13 and 18 need
+utility classes (`.text-quiet`, `.text-faint`, `.tabular`) the card never says where to put — they
+went into the Sass as colour/figure utilities, no spacing, no hex.
+
+**Correction to Session 38's summary below.** It opens *"Documentation only, no app code"*, which
+was true when written and false by the end of that session — the board's first cut was built in it.
+Left in place per the never-edit habit; this line is the correction.
 
 ---
 

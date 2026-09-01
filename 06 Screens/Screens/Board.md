@@ -2,7 +2,7 @@
 type: screen-decision
 screen: Board
 route: GET /workshop → workshops#show
-updated: 2026-08-27 (Session 38 — first cut built; everything under §First cut is TBD)
+updated: 2026-09-01 (Session 40 — re-cut against UI rules 8–23; still TBD; prior: 2026-08-27 first cut)
 ---
 # Board
 
@@ -10,8 +10,8 @@ The landing surface after sign-in: **one board for everyone**, answering *"what 
 whose?"* What the screen contains today, and its gates, are in [[Screen map]] §3 — this note is only
 the reasoning. Conventions: [[Screen decisions]].
 
-> [!warning] A first cut exists, and **all of it is TBD** *(2026-08-27, branch `s5a-sass`,
-> uncommitted)*
+> [!warning] A first cut exists, and **all of it is TBD** *(re-cut and committed 2026-09-01,
+> `a70aafd` on `s5a-sass`)*
 > The screen was re-cut against the structure below and **renders green**, but nothing in
 > §First cut is ruled — it is a shape to react to, not a decision. The rulings in §Settled are
 > separate and do stand.
@@ -62,13 +62,27 @@ The board becomes a monitoring surface with no create path.
 **Search and filters live in the panel's list toolbar**, not the page head — the list toolbar is
 already a named component carrying search left and the count right.
 
-## First cut — built 2026-08-27 · **all TBD**
+## First cut — built 2026-08-27, re-cut 2026-09-01 · **all TBD**
 
 Built to see the shape, not to settle it. Renders green; no commit.
 
-**Structure.** `page head → section stack (gap-3) → metric strip → split(main, rail)`. The only new
-CSS in the whole build is `.split` — `grid-template-columns: minmax(0,1fr) var(--rail)`; every gap
-and padding is a Bootstrap utility in the template, none in the stylesheet.
+**Structure** *(re-cut 2026-09-01 against [[UI rules]] 8–23, which were captured after the first
+build)*: `page head → split(main, rail)`, sections separated by `gap-4`. **No `.card` anywhere** —
+rule 12 puts space first, a hairline second, a bordered panel last, and the board needs none.
+Sections are uniformly *head (title + right-side count) → body* (rule 10), which is why the metric
+strip stopped being a headless section of its own and moved **inside** the *In the shop* body,
+where it summarises the table beneath it. With the boxes gone, `ps-0`/`pe-0` on the outer table
+cells put the page head, both section heads and the table text on one left edge (rule 8).
+
+**The dense list is a real `<table>`**, per rule 1 and the book's *Not to be copied* — with
+`tr.position-relative` + `a.stretched-link` making the whole row a target with no JS, which is how
+rule 16's whole-row requirement and "use a real table" stop fighting. Hover on both row surfaces is
+themed to `--hover` through `--bs-table-hover-bg` / `--bs-list-group-action-hover-bg`, never
+hand-rolled.
+
+**CSS added, in total:** `.split` (the grid), `.text-quiet` / `.text-faint` (the two ramp steps
+Bootstrap doesn't ship, rule 13), `.tabular` (rule 18), and the two hover themes. No spacing values,
+no raw hex.
 
 **The row is the car.** A new `intakes/_board_row` replaced the job row — which means **there is no
 single stage to show**, so a car renders **one badge per repair**, reusing `jobs/_stage_badge` and
@@ -76,9 +90,10 @@ single stage to show**, so a car renders **one badge per repair**, reusing `jobs
 becoming visible for the first time. **This pulled the intake regroup forward** out of Sprint 6, on
 cost-of-late-change: styling a job row that is about to become a car row is work done twice.
 
-**What the screen carries.** Strip: cars in shop · unassigned · assigned · in progress · ready for
-collection. Main: every open visit. Rail: needs-attention (*ready, not collected* / *nobody has
-picked this up*) then crew load.
+**What the screen carries.** *In the shop* — a four-tile strip (unassigned · assigned · in progress
+· ready for collection) over a table of every open visit. Rail — needs-attention (*ready, not
+collected* / *nobody has picked this up*), then crew load. Every empty state is one quiet line
+(rule 17); every count is `.tabular` (rule 18).
 
 **Deliberately not built, each for a reason:**
 
@@ -119,6 +134,9 @@ and 9 at 18** — flat.
 - **The waiting pin renders an email**, because `User` carries no name. The only personal datum on
   the board, and visibly the ugliest thing on the page once drawn.
 - **The technician's mine-first scope** — deferred with the floor posture, by ruling not by finding.
+- **A live card-vs-book fork on section spacing.** [[UI rules]] 9 says sections separate by
+  `1.5rem`; [[Design system]] says `gap-3` in both §Layout archetypes and the six-dimensions table.
+  The code currently follows the card (`gap-4`). **Unruled** — see the note on rule 9.
 - **`jobs/_board_row` is now dead** — nothing references it since the row became the car.
 - **Cancelled repairs still render a badge** on a live car. Honest, or noise — undecided.
 - **Crew load prints an email**, the third place this screen has been forced to. The case for a

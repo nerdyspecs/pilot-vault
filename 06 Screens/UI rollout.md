@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-08-25
-updated: 2026-08-27 (S5A.3a; page head is a pattern; S5A.9 first cut spec — TBD)
+updated: 2026-09-01 (S5A.9 re-cut against UI rules 8–23 — still TBD; prior: S5A.3a; page head is a pattern)
 ---
 # UI rollout — what each task builds
 
@@ -29,7 +29,7 @@ first.
 | Component | Partial | Used on |
 |---|---|---|
 | Page head | **pattern, not a partial** — see S5A.4 | every app screen |
-| Panel | Bootstrap `.card` *(2026-08-27: not a hand-rolled `.panel` — rule 1)* | every app screen |
+| Panel | Bootstrap `.card` — *but the board uses none (rule 12: whitespace before boxes)* | forms, gate |
 | List row | `shared/_list_row` | board, customers, visit, repair |
 | Metric strip | `shared/_metric_strip` | board, home |
 | Status chip | `jobs/_stage_badge` | board, visit, repair |
@@ -164,18 +164,22 @@ Each is a **re-cut**, not a rebuild: same controller, same data, new layout and 
 > Spec below describes what exists so it can be reacted to. Reasoning and what is deliberately
 > missing: [[Board]].
 
-**Structure:** `page head → .d-flex.flex-column.gap-3 → metric strip → .split.gap-3(main, aside)`.
-**New CSS — the only rule added:** `.split { display: grid; grid-template-columns: minmax(0,1fr)
-var(--rail) }`. Every gap and padding is a utility in the template.
-**Metric strip:** one `.d-flex.border`, tiles `.flex-fill.p-3` sharing rules via `.border-start` —
-not a gapped grid. Number `.fs-3`, label `.small.text-secondary`.
-**Row:** `intakes/_board_row` — the row is the **car**, so there is no single stage: it renders one
-`jobs/_stage_badge` per repair, plus `jobs/_waiting_pin`. Replaces `jobs/_board_row`, now dead.
-**Rail:** needs-attention (two groups, disjoint by construction) then crew load.
+**Structure** *(re-cut 2026-09-01 against [[UI rules]] 8–23)*: `page head → .split.gap-4(main,
+aside)`. **No `.card`** — rule 12. Sections are uniformly *head (`.fs-5` + right-side `.tabular`
+count) → body*, so the metric strip sits **inside** the *In the shop* body rather than being a
+headless section.
+**Main:** four `.flex-fill.p-3` tiles in a `.border-top.border-bottom` strip, divided by
+`.border-start`; then a real `table.table.table-hover` with `.ps-0`/`.pe-0` on the outer cells so
+every left edge lines up (rule 8). Whole-row target = `tr.position-relative` + `a.stretched-link`,
+no JS.
+**Rail:** `.list-group.list-group-flush` of `intakes/_board_row` — the row is the **car**, so there
+is no single stage: one `jobs/_stage_badge` per repair, plus `jobs/_waiting_pin`. Replaces
+`jobs/_board_row`, now dead.
 **Controller provides:** `@intakes` · `@ready` · `@waiting` · `@pending_acknowledgements` ·
 `@job_counts` · `@crew_load`.
-**Panel is Bootstrap's `.card`**, not a hand-rolled `.panel` — with radius 0 and no shadow it
-already is the panel, and rule 1 forbids hand-rolling a Bootstrap equivalent.
+**CSS added by this task:** `.split` · `.text-quiet` / `.text-faint` (rule 13's ramp; Bootstrap
+ships only two of the four) · `.tabular` (rule 18) · `--bs-table-hover-bg` and
+`--bs-list-group-action-hover-bg` themed to `--hover` (rule 16). No spacing values, no raw hex.
 
 ### S5A.10 — The visit and the repair
 **Pages:** `intakes/show` · `jobs/show`.

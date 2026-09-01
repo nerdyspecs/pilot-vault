@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — authority split clarified: 1–7 derive from the book, 8–23 originate here; forks ruled as 22–23: narrow red exemption on form controls, no icons; prior: rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
+updated: 2026-09-01 (Session 40 — rule 9 vs the book recorded as an unruled fork, found road-testing the card; prior: 2026-08-31 Session 39 — authority split clarified: 1–7 derive from the book, 8–23 originate here; forks ruled as 22–23: narrow red exemption on form controls, no icons; prior: rules 8–21 captured: composition, ink jobs, behaviour, full canvas, form anatomy — argued against three standalone mocks the same day; prior: created, extracted from [[Design system]] and the repo's CLAUDE.md design rules)
 ---
 # UI rules — the card
 
@@ -45,6 +45,18 @@ updated: 2026-08-31 (Session 39 — authority split clarified: 1–7 derive from
    element whose left edge aligns with nothing is wrong.
 9. **One rhythm per level, off the ladder.** Sections separate by `1.5rem`, panels pad `1rem`,
    component internals `.5/.25rem` — the same value for the same job everywhere on the page.
+> [!question] **Rule 9 vs the book — unruled** *(found 2026-09-01, Session 40, road-testing the
+> card on the Board)*
+> [[Design system]] says the section gap is **`gap-3`** — in §Layout archetypes *and* in the
+> six-dimensions table (*"Section gap · panel head · `gap-3` · `p-3` · 16"*). Rule 9 says
+> **1.5rem**. Rules 8–23 originate here, so per the header this is **a real fork to rule, not a
+> transcription error**. The Board's code currently follows the card (`gap-4`); whichever way it
+> rules, the losing note needs a dated correction.
+>
+> A second, softer tension from the same session: the archetype lists **metric strip** as a
+> headless section type, which rule 10 forbids. Resolved on the Board by nesting the strip inside
+> a section body — worth confirming as the general answer.
+
 10. **One section anatomy.** Every section is *head (title + optional right-side note or action)
     → body*. A screen never contains two differently-shaped sections.
 11. **One focal point.** One display-size element, one solid primary — the weight budget is

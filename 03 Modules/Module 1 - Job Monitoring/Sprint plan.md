@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)
+updated: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -232,8 +232,9 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 - [ ] **S5A.8** Forgot + reset password
 
 ### 6 · Screens into the shell — each a re-cut, not a rebuild
-- [ ] **S5A.9** The board — *first cut built 2026-08-27 on `s5a-sass`, uncommitted and **TBD**;
-  structure only, renders green. Not ticked: ageing, filters and the law-3 pass are absent*
+- [ ] **S5A.9** The board — *first cut 2026-08-27, re-cut against [[UI rules]] 8–23 and **committed
+  2026-09-01 `a70aafd`** on `s5a-sass`. Still **TBD** and not ticked: ageing, filters and the law-3
+  pass are absent*
 - [ ] **S5A.10** The visit and the repair
 - [ ] **S5A.11** Customers
 - [ ] **S5A.12** Crew and blocker types
