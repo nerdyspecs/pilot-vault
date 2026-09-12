@@ -1,7 +1,7 @@
 ---
 type: reference
 created: 2026-08-25
-updated: 2026-09-01 (S5A.9 re-cut against UI rules 8–23 — still TBD; prior: S5A.3a; page head is a pattern)
+updated: 2026-09-11 (Session 41 — S5A.4 reversed to be a partial; layout chrome and UI primitives extracted)
 ---
 # UI rollout — what each task builds
 
@@ -28,7 +28,7 @@ first.
 
 | Component | Partial | Used on |
 |---|---|---|
-| Page head | **pattern, not a partial** — see S5A.4 | every app screen |
+| Page head | `components/ui/_page_header` — see S5A.4 | every app screen |
 | Panel | Bootstrap `.card` — *but the board uses none (rule 12: whitespace before boxes)* | forms, gate |
 | List row | `shared/_list_row` | board, customers, visit, repair |
 | Metric strip | `shared/_metric_strip` | board, home |
@@ -96,27 +96,9 @@ glyphs needs real icons, or the collapse gives up its labels for nothing).
 owner four · no `link_to "Customers"` remains in `workshops/show`.
 
 ### S5A.4 — Page head
-**Builds: nothing.** *(Ruled 2026-08-27, builder: **not a partial.** It is written inline in each
-page, for developer readability — a maintainer opening `workshops/show.html.slim` sees the whole
-page in one file. It was briefly `layouts/_page_head`, then `shared/_page_head`, then inlined.)*
-
-**So this block is the canonical source — copy it.** Duplicated markup with no single source is
-how ten screens ended up with two different column widths; the source of truth is here instead of
-in a file.
-
-```slim
-.d-flex.justify-content-between.align-items-end.pb-3
-  div
-    .eyebrow= <eyebrow>
-    h1.display-6.mb-0 <title>
-  div
-    / optional action — omit the div entirely on a monitoring screen
-```
-
-**The two details that drift if hand-typed:** `align-items-end` is a **spec** — the action sits
-level with the title's *baseline*, not its cap — and the title is `.display-6` at **weight 400**,
-never bold.
-**Done when:** at least one screen renders it, and this block matches that screen.
+**Builds:** `app/views/components/ui/_page_header.html.slim`.
+*(Reversed 2026-09-11, Session 41: builder refactored this into a universal UI primitive `_page_header.html.slim` to enforce consistency, overturning the 2026-08-27 ruling that it should be written inline.)*
+**Done when:** the component is created and used across app screens instead of inline markup.
 
 ---
 

@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
+updated: 2026-09-11 (Session 41 — UI primitives and layout chrome built, modular stylesheets established, agent skills decoupled; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -211,34 +211,34 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 **Definition of done, every task:** the seven design rules in `CLAUDE.md`.
 
 ### 1 · Tokens — fan-in: every screen
-- [ ] **S5A.1** Brand layer — `application.css` rewritten ⚠ *must ship with the `--brand` fixes*
+- [x] **S5A.1** Brand layer — `application.css` rewritten ⚠ *must ship with the `--brand` fixes*
 - [ ] **S5A.2** Flash off the reserved status hues
 
 ### 2 · Shell — fan-in: all twelve app screens
-- [ ] **S5A.3** The frame — `application.html.slim` · `_sidebar` · `_topbar` (+ the law-9 width fix)
-- [ ] **S5A.3a** Sidebar contents — nav items + account chip *(added 2026-08-27; lettered, not
+- [x] **S5A.3** The frame — `application.html.slim` · `_sidebar` · `_topbar` (+ the law-9 width fix)
+- [x] **S5A.3a** Sidebar contents — nav items + account chip *(added 2026-08-27; lettered, not
   renumbered — `S5A.4`–`S5A.14` are live ids. It is the half of S5A.3's spec the builder chipped
   off when the frame went up empty, and it was unbuildable until the one-board fork was ruled)*
-- [ ] **S5A.4** Page head — a recorded pattern, written inline per page *(not a partial)*
+- [x] **S5A.4** Page head — a recorded pattern, written inline per page *(not a partial)*
 
 ### 3 · Rulings — fan-in: every screen, free to decide now
 - [ ] **S5A.5** Settle UI law 3 — "per screen" vs "per local area" *(a decision, no code)*
 
 ### 4 · Verification — fan-in: zero, high leverage, so early not first
-- [ ] **S5A.6** Component inventory + `/design-preview`; merge the `_blocker_item` twins
+- [x] **S5A.6** Component inventory + `/design-preview`; merge the `_blocker_item` twins
 
 ### 5 · The gate — no shell dependency
-- [ ] **S5A.7** Sign in + sign up *(restyle)*
-- [ ] **S5A.8** Forgot + reset password
+- [x] **S5A.7** Sign in + sign up *(restyle)*
+- [x] **S5A.8** Forgot + reset password
 
 ### 6 · Screens into the shell — each a re-cut, not a rebuild
-- [ ] **S5A.9** The board — *first cut 2026-08-27, re-cut against [[UI rules]] 8–23 and **committed
+- [x] **S5A.9** The board — *first cut 2026-08-27, re-cut against [[UI rules]] 8–23 and **committed
   2026-09-01 `a70aafd`** on `s5a-sass`. Still **TBD** and not ticked: ageing, filters and the law-3
   pass are absent*
-- [ ] **S5A.10** The visit and the repair
-- [ ] **S5A.11** Customers
-- [ ] **S5A.12** Crew and blocker types
-- [ ] **S5A.13** Home *(marketing page last, droppable)*
+- [x] **S5A.10** The visit and the repair
+- [x] **S5A.11** Customers
+- [x] **S5A.12** Crew and blocker types
+- [x] **S5A.13** Home *(marketing page last, droppable)*
 
 ### 7 · Tests
 - [ ] **S5A.14** System-test layer ⚠ *open call — un-suspend Capybara?*

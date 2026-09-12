@@ -1,11 +1,27 @@
 ---
 type: log
-updated: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
+updated: 2026-09-11 (Session 41 — UI primitives and layout chrome built, modular stylesheets established, agent skills decoupled; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-11 · Session 41 — UI primitives, layout chrome, and agent skill decoupling
+
+**Summary.** Sprint 5A (Design system rollout) is functionally complete. The monolithic `application.css` has been broken apart into modular stylesheets, and layout chrome/UI primitives have been explicitly extracted into `app/views/components/layout/` and `app/views/components/ui/`. We also extracted agent skills out of the repo to avoid PR bloat.
+
+**The reversal on S5A.4: Page Head is a partial, not a pattern.** The previous decision was that the page head should be written inline per page for developer readability. That was reversed in favor of a universal UI primitive `app/views/components/ui/_page_header.html.slim`. A standard `_panel`, `_stage_badge`, `_metric_strip`, and `_empty_state` were also added as UI primitives to enforce consistency across screens rather than relying purely on Bootstrap classes and manual patterns.
+
+**Modular Stylesheets.** The brand layer (`application.css`) was deconstructed into single-responsibility stylesheets: `tokens.css`, `base.css`, `layout.css`, and `components.css`. This isolates CSS custom properties and variables from structural rules and component-specific styling, making the zero-custom-page-CSS law easier to enforce.
+
+**Agent skills decoupled.** Extracted `hallmark` and `chip` skills into a central `agents-skills` repo (`https://github.com/cqh57/agents-skills`). Removed local `.agents` and `.claude/skills` directories to eliminate PR bloat. Updated `AGENTS.md` and `CLAUDE.md` to document the new 3-tier multi-repo architecture. Skills are now loaded globally via `~/.claude/skills` and `~/.gemini/config/skills`.
+
+**All screens into the shell.** The rest of Sprint 5A (S5A.7 through S5A.13) was completed. UI for the board, account, account settings, switch workshop, customers, vehicles, crew, and blockers were all brought into the layout shell. The board navigation and design tokens are complete.
+
+**Next:** Sprint 5 — the Intake vertical. The immediate missing pieces are the Add-vehicle screen, the Intake front door (`/intakes/new`), and the actual Jobsheet UI form.
 
 ---
 
