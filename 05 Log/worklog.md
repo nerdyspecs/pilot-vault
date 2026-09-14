@@ -11,9 +11,9 @@ Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story
 
 ## 2026-09-14 · Session 42 — Customer directory and profile screens built (Phase 1, Chunk 1A)
 
-**Summary.** Implemented the read surfaces for the Customer domain layer (`customers#index` and `customers#show`) using the universal UI primitives (`_page_header`, `_panel`, `_empty_state`, `_metric_cell`). The screens strictly adhere to the zero-custom-page-CSS law and pass 175 automated tests.
+**Summary.** Implemented the read surfaces for the Customer domain layer (`customers#index` and `customers#show`) using the universal UI primitives (`_page_header`, `_panel`, `_empty_state`, `_metric_cell`). The screens strictly adhere to the zero-custom-page-CSS law, codify UI Rules 24 & 25, and pass 175 automated tests.
 
-**Customer Directory (`customers#index`).** Features a 40px search bar matching customer name or canonicalized phone number. Implements dual empty states: a workshop empty state when no customers exist, and a search-first empty state when a search yields zero matches, offering a pre-filled link to add the searched customer.
+**Customer Directory (`customers#index`).** Features a 40px search bar matching customer name or canonicalized phone number. Implements dual empty states (workshop empty and search-first empty with pre-filled link). Adheres to strict typography rules: bold sentence-case headers, unbolded data fields, left-aligned Action column, and a dedicated pagination footer.
 
 **Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Person`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges.
 
