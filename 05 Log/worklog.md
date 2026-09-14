@@ -17,7 +17,9 @@ Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story
 
 **Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Person`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges with left-aligned Action column and darker header border.
 
-**Next:** Phase 1, Chunk 1B — Customer Create & Edit forms (`customers#new`, `customers#edit`, `_form`).
+**Customer Create & Edit Screens (`customers#new`, `customers#edit`, `_form`) — Chunk 1B built.** Form partial sits inside a focused 640px panel. Features an Account Type dropdown (`Private (Individual)` / `Company (Fleet)`) powered by Stimulus (`customer_form_controller.js`) that dynamically toggles the corporate "Contact Person / Fleet Manager" field and re-labels the name input. Submits with a single solid Bay Blue primary button (`Register customer` / `Save Changes`) paired with a secondary `Cancel` link. Implements full validation error handling with amber warning container (`.form-errors`), field `.is-invalid` borders, and inline error feedback. Pre-fills customer name when redirected from search empty states. Fully covered by 182 passing automated tests.
+
+**Next:** Phase 2 — Vehicle Management Flow (Chunk 2A & 2B).
 
 ---
 
