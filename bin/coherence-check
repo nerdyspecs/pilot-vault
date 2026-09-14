@@ -1,30 +1,40 @@
 #!/usr/bin/env bash
 # Vault + app coherence check. Run at the start of a main session, and after any carry-back.
 # Everything below should read clean; anything flagged is a real drift to reconcile.
-A=/Users/teckhong/teckhong/pilot
-V=/Users/teckhong/teckhong/pilot-vault
+# Resolve the vault from this script, then use its sibling app repository. These
+# overrides keep the check usable when either repository intentionally lives elsewhere.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+V="${PILOT_VAULT_ROOT:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+A="${PILOT_APP_ROOT:-$(cd -- "$V/../pilot" && pwd)}"
+
+for R in "$A" "$V"; do
+  if ! git -C "$R" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "coherence-check: expected a Git repository at $R" >&2
+    exit 1
+  fi
+done
 
 echo "── uncommitted ──"
-echo "  app[$(git -C $A status --porcelain | wc -l | tr -d ' ')]  vault[$(git -C $V status --porcelain | wc -l | tr -d ' ')]"
+echo "  app[$(git -C "$A" status --porcelain | wc -l | tr -d ' ')]  vault[$(git -C "$V" status --porcelain | wc -l | tr -d ' ')]"
 
 echo "── unpushed ──"
-echo "  app[$(git -C $A log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]  vault[$(git -C $V log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]"
+echo "  app[$(git -C "$A" log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]  vault[$(git -C "$V" log --oneline @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')]"
 
 echo "── unmerged branches (work a sub-session may have stranded) ──"
 found=0
-for R in $A $V; do
-  for b in $(git -C $R for-each-ref --format='%(refname:short)' refs/heads | grep -v '^main$'); do
-    n=$(git -C $R rev-list --count main.."$b" 2>/dev/null)
-    [ "$n" != "0" ] && { echo "  ⚠ $(basename $R)/$b — $n commit(s) not in main"; found=1; }
+for R in "$A" "$V"; do
+  for b in $(git -C "$R" for-each-ref --format='%(refname:short)' refs/heads | grep -v '^main$'); do
+    n=$(git -C "$R" rev-list --count main.."$b" 2>/dev/null)
+    [ "$n" != "0" ] && { echo "  ⚠ $(basename "$R")/$b — $n commit(s) not in main"; found=1; }
   done
 done
 [ $found = 0 ] && echo "  none"
 
 echo "── stray worktrees (gitignored, invisible to git status) ──"
-echo "  app[$(git -C $A worktree list | tail -n +2 | wc -l | tr -d ' ')]  vault[$(git -C $V worktree list | tail -n +2 | wc -l | tr -d ' ')]"
+echo "  app[$(git -C "$A" worktree list | tail -n +2 | wc -l | tr -d ' ')]  vault[$(git -C "$V" worktree list | tail -n +2 | wc -l | tr -d ' ')]"
 
 echo "── vault citations leaking into app code ──"
-n=$(grep -rniE 'ADR-[0-9]|law [0-9]|\(S[0-9]|Sprint [0-9]' $A/app 2>/dev/null | wc -l | tr -d ' ')
+n=$(grep -rniE 'ADR-[0-9]|law [0-9]|\(S[0-9]|Sprint [0-9]' "$A/app" 2>/dev/null | wc -l | tr -d ' ')
 echo "  $n  (must be 0 — a reader without the vault can't resolve them, and they rot)"
 
 echo "── vault links ──"

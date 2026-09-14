@@ -1,11 +1,57 @@
 ---
 type: log
-updated: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
+updated: 2026-09-14 (Session 42 — Customer directory, profile, CRUD, and mobile responsiveness completed (Phase 1, Chunks 1A–1C); prior: 2026-09-11 (Session 41 — UI primitives and layout chrome built, modular stylesheets established, agent skills decoupled; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-14 · Session 42 — Customer directory, profile, CRUD, and mobile responsiveness completed (Phase 1, Chunks 1A–1C)
+
+**Summary.** Implemented the full Customer domain layer across Phase 1 (Chunks 1A, 1B, and 1C). Built customer directory read surfaces, create/edit CRUD forms, responsive mobile table-to-card transformations, decoupled profile header navigation, dynamic vanilla Rails pagination, and codified the Last-Row Border Suppression invariant into the design system. All 183 automated tests pass with 0 failures and 0 coherence issues.
+
+**Customer Directory (`customers#index`).** Features a single-row search toolbar combining an inline type dropdown filter (`All`, `Company`, `Private`) next to the search box and search button. Implements dual empty states (workshop empty and search-first empty with pre-filled link). Adheres to strict typography and table rules: bold sentence-case headers with a darker anchor baseline border (`var(--ink)`), unbolded data fields, a dedicated Email column, a strictly left-aligned Action column sharing the vertical grid line with the button (`ms-n2 px-2`), and a flush bottom table row with zero redundant divider line.
+
+**Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Private`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges with left-aligned Action column and darker header border.
+
+**Customer Create & Edit Screens (`customers#new`, `customers#edit`, `_form`) — Chunk 1B built.** Form sits flush with the page header inside the universal UI primitive (`_panel`), strictly adhering to the left-aligned canvas grid. Fields are organized in a clean 2-column grid (`.row.g-3` with `.col-12.col-md-6`): Account Type paired with Phone Number, Name paired with Email, and Contact Person paired with Address (no full-width inputs). An Account Type dropdown (`Private (Individual)` / `Company (Fleet)`) powered by Stimulus (`customer_form_controller.js`) dynamically toggles the corporate "Contact Person / Fleet Manager" field and re-labels the name input. Submits with a single solid Bay Blue primary button (`Register customer` / `Save Changes`) paired with a secondary `Cancel` link, with no dividing border above the actions. Implements full validation error handling with amber warning container (`.form-errors`), field `.is-invalid` borders, and inline error feedback. Pre-fills customer name when redirected from search empty states. Redundant navigation buttons removed from header in favor of the canonical form footer actions.
+
+**Mobile Responsiveness & Viewport Optimization — Chunk 1C built.**
+- **Responsive Table-to-Card Transformations:**
+  - `customers#index`: Converts 5-column directory table into mobile cards with full-width tap targets via `stretched-link`. Personal details are sequenced in a pure vertical stack on the left: Name (with `Private`/`Company` badge anchored at the top right), Attn line, monospace Phone, Email, and Vehicle Count (with `View →` button anchored at the bottom right).
+  - `customers#show`: Converts Registered Vehicles table into mobile cards (`.mobile-card`) with guaranteed `min-height: 100px` (`justify-content: space-between`), ensuring comfortable vertical separation between the stage badge (top right) and the `Details →` button (bottom right).
+- **Decoupled 2-Row Profile Header:** In `_page_header.html.slim`, introduced `.page-header-split` when `back_path:` is present. Row 1 hosts a full-width navigation toolbar with a square 36px back chevron button on the left and secondary "Edit details" on the right. Row 2 holds the customer title (`h1.page-title`), allowing long company names to wrap cleanly without cramping or misaligning action controls.
+- **Dynamic Vanilla Rails Pagination:**
+  - Removed mockup static `1, 2, 3` page buttons.
+  - Sized desktop to 25 rows (~1,100px scroll) and mobile to 10 cards (~1,150px scroll, 1.5 thumb swipes).
+  - When records fit on a single page (`@total_pages <= 1`), pagination controls are suppressed entirely, displaying only `Showing X customers`.
+  - When records span multiple pages, functional page links preserve active search (`q`) and type filter (`kind`) params.
+- **Control Height & Typography Harmonization:**
+  - Eliminated legacy 48px cascade override on form controls and secondary buttons, standardizing mobile buttons and inputs to 36px and small action/pagination items to 32px.
+  - Downscaled mobile headers to 24px title / 32px line-height.
+  - Eliminated redundant page description subtitles across index, show, new, and edit screens.
+- **Last-Row Border Suppression Invariant:** Codified into `docs/design-system.md` and `AGENTS.md` and enforced via CSS (`.app-panel .mobile-card:last-child`, `.table > tbody > tr:last-child > *`, `border-bottom: 0 !important`) to eliminate double borders at panel boundaries.
+
+**Next:** Phase 2 — Vehicle Management Flow (Chunk 2A & 2B).
+
+---
+
+## 2026-09-11 · Session 41 — UI primitives, layout chrome, and agent skill decoupling
+
+**Summary.** Sprint 5A (Design system rollout) is functionally complete. The monolithic `application.css` has been broken apart into modular stylesheets, and layout chrome/UI primitives have been explicitly extracted into `app/views/components/layout/` and `app/views/components/ui/`. We also extracted agent skills out of the repo to avoid PR bloat.
+
+**The reversal on S5A.4: Page Head is a partial, not a pattern.** The previous decision was that the page head should be written inline per page for developer readability. That was reversed in favor of a universal UI primitive `app/views/components/ui/_page_header.html.slim`. A standard `_panel`, `_stage_badge`, `_metric_strip`, and `_empty_state` were also added as UI primitives to enforce consistency across screens rather than relying purely on Bootstrap classes and manual patterns.
+
+**Modular Stylesheets.** The brand layer (`application.css`) was deconstructed into single-responsibility stylesheets: `tokens.css`, `base.css`, `layout.css`, and `components.css`. This isolates CSS custom properties and variables from structural rules and component-specific styling, making the zero-custom-page-CSS law easier to enforce.
+
+**Agent skills decoupled.** Extracted `hallmark` and `chip` skills into a central `agents-skills` repo (`https://github.com/cqh57/agents-skills`). Removed local `.agents` and `.claude/skills` directories to eliminate PR bloat. Updated `AGENTS.md` and `CLAUDE.md` to document the new 3-tier multi-repo architecture. Skills are now loaded globally via `~/.claude/skills` and `~/.gemini/config/skills`.
+
+**All screens into the shell.** The rest of Sprint 5A (S5A.7 through S5A.13) was completed. UI for the board, account, account settings, switch workshop, customers, vehicles, crew, and blockers were all brought into the layout shell. The board navigation and design tokens are complete.
+
+**Next:** Sprint 5 — the Intake vertical. The immediate missing pieces are the Add-vehicle screen, the Intake front door (`/intakes/new`), and the actual Jobsheet UI form.
 
 ---
 
