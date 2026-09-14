@@ -1,11 +1,23 @@
 ---
 type: log
-updated: 2026-09-11 (Session 41 — UI primitives and layout chrome built, modular stylesheets established, agent skills decoupled; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
+updated: 2026-09-14 (Session 42 — Customer directory and profile screens built; prior: 2026-09-11 (Session 41 — UI primitives and layout chrome built, modular stylesheets established, agent skills decoupled; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-14 · Session 42 — Customer directory and profile screens built (Phase 1, Chunk 1A)
+
+**Summary.** Implemented the read surfaces for the Customer domain layer (`customers#index` and `customers#show`) using the universal UI primitives (`_page_header`, `_panel`, `_empty_state`, `_metric_cell`). The screens strictly adhere to the zero-custom-page-CSS law and pass 175 automated tests.
+
+**Customer Directory (`customers#index`).** Features a 40px search bar matching customer name or canonicalized phone number. Implements dual empty states: a workshop empty state when no customers exist, and a search-first empty state when a search yields zero matches, offering a pre-filled link to add the searched customer.
+
+**Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Person`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges.
+
+**Next:** Phase 1, Chunk 1B — Customer Create & Edit forms (`customers#new`, `customers#edit`, `_form`).
 
 ---
 
