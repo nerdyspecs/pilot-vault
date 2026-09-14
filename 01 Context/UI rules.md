@@ -109,6 +109,12 @@ updated: 2026-09-01 (Session 40 — rule 9 vs the book recorded as an unruled fo
     dependency by another name, every icon is a vocabulary the crew must learn, and the system's
     density comes from type doing the work. Revisit only if a real screen produces a label that
     cannot fit — that trigger, not taste, reopens this.
+24. **The Button Hierarchy.** Primary (`.btn-primary`) is solid Bay Blue and strictly limited to
+    ONE per canvas focal point. Secondary (`.btn-secondary`, `.btn-outline-secondary`) uses
+    `--paper` ground, hairline `--border`, `--ink` text, and `--subtle` hover. Row-level table
+    actions are Ghost (`.btn-ghost`) to eliminate visual noise on dense data tables.
+25. **Tables inside panels sit flush.** The last row in a panel-nested table suppresses its
+    bottom border (`border-bottom-width: 0`) so it never doubles against the enclosing panel frame.
 
 ## While working
 - Keep `bin/rails dartsass:watch` running; spacing goes in the template's utility classes,
