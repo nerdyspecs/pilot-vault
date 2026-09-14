@@ -13,9 +13,9 @@ Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story
 
 **Summary.** Implemented the read surfaces for the Customer domain layer (`customers#index` and `customers#show`) using the universal UI primitives (`_page_header`, `_panel`, `_empty_state`, `_metric_cell`). The screens strictly adhere to the zero-custom-page-CSS law, codify UI Rules 24 & 25, and pass 175 automated tests.
 
-**Customer Directory (`customers#index`).** Features a 40px search bar matching customer name or canonicalized phone number. Implements dual empty states (workshop empty and search-first empty with pre-filled link). Adheres to strict typography rules: bold sentence-case headers, unbolded data fields, left-aligned Action column, and a dedicated pagination footer.
+**Customer Directory (`customers#index`).** Features a 40px search bar matching customer name or canonicalized phone number. Implements dual empty states (workshop empty and search-first empty with pre-filled link). Adheres to strict typography rules: bold sentence-case headers, unbolded data fields, an Action column anchored flush to the end of the row with collapsed width (`text-end`), and Bootstrap 5 standard pagination themed to Knot square hairline tokens.
 
-**Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Person`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges.
+**Customer Profile (`customers#show`).** Displays the customer's header with kind badge (`Person`/`Company`), an action button to edit details, a 3-cell metric strip (Total Visits, Active In Shop, Last Visit), a 2-column contact details panel, and a registered vehicles table showing license plate, VIN, and in-shop status badges with end-aligned Action column.
 
 **Next:** Phase 1, Chunk 1B — Customer Create & Edit forms (`customers#new`, `customers#edit`, `_form`).
 
