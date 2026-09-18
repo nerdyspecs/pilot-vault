@@ -1,11 +1,62 @@
 ---
 type: log
-updated: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))
+updated: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-18 · Session 41 — Connor's UI PR re-sliced; three-tier ownership settled
+
+**Summary.** Three days on one pull request. Started as orientation on Connor's `#10`, became a
+re-slicing of it into four reviewable PRs plus a governance model for working with a partner. Two
+rulings taken: **design ownership** (current values move into the app repo) and **skills**
+(shared toolbox becomes craft authority). The pipeline question — vendored Bootstrap versus the
+Sass build — is deliberately left open for a face-to-face with Connor.
+
+**What `#10` actually was.** 174 files, but 9,752 of the 12,575 insertions were vendored skill
+files; the real diff was ~2,800 lines. Its commit messages misdescribe it. `8d9e4fa`
+("Establish layout chrome, UI primitives, and modular stylesheets") **deleted ~730 lines of
+working views** without saying so — a complete vehicle register, `/design-preview`, and every
+content page reduced to a title line — and weakened the tests in the same commit so the suite
+stayed green. GitHub's PR view hides this: files created *and* deleted inside a branch net to
+zero and never appear in the diff.
+
+**The re-slice.** Fourteen commits, each of which runs on its own, cut by feature rather than by
+layer: styling → components → badge → layout → auth → account → public → vehicles → customers.
+Only five authored lines in the whole stack (`link_to "#"` placeholders, so the navigation renders
+before its routes land); everything else is Connor's code reordered. Landed as `#12` → `#11` →
+`#13` stacked, plus `#14` independent. `#10` closed; `connor/ui` kept — work dropped from the
+slice exists only there.
+
+**What was dropped.** The `ui-work` branch: jobs index, board controller shaping, 185 lines of
+controller tests including an N+1 guard. It was a controller layer with no views — seventeen
+instance variables computed, four read. Main's board and crew screens were kept instead, then
+cleared to title lines in `6a6747c` so they can be re-cut fresh.
+
+**Ruling — design ownership.** `docs/design-system.md` in the app repo holds **current** design
+values; Connor edits it by PR and the builder reviews. This note keeps rationale, rulings and
+history. The trigger: Connor changes design through code and will not maintain the vault, so a
+vault that claims current values would go stale on his first merge. **Consequence:** `--bay-blue`
+and `--paper` stand, and [[Design system]]'s token table becomes historical — see its footnote.
+
+**Ruling — skills.** `cqh57/agents-skills` cloned and linked globally (20 skills). It is the
+authority for engineering craft; `AGENTS.md` stops restating it. `lucide-rails` is Connor's call
+and is approved, closing the icon-source open call.
+
+**The pipeline, left open.** The important finding is that **Connor never decided it.** Vendored
+Bootstrap was the status quo at his fork point `c229da7`; `cf1c0ee` landed the day after he
+branched and he never merged main. Three signals point at Sass, two of them his: his own markup
+uses `ms-n2` and `w-md-auto`, which only exist in a compiled build; his own
+`dartsass-bootstrap-theming` skill says compile from Sass; and vendoring ends gem-managed
+Bootstrap upgrades. Chipped to its own session rather than ruled remotely.
+
+**Method note.** Six token divergences between this note and the branch's CSS were found by hand
+over an afternoon. A check comparing the token table to the stylesheets mechanically would have
+caught all six on day one — worth adding to `bin/coherence-check`.
 
 ---
 
