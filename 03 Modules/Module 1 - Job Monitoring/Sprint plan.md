@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
+updated: 2026-09-21 (Session 42 — S5A.1/.3/.3a annotated against the unmerged `#12`; S5A.13 dropped, marketing leaves the app; nothing ticked, `#12` is not merged; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -212,13 +212,25 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 
 ### 1 · Tokens — fan-in: every screen
 - [ ] **S5A.1** Brand layer — `application.css` rewritten ⚠ *must ship with the `--brand` fixes*
+  *(2026-09-21: built on `ui-application`, **not merged** — `8bdb84b`, `aa137ef`. The file is now
+  `_tokens.scss` behind the Sass build. Carries a known gap: **zero `--st-*` status tokens**, so
+  the sacred palette is absent. Do not tick until that lands.)*
 - [ ] **S5A.2** Flash off the reserved status hues
 
 ### 2 · Shell — fan-in: all twelve app screens
 - [ ] **S5A.3** The frame — `application.html.slim` · `_sidebar` · `_topbar` (+ the law-9 width fix)
+  *(2026-09-21: frame and sidebar built on `ui-application`, **not merged** — `76fcafe`, `96a89a7`.
+  The three-way identity fork collapsed to **one frame**; `body` carries the grid, so there is no
+  wrapper element. **`_topbar` is deliberately not built** and its shape is unsettled — see the
+  ⚠ footnote on [[Design system]] §Archetype 1 item 2. This task cannot be ticked on the frame
+  alone.)*
 - [ ] **S5A.3a** Sidebar contents — nav items + account chip *(added 2026-08-27; lettered, not
   renumbered — `S5A.4`–`S5A.14` are live ids. It is the half of S5A.3's spec the builder chipped
   off when the frame went up empty, and it was unbuildable until the one-board fork was ruled)*
+  *(2026-09-21: built on `ui-application`, **not merged** — `70517ea`. The rail follows workshop
+  context: signed in without a workshop is a **state of the one frame**, and the rail simply drops
+  its navigation. Icon source settled as `lucide-rails`. Four nav links are still inert
+  `link_to "#"` — they cannot be finished until the work on `connor/ui` is recovered.)*
 - [ ] **S5A.4** Page head — a recorded pattern, written inline per page *(not a partial)*
 
 ### 3 · Rulings — fan-in: every screen, free to decide now
@@ -238,7 +250,10 @@ sprint and is now sixth: nothing depends on it, and it cannot render until the t
 - [ ] **S5A.10** The visit and the repair
 - [ ] **S5A.11** Customers
 - [ ] **S5A.12** Crew and blocker types
-- [ ] **S5A.13** Home *(marketing page last, droppable)*
+- [ ] ~~**S5A.13** Home *(marketing page last, droppable)*~~ — **dropped 2026-09-21** (`76fcafe`).
+  Marketing leaves the app entirely and moves to its own property; root now **requires auth**, and
+  there is no landing page in the repo. It was droppable by design, and this is that drop. The
+  deleted markup and CSS are recoverable from `76fcafe^` if the static site ever wants a start.
 
 ### 7 · Tests
 - [ ] **S5A.14** System-test layer ⚠ *open call — un-suspend Capybara?*

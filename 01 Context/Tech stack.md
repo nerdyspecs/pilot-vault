@@ -1,6 +1,6 @@
 ---
 type: context
-updated: 2026-08-26 (Session 37 — the no-build-step rule is reversed; Bootstrap compiles from Sass)
+updated: 2026-09-21 (Session 42 — the Session 37 Sass ruling held after PR #12 briefly reversed it; standing constraint added: colour stays runtime, `$primary` never set in Sass; prior: 2026-08-26 (Session 37 — the no-build-step rule is reversed; Bootstrap compiles from Sass))
 ---
 # Tech Stack
 Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at the start of every Claude session.
@@ -33,6 +33,18 @@ Use alongside [[Builder identity]], [[Product overview]], [[User stories]] at th
     have no variable behind them — `.form-check-input:checked` among them, which we use.
     Setting Sass variables before the import reaches all of them, so the brand layer stops
     patching Bootstrap after the fact. Cost: seven gems (two direct, five transitive).
+  - **↳ 2026-09-21 (Session 42): this ruling HELD, after being briefly reversed.** Connor's
+    `#12` as cut removed `dartsass-rails` and restored the vendored file; `aa137ef` puts the Sass
+    build back. Decided on evidence rather than preference: `ms-n2` and `w-md-auto` exist only in
+    a compiled build, and **Connor's own `#13` markup uses both** — the vendored file would have
+    shipped them dead. He never chose vendoring; he branched at `c229da7` the day before `cf1c0ee`
+    landed and never merged main, so vendoring was his fork-point status quo, not a decision.
+    **Two standing constraints fall out of it.** (1) Colour stays **runtime** — `--bs-*` overrides
+    in `_tokens.scss`; Sass is only for what *generates classes*, so **`$primary` is never set in
+    Sass**. (2) `$spacers` is deliberately **not** aligned to the `--space-*` scale: aligning it
+    would silently resize ~160 utilities already written into the views (`mb-3` 16px→12px) and
+    delete `py-5`. That sweep belongs with the screen rework; the reason is recorded in
+    `_bootstrap_config.scss` so it is not rediscovered as a bug.
 
 ## Device posture (per role) — v1
 Web app, standard login (Devise) on whatever device — phone browser or PC. No native app, no

@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-07-06
-updated: 2026-09-01 (Session 40 — §Layout archetypes flags the unruled gap-3 / 1.5rem fork with [[UI rules]] 9; prior: Session 39 — ruled: Bay's design language is the ONLY design language, identity and status palette the two exceptions; [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
+updated: 2026-09-21 (Session 42 — the three footnotes owed since Session 41 are written: this note is historical on values, the icon source is settled (`lucide-rails`), and the topbar is a three-way divergence; prior: Session 40 — §Layout archetypes flags the unruled gap-3 / 1.5rem fork with [[UI rules]] 9; prior: Session 39 — ruled: Bay's design language is the ONLY design language, identity and status palette the two exceptions; [[UI rules]] card created from this note, pointer added; prior: Session 38 — L1 fork ruled: one board for everyone, viewpoints are scopes; the Board's content is safe for every role; named the Board; front door moved off it, page pattern narrowed)
 ---
 # Design system
 
@@ -17,6 +17,22 @@ updated: 2026-09-01 (Session 40 — §Layout archetypes flags the unruled gap-3 
 >    implementing it.
 > 3. **`/design-preview`** — renders every component from those tokens, so drift becomes
 >    *visible* instead of a doc-versus-code guess.
+>
+> **↳ 2026-09-21 (Session 42) — two of those three layers are gone, and this note is no longer
+> authoritative on values.** Layer 3, `/design-preview`, was deleted by `8d9e4fa` and is not coming
+> back — it is the designing partner's call and he has not asked for it. Layer 2 moved: tokens live
+> in `app/assets/stylesheets/_tokens.scss`, and the **current** values are owned by
+> `docs/design-system.md` in the app repo, per Session 41's design-ownership ruling — Connor edits
+> that file by PR and the builder reviews.
+>
+> **Read this note for *rationale, rulings and history*; read the app repo for *what the values are
+> today*.** The tables below — colour roles, status palette, type scale, the six dimensions — are
+> **historical**: correct as of the ruling date beside each, not a live mirror of the stylesheets.
+> Where they disagree with the code, the code is not automatically wrong.
+>
+> The exception is the **status palette, which stays sacred** — semantic, not decorative. `#12`'s
+> `_tokens.scss` ships **zero `--st-*` tokens**; that is a defect in the branch, not a change of
+> mind, and it is on the styling list for the CSS session.
 >
 > Layer 3 is the one that makes the other two honest. It is [[Sprint plan]] **S5.5a**.
 >
@@ -313,6 +329,15 @@ Everything behind the sign-in wall. Four things, always in this order.
 1. **Frame** — fixed sidebar `--sidebar`, full viewport height, 1px right edge. The content column
    is grid column 2, and **the topbar lives inside it**, not above the whole shell.
 2. **Topbar** — `--topbar` tall, sticky, eyebrow + context on the left, avatar right.
+   *(⚠ 2026-09-21, Session 42 — **three sources disagree and none has been made to win.** This
+   note mandates the topbar above. The app repo's `docs/design-system.md:155` says the opposite:
+   "Do not add a duplicate desktop top context bar." The code has **no topbar at all**, and
+   `footer_navigation_test.rb:40` asserts its absence. The builder now wants one, but a third
+   shape again — **logo at the right, spanning the width beside the rail** — which is neither the
+   "eyebrow + context left, avatar right" specified here nor the nothing that is built. Building it
+   is structural: it changes `body.app`'s grid, adds a component, moves the brand out of the
+   sidebar, and deletes that test. **Settle the shape before anyone builds it**, then footnote
+   whichever two sources lose. Not in `#12`.)*
 3. **Page head** — eyebrow → page title, one primary action on the right, **bottom-aligned**
    (the button sits level with the title's baseline, not its cap), `p-3` below.
 4. **Section stack** — sections separated by `gap-3` *(⚠ 2026-09-01: [[UI rules]] 9 says `1.5rem`.
@@ -873,7 +898,12 @@ not by `customer:`.
   drawer~~, plus an icon source for the rail. *(2026-08-27: the Stimulus half is **settled by
   build** — `sidebar_controller.js` ships the collapse. What remains is the **icon source**, and it
   is inseparable from the collapse: UI law 6 says words over icons, so a collapsed rail with no
-  icons is unreadable. Belongs to S5A.3a.)*
+  icons is unreadable. Belongs to S5A.3a.)* **↳ 2026-09-21 (Session 42): closed.** The icon source
+  is **`lucide-rails`** (pinned `~> 0.7`), approved as Connor's call under the design-ownership
+  ruling, rendered through an `ui_icon` helper. The Stimulus half also changed shape without being
+  re-decided: `sidebar_controller.js` is gone, replaced by `shell_controller.js` — same job, and
+  worth renaming, since "shell" is vocabulary the builder has already rejected once in favour of
+  "application".
 - **UI law 3: "per screen" or "per local area"** — settle it with X4, not before
   ([[Design system]] UI laws).
 - **The re-derived status chips have not been sample-compared.** [[Design system]] flags this; the

@@ -1,11 +1,70 @@
 ---
 type: log
-updated: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))
+updated: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-09-21 · Session 42 — the pipeline is ruled, and the frame collapses to one
+
+**Summary.** `#14` merged. `#12` built out, pushed, **not merged** — fourteen commits, suite green at
+161 runs. The question Session 41 deliberately left open is **ruled: Bootstrap compiles from Sass.**
+The layout's three-way identity fork collapsed to one frame, marketing left the application, and the
+branch's CSS was re-cut one file per component. The two PRs stacked below `#12` now need reworking
+before either can be read.
+
+**Ruling — the pipeline, and how it got ruled.** Session 41 chipped this to its own session for a
+face-to-face with Connor. That is not what happened: the `#12` session decided it on evidence and the
+chipped session never reached a verdict. The evidence is mechanical, which is why the ruling stands
+anyway — the vendored `bootstrap.min.css` contains neither `ms-n2` nor `w-md-auto`, and **Connor's
+own `#13` markup uses both**. Vendoring would have shipped his own utilities dead. It restores
+`cf1c0ee` (Session 37), which `#12` as cut had reversed. Two constraints fall out and are recorded on
+[[Tech stack]]: colour stays **runtime** (`$primary` is never set in Sass), and `$spacers` is
+deliberately left unaligned because aligning it would silently resize ~160 utilities already in the
+views. **Process note, worth more than the ruling:** a question chipped out to be decided in one place
+was decided in another, and the first session still reads as open. Close a chip when its subject is
+settled elsewhere, or it will rule twice.
+
+**One frame, not three.** `application.html.slim` went from 58 lines forking three ways on identity to
+29 with no conditionals. Signed-in-without-a-workshop stopped being a frame of its own and became a
+**state** of the one frame — the rail simply drops its navigation. `.account-*` and `.public-*` are
+deleted, and `.app-shell` went with them: `body` carries the grid, so no wrapper element needs a
+meaningless name. Authentication is now enforced once in the base class instead of twelve times, and
+each auth controller declares its own layout.
+
+**Marketing leaves the application.** Root requires auth; there is no landing page in the repo. This
+is **S5A.13 dropped**, not deferred — it was marked droppable when it was written, and the static site
+isn't built. The markup and CSS are recoverable from `76fcafe^` if that property ever starts.
+
+**A topbar is wanted, and three sources disagree about it.** [[Design system]] §Archetype 1 mandates
+one (`--topbar` 72px, eyebrow + context left, avatar right). The app repo's `docs/design-system.md`
+forbids one. The code has none and a test asserts its absence. The builder now wants a fourth shape —
+logo right, spanning beside the rail. **Nothing was built and nothing was ruled**; the divergence is
+footnoted on the archetype. It is structural work (it changes `body.app`'s grid) and arguably a new
+feature rather than part of this refactor, so it does not belong in `#12`.
+
+**What the branch still owes.** Structurally, only the topbar, plus two meta tags missing from
+`auth.html.slim`. The rest is styling, held for a CSS session: **zero `--st-*` status tokens** — the
+sacred palette is simply absent — plus `--weight-medium` used undefined, a dropped `::placeholder`
+colour, a footer overflowing 23px on mobile, `.app-nav-group` used and never defined, `aria-modal`
+with no focus trap, and `env()` calls inert without `viewport-fit=cover`. Separately, `CLAUDE.md`'s CSS
+paragraph still describes the vendored pipeline and four stylesheets this branch deletes — it must be
+corrected **in `#12`**, or every future session opens by being told the pipeline is the opposite of
+what it is.
+
+**The stack, and what the rebase cost.** `#12`'s history was rewritten, so `#11` and `#13` still point
+at the old SHAs; their merge-base collapsed to `6a6747c` and their diffs now show Connor's original
+`#12` commits as their own — `#11` reads 47 files where it owns 3 commits. Nothing is destroyed, but
+neither is readable until rebased. `#11` is also roughly half obsolete: it styles `.account-shell`,
+`.account-sidebar` and `.public-shell`, frames that no longer exist — though it also carries the auth
+styling `#12` is missing, which is the fix for the worst defect above. **`origin/connor/ui` at
+`da672fa` must be preserved**: it is the only place the jobs index, board-controller shaping and 185
+lines of controller tests exist, and the four inert `link_to "#"` nav links cannot be finished until
+that work is recovered.
 
 ---
 
