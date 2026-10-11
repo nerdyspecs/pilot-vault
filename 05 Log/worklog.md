@@ -1,6 +1,6 @@
 ---
 type: log
-updated: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))))
+updated: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))))))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
@@ -8,6 +8,58 @@ Each session (~one work period) opens with a **summary**, then **topic entries**
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
 
 ---
+
+## 2026-10-11 · Session 43 — #11 re-cut on #12; three primitives earn their names; buttons ruled at three
+
+**Summary.** `#11` rebased onto `#12` and re-cut from scratch into three commits that compose on
+`#12`'s primitives rather than parallel them. One cleanup commit on `#12` itself: `.mobile-card`
+deleted. Both branches pushed, both green at 161/763/0, each CSS delta rule-counted. **S5A.13
+confirmed dropped** — the hero on the public page is removed; the workshop switcher survives,
+re-cut on primitives.
+
+**The rule that generated this re-cut, which is the memory.** A design class earns its name by
+what it *is* (concept), not where it *lives* (location). `.panel-row` is a concept — the next
+row-in-a-panel never asks "what can this be shaped similarly to?" `.invitation-row` is a location —
+a second instance forces a rename or a merge. **Split signal:** the definition grows conditional
+branches (`.panel-row-tall`, `.panel-row-button`). Not before.
+
+**Three primitives earned by that rule, each in an existing file.**
+`.panel-foot` (`_panel.scss`) — a bottom section inside a panel with a top border.
+`.narrow-column` (`_layout.scss`) — single-task forms inside the app canvas; replaces #11's
+`.account-page { max-width: 760px }` which named the shape after a screen.
+`.panel-row` (`_panel.scss`) — an actionable row inside a panel; the primitive resets button
+chrome so one class works for both `<div>` and `<button_to>`. Replaces #11's five location-named
+row classes (`.invitation-row`, `.workshop-choice`, `.workshop-choice-form`, `.invitation-list`,
+`.workshop-choice-list`) with one concept.
+
+**Button vocabulary ruled at three.** Primary (one per surface), secondary (cancel, back,
+alternative), danger (destructive). `.btn-success/.btn-warning/.btn-info/.btn-light/.btn-dark`
+are noise for an operational UI. Size (`.btn-sm`, `.btn-lg`) and shape (`.btn-link`) are
+**orthogonal modifiers**, not more roles.
+
+**The silent bad auto-merge, worth naming.** The first rebase of `#11` onto `#12` resolved cleanly
+with two visible conflicts (`layout.css`, `home/index.html.slim`). Git *also* auto-merged
+`app/views/layouts/auth.html.slim` with no conflict reported, and produced the wrong file — kept
+`#11`'s pre-Sass `stylesheet_link_tag` list and re-added the footer `5e78f75` deliberately
+removed. A test error caught it. **Verify file-by-file against the commits named** — the CLAUDE.md
+check that covers carry-backs applies to merge/rebase results too. The branch was re-cut from
+scratch rather than carrying the auto-merged file forward.
+
+**Verification was `a6a7197`'s method.** Compile Sass before and after each commit, count rules,
+delta must match additions. Across all three #11 commits plus the cleanup: 2924 → 2931. Each
+delta exactly matched expected additions.
+
+**What `#13` still owes.** `ui-customer-vehicle-records` still points at the pre-rebase `#11` tip
+(`2781fc5`) — history intact, tagged `backup/ui-cvr-prerebase`, needs its own rebase onto the new
+`#11` tip (`95bedac`). Next session.
+
+**Branches pushed.** `ui-application` fast-forwarded (`359fb8b → 9a49a11`). `ui-account-setup`
+force-with-leased (`2781fc5 → 95bedac`); owns `0192e01` Authentication screens, `a159493` Account
+settings and workshop switching, `95bedac` The workshop switcher. `#11` on GitHub now sits on `#12`
+and reads at its stated size (3 commits, not 7).
+
+---
+
 
 ## 2026-09-21 · Session 42 — the pipeline is ruled, and the frame collapses to one
 
