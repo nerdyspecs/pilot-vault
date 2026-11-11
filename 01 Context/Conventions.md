@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — created; §Naming, §Comments and the convention rules moved here from [[Agent guide]], verbatim; DRY criteria stated from [[Architecture laws]] law 9 + ADR-013)
+updated: 2026-11-07 (§CSS naming, §Skeleton-first, §Query style, §Build sequence added — migrated from Claude memory; prior: 2026-08-31 Session 39 — created; §Naming, §Comments and the convention rules moved here from [[Agent guide]], verbatim; DRY criteria stated from [[Architecture laws]] law 9 + ADR-013)
 ---
 # Conventions — the card
 
@@ -21,6 +21,21 @@ Rename toward the word someone at the workshop would actually say.
 - **Parallel things get parallel names** — qualify (`raise_intake_blocker!`), don't reinvent.
 - **Spend characters to kill guesswork** — a longer explicit name beats a clever short one.
 - Good names are what let a comment stay rare — see [[#Comments]].
+
+## CSS naming
+A design class earns its name by what it **is** (concept), not where it **lives** (location).
+`.panel-row` is a concept — rent paid every time a row sits inside a panel. `.invitation-row`
+is a location — one tenant, forever.
+- Before writing a class: *what is this, generically?* If the answer names a concrete screen
+  or feature, the name is wrong.
+- Prefer composing existing primitives + Bootstrap utilities over a new class.
+- A component's stylesheet is named after its partial. If no partial names it, the class
+  probably shouldn't exist.
+- **Split signal:** a class whose definition grows conditional branches (`.panel-row-tall`,
+  `.panel-row-button`). Not before.
+- Byte-identical duplicates (`.account-panel` == `.app-panel`) are the loudest sign the author
+  couldn't see the primitive. Delete the duplicate, fix the markup.
+*(2026-11-07: migrated from Claude memory — captured ~2026-09-18.)*
 
 ## Comments
 Names and structure carry intent. If a competent reader would understand the line from the
@@ -48,6 +63,12 @@ explain, it belongs in an ADR or the module note, not inlined.
 Methods always use explicit `def`/`end` — never endless methods (`def foo = expr`), even for
 one-liners. The builder reads code by block shape. *(From the repo's CLAUDE.md.)*
 
+## Skeleton-first at discussion stage
+At the **early/idea stage** of a design discussion, show code as a bare skeleton — class name +
+method names with empty `def`/`end` bodies — never full implementations. The method names alone
+should convey the shape. Detailed code comes later, at build time, once direction is agreed.
+*(2026-11-07: migrated from Claude memory — captured ~2026-07-19.)*
+
 ## When to DRY up, when to stay flat
 A separate action class is earned, never defaulted to. The criteria *(2026-07-13, reaffirmed;
 narrowed 2026-08-14 by [[ADR-013 The door decomposed]])*:
@@ -63,6 +84,20 @@ narrowed 2026-08-14 by [[ADR-013 The door decomposed]])*:
 - **Never a gem without explaining why the Rails built-in isn't enough.** Currently: devise,
   slim-rails, bootstrap, dartsass-rails. Anything that adds a dependency is flagged — the
   builder decides.
+
+## Query style
+Trust RLS as the tenancy boundary — use bare `Model.all` / `Model.find` / `Model.where(...)` in
+normal CRUD. The `for_current_workshop` scope stays defined in `WorkshopScoped` for explicit
+cases (admin views, cross-tenant reporting) but standard controllers don't reach for it. Existing
+controllers get swept as they're touched — not a dedicated cleanup pass.
+*(2026-11-07: migrated from Claude memory — captured 2026-10-17.)*
+
+## Build sequence
+Build core features and pages first; tests are a later pass. Do not raise tests — coverage,
+dropped tests, test strategy — until the builder explicitly reopens the subject. Still *run* the
+suite when verifying a change and report a real failure; a red suite is a broken build, not a
+coverage opinion.
+*(2026-11-07: migrated from Claude memory — captured 2026-10-11.)*
 
 ## Change discipline
 - **Never rewrite working code into a "better pattern" unprompted.** No three-version answers —

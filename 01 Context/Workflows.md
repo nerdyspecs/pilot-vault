@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-08-31 (Session 39 — created; §UI's five-home table moved here from [[Screen decisions]]; §Solution written down from existing ADR practice; §Session close gathered from CLAUDE.md's tracking conventions + the worklog header)
+updated: 2026-11-07 (§Session briefing added — migrated from Claude memory; prior: 2026-08-31 Session 39 — created; §UI's five-home table moved here from [[Screen decisions]]; §Solution written down from existing ADR practice; §Session close gathered from CLAUDE.md's tracking conventions + the worklog header)
 ---
 # Workflows
 
@@ -48,6 +48,17 @@ The existing ADR practice, written down:
    [[Design system]] if it needs any) · **code** → [[Conventions]].
 2. Add it **dated**, with one line of why or a link to the discussion (worklog session / ADR).
 3. Rules never land in [[Agent guide]] or the repo's `CLAUDE.md` anymore — those only point here.
+
+## §Session briefing — chipped sessions orient only
+When chipping out a sub-session, the chip is for **orienting only**. The session reasons about
+the underlying problem and builds understanding. It does not suggest code, a build order, or an
+implementation sequence — not unless the direction is genuinely settled, or the builder says so.
+
+A chip prompt carries: the problem, the verified state of the code, the constraints, the open
+questions, and what is out of scope. It does NOT carry "suggested sequence", "build this first",
+specified markup, or a recommended pattern to copy. State findings as findings, forks as forks
+for the builder to rule on. If the brief starts to read like a plan, it has already overstepped.
+*(2026-11-07: migrated from Claude memory — captured 2026-10-11.)*
 
 ## §Session close
 
