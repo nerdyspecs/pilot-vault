@@ -1,6 +1,6 @@
 ---
 type: reference
-updated: 2026-08-31 (Session 39 — renamed from *Deferred design*; prior: Session 36 — job↔vehicle customer-match: the recorded two-branch confirm re-scoped as a sub-screen of a three-choice mismatch surface (§1b has four forks), and deferred past intake's first cut; prior: Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
+updated: 2026-11-11 (added "revisit all search queries" — the Vehicles register reuses `Vehicle.search` as-is; prior: 2026-08-31 Session 39 — renamed from *Deferred design*; prior: Session 36 — job↔vehicle customer-match: the recorded two-branch confirm re-scoped as a sub-screen of a three-choice mismatch surface (§1b has four forks), and deferred past intake's first cut; prior: Session 35 — linked the recovered V2 dashboards note; prior: Session 34 — jobsheet per-answer-snapshot re-examined and re-rejected on new grounds; four new jobsheet items added — ADR-015; prior: jobsheet per-answer-snapshot item marked moot — ADR-014; prior: 2026-08-14 B2 amended — request/reply addressing rule, derive-vs-store split)
 ---
 # Deferred decisions
 
@@ -267,6 +267,20 @@ Consciously parked — **revisit later**, not dropped. Each is additive (won't r
   database. Scope default queries to exclude discarded records; keep them accessible for
   historical lookups. Decision: which gem/pattern (Discard, paranoia, or hand-rolled
   `default_scope`) — revisit when implementing.
+
+- **Revisit all search queries** *(2026-11-11)* — review the `search` scopes across the app as
+  **one set**, not model by model. Today `Customer.search` matches name + canonicalized phone, and
+  `Vehicle.search` reaches through a `customers` join to match plate / VIN / owner name / exact
+  phone. Questions to settle together: (1) **consistency** — substring `ILIKE` vs exact match,
+  which fields each surfaces, and the phone canonicalization that is duplicated between a model's
+  `before_validation` and its `search` scope (the extract-before-a-third-caller note under the
+  superseded S5.8); (2) **behaviour at scale** — leading-wildcard `ILIKE` can't use a btree index;
+  decide if/when that matters and whether a trigram/`pg_trgm` index earns its keep (a dependency —
+  builder decides); (3) **fit to purpose** — the Vehicles register (`vehicles#index`) reuses
+  `Vehicle.search` unchanged, including the reach-through to the customer; confirm that is right for
+  an admin database view, or whether that screen wants its own narrower match. **Trigger:** before
+  search becomes load-bearing on a report-heavy screen, or when a third caller needs the shared
+  phone canonicalization.
 
 ## Related
 - [[M1-F1 Status flow and transitions]] · [[Blocker]] · [[Job]] ·

@@ -1,11 +1,52 @@
 ---
 type: log
-updated: 2026-11-11 (Session 44 — customer/vehicle CRUD built nested under customers; the sidebar register was NOT built, so S5.5f is partial; kaminari added without a recorded dependency ruling; suite red on a stale assertion; Claude-memory rules migrated into Conventions/Workflows; prior: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))))))
+updated: 2026-11-11 (Session 45 — the Vehicles sidebar register ships (`5933ecc`); kaminari ruled in, `mobile_device?` dropped, search-queries review backlogged) · prior: 2026-11-11 (Session 44 — customer/vehicle CRUD built nested under customers; the sidebar register was NOT built, so S5.5f is partial; kaminari added without a recorded dependency ruling; suite red on a stale assertion; Claude-memory rules migrated into Conventions/Workflows; prior: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))))))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-11-11 · Session 45 — the vehicles register ships
+
+**Summary.** A chip briefed to *orient only* on the Vehicles tab became a build once the forks were
+ruled. S5.5f's outstanding half now exists: `app/views/vehicles/index.html.slim` is a searchable
+register — search over `Vehicle.search` (plate / VIN / owner / phone), a plate · owner ·
+in-shop-status table, kaminari pagination, honest empty states, and **no create action** — reached
+from the sidebar. `5933ecc`. First take, not browser-verified.
+
+**Pagination fork — keep kaminari (Option A).** Three of four list actions already use it, including
+the register's own sibling. The honest basis is consistency + sunk cost, **not** necessity:
+`customers#index` proves the built-in `offset`/`limit` suffices, so the card's "why isn't the
+built-in enough" bar is not cleanly cleared — ratified rather than re-litigated. **Still owed:** the
+dependency record (a [[Conventions]] §Dependencies footnote + the app `CLAUDE.md` gem list) and
+converging `customers#index` off its hand-rolled pager when next touched — both backlogged.
+
+**`mobile_device?` dropped; the register uses Bootstrap's responsive split.** The builder's reason —
+*prefer Bootstrap, refrain from custom unless the value outlives the cost of "which rules are mine
+vs Bootstrap's"* — is UI rule 1, and it also settles the fork Session 44 left unruled: the register
+follows **the book's track**, not the shipped `customers/vehicles` precedent (the orphan
+`_table_mobile_responsive.scss`, `btn-ghost`, in-table icons). The register ships zero new custom CSS.
+
+**Purpose clarified — the Vehicles page is an admin database/monitor, potentially report-heavy.**
+This resolves the earlier two-audience tension toward the admin/overview job. But the model is thin
+(`registration_number`, `vin`, customer, intakes), so real reporting — brand / type / year mix — is
+gated on a `vehicles` attributes schema (backlogged). In-shop is a **column**, not a filter:
+filtering by "in the shop" is the Board's job, and the only facet with data today would need a model
+scope. The toolbar reserves the facet slot structurally without shipping a dead control.
+
+**Backlog added:** *revisit all search queries* ([[Deferred decisions]]) — review `Customer.search`
+and `Vehicle.search` as one set (match consistency, the duplicated phone canonicalization, `ILIKE`
+at scale, and fit-to-purpose of the register's reach-through to the customer).
+
+**Still owed (not done this session):** the kaminari dependency record (both repos), `customers#index`
+convergence, the `vehicles` attributes schema, a [[Screen decisions]] note for the register, and a
+[[Screen map]] status update (stub → built).
+
+**Next:** the builder verifies the register; then the report-heavy direction (a metric strip of the
+counts available today) and the attributes schema that makes it substantive.
 
 ---
 
