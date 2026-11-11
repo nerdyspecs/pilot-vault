@@ -1,11 +1,64 @@
 ---
 type: log
-updated: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD))))))
+updated: 2026-11-11 (Session 44 — customer/vehicle CRUD built nested under customers; the sidebar register was NOT built, so S5.5f is partial; kaminari added without a recorded dependency ruling; suite red on a stale assertion; Claude-memory rules migrated into Conventions/Workflows; prior: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))))))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-11-11 · Session 44 — customer/vehicle CRUD lands nested; the sidebar register does not
+
+**Summary.** A chipped session built vehicle registration as ten commits (`91f025e`–`5c3de52`),
+all under a customer: nested write routes, a Turbo-Frame modal, the vehicle page, an edit view,
+a paginated vehicles index under the customer, and a `table-mobile-responsive` CSS component that
+replaces the dual desktop/mobile markup. Verified file by file against the commits named, per the
+carry-back check. The build is real and the artifacts all exist. **Four things did not match the
+carry-back**, one of them load-bearing.
+
+**The sidebar register was not built — S5.5f is partial, not done.** The builder's ruling when the
+work was chipped was **two** entry points: the Vehicles sidebar entry and the customer show page.
+The customer side shipped in full. `app/views/vehicles/index.html.slim` is still the one-line
+`content_for :title` stub it was before the session, and the sidebar still links `vehicles_path`
+at it — so the dead end that motivated the whole chip is still there. The carry-back's "customer
+vehicles index" is the *nested* `/customers/:id/vehicles` page, not `/vehicles`, and it reports
+S5.5f as done. Ticked `[~]` instead.
+
+**Three smaller mismatches.** (1) "All on main, pushed" is off by one — `5c3de52` was unpushed.
+(2) The suite is **red**: `35eb025`'s table conversion removed the `.d-none.d-md-block` dual
+markup that `CustomersControllerTest:124` asserts on — a stale assertion against deliberately
+changed markup, not a product bug, but it shipped red and unmentioned. (3) **`kaminari` was added
+to the Gemfile with no recorded dependency ruling**, and `69a8a77` — which rewrote `CLAUDE.md` in
+the same batch — left the gem list reading "devise, slim-rails, lucide-rails". The instruction
+file now contradicts the Gemfile and loads that way into every session: the same failure shape as
+the CSS paragraph retired in Session 42.
+
+**The best thing in the batch wasn't in the carry-back.** Two vault notes were edited and not
+reported: [[Conventions]] gained §CSS naming, §Skeleton-first, §Query style and §Build sequence,
+and [[Workflows]] gained §Session briefing — all **migrated out of Claude's memory into the
+vault**, which is where rules belong. Claude's memory went from 14 entries to 4. Checked whether
+anything was lost in the pruning: nothing was. The tests-later rule landed at [[Conventions]]
+§Build sequence, and sequence-by-fan-in was already in [[Sprint plan]] §Conventions.
+
+**Patterns established.** Turbo-Frame modal (an empty `turbo_frame_tag "modal"` in the layout,
+links target it, Stimulus owns the lifecycle — scroll lock, escape, refresh on submit);
+`button_to` over `link_to` + `turbo_method: :delete` for destructive actions (form-based, no
+double-click risk, no JS dependency); one `table-mobile-responsive` table that reflows to cards
+below 768px, replacing dual markup. Pagination settled at 25/page for full-page lists, 10/page for
+panels embedded in another page.
+
+**One precedent to rule.** `_table_mobile_responsive.scss` has no partner partial, and
+[[Conventions]] §CSS naming — added by this same session — says a component's stylesheet is named
+after its partial, and if no partial names it the class probably shouldn't exist. It is CSS-only
+behaviour applied to any table, so it may genuinely earn the exception; left unruled rather than
+set as a silent precedent.
+
+**Deferred, recorded:** customer soft delete ([[Deferred decisions]] — `discarded_at`, gem/pattern
+open) and two visual nits in the new [[UI polish]] backlog.
+
+**Next:** the vehicles page — the sidebar register that this session left stubbed.
 
 ---
 

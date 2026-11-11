@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-09-21 (Session 42 — S5A.1/.3/.3a annotated against the unmerged `#12`; S5A.13 dropped, marketing leaves the app; nothing ticked, `#12` is not merged; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions))
+updated: 2026-11-11 (Session 44 — S5.5f ticked partial: customer-side vehicle CRUD built, the sidebar register outstanding; S5.7 partly delivered by the vehicle page; prior: 2026-09-21 (Session 42 — S5A.1/.3/.3a annotated against the unmerged `#12`; S5A.13 dropped, marketing leaves the app; nothing ticked, `#12` is not merged; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)))
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -331,10 +331,20 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       phase now lives. They were never intake work: they cover the auth gate and a restyle of every
       existing screen. Nothing is dropped — the tasks are `S5A.1`–`S5A.13`, and the ordering rule
       and dependencies moved with them. **What stays in S5.5 is the two genuinely new screens:**
-- [ ] **S5.5f** **Add-vehicle screen — NEW.** No `VehiclesController`, no route, no screen exists;
-      today a vehicle can only be born inside the intake flow. Builder ruling 2026-08-25: ordinary
-      CRUD under a customer. The smaller of the two new screens. **Depends on Sprint 5A** — it sits
-      in the app shell and uses the archetype.
+- [~] **S5.5f** **Add-vehicle screen — NEW.** ~~No `VehiclesController`, no route, no screen
+      exists;~~ today a vehicle can only be born inside the intake flow. Builder ruling 2026-08-25:
+      ordinary CRUD under a customer. The smaller of the two new screens. **Depends on Sprint 5A** —
+      it sits in the app shell and uses the archetype.
+      *(⚠ 2026-11-11 — **partial, not done.** Built as ten commits `91f025e`–`5c3de52`: nested write
+      routes under customers (`91f025e`), kaminari pagination (`c97b3de`), the customer-show vehicle
+      panel (`df26d15`), a Turbo-Frame add-vehicle modal (`4017144`), the vehicle page (`f33b0b0`),
+      `table-mobile-responsive` (`ff6ae1c`, applied `35eb025`), the edit view (`28f61a8`) and the
+      nested vehicles index (`5c3de52`). The 2026-08-25 "under a customer" ruling was **widened at
+      chip time to two entry points** — the customer page AND the Vehicles sidebar register. Only
+      the customer half shipped: `app/views/vehicles/index.html.slim` is still a one-line stub and
+      the sidebar links at it. The outstanding half is the vehicles page, tracked as the next
+      chunk. Also landed from this work: `kaminari` entered the Gemfile with no recorded dependency
+      ruling, and the repo's `CLAUDE.md` gem list still omits it.)*
 - [ ] **S5.5g** **`Vehicle.find_by_plate`** + unit tests — the lookup Screen A needs, beside the
       existing `Vehicle.canonicalize` ([[Architecture laws]] #9: logic you can't call without a request is
       misplaced). Absorbs the live half of S5.8 below. **No UI dependency** — can land any time.
@@ -352,8 +362,10 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 - [ ] **S5.6** *(Product-gap #1)* ETA: add `promised_ready_at` to **Intake**; SA sets at intake;
       show on the visit. *(⚠ 2026-08-14, ADR-012: was "to Job" — a promised-ready time is a per-visit
       commitment to the customer, not a per-repair one; several repairs on one visit share one ETA.)*
-- [ ] **S5.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
-      prior **intakes**.
+- [~] **S5.7** *(Product-gap #9)* vehicle history: on the vehicle/intake screen, list that vehicle's
+      prior **intakes**. *(⚠ 2026-11-11 — **partly delivered** by S5.5f's vehicle page (`f33b0b0`):
+      `vehicles#show` lists that vehicle's prior intakes as a visit history. The **intake** screen's
+      half is untouched.)*
 - [ ] ~~**S5.8** Plate normalization + existing-vehicle lookup.~~ **Superseded 2026-08-25
       (Session 36) — it was half-done and mis-ordered.** The *plate-normalization* half already
       shipped, well before S5.5, as `Vehicle.canonicalize` (called from a `before_validation`, with
