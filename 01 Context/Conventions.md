@@ -1,7 +1,7 @@
 ---
 type: context
 created: 2026-08-31
-updated: 2026-11-07 (§CSS naming, §Skeleton-first, §Query style, §Build sequence added — migrated from Claude memory; prior: 2026-08-31 Session 39 — created; §Naming, §Comments and the convention rules moved here from [[Agent guide]], verbatim; DRY criteria stated from [[Architecture laws]] law 9 + ADR-013)
+updated: 2026-11-11 (§Dependencies reconciled to the Gemfile — lucide-rails + kaminari added, kaminari ratified with a footnote; prior: 2026-11-07 (§CSS naming, §Skeleton-first, §Query style, §Build sequence added — migrated from Claude memory; prior: 2026-08-31 Session 39 — created; §Naming, §Comments and the convention rules moved here from [[Agent guide]], verbatim; DRY criteria stated from [[Architecture laws]] law 9 + ADR-013))
 ---
 # Conventions — the card
 
@@ -82,8 +82,13 @@ narrowed 2026-08-14 by [[ADR-013 The door decomposed]])*:
 
 ## Dependencies
 - **Never a gem without explaining why the Rails built-in isn't enough.** Currently: devise,
-  slim-rails, bootstrap, dartsass-rails. Anything that adds a dependency is flagged — the
-  builder decides.
+  slim-rails, lucide-rails, bootstrap, dartsass-rails, kaminari. Anything that adds a dependency
+  is flagged — the builder decides.
+  *(2026-11-11, Session 45: kaminari ratified for pagination — kept on consistency with three
+  existing list actions + sunk cost, not on necessity; `customers#index` proves the built-in
+  offset/limit suffices, so it does not cleanly clear the bar above. Converge `customers#index`
+  off its hand-rolled pager when next touched. See [[worklog]] Session 45. lucide-rails was in use
+  but unlisted — added in the same pass.)*
 
 ## Query style
 Trust RLS as the tenancy boundary — use bare `Model.all` / `Model.find` / `Model.where(...)` in
