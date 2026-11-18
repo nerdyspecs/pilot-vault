@@ -1,11 +1,94 @@
 ---
 type: log
-updated: 2026-11-11 (Session 45 — the Vehicles sidebar register ships (`5933ecc`); kaminari ruled in, `mobile_device?` dropped, search-queries review backlogged) · prior: 2026-11-11 (Session 44 — customer/vehicle CRUD built nested under customers; the sidebar register was NOT built, so S5.5f is partial; kaminari added without a recorded dependency ruling; suite red on a stale assertion; Claude-memory rules migrated into Conventions/Workflows; prior: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))))))
+updated: 2026-11-19 (Sessions 46–47 backfilled — the open visit becomes editable + destroy cascades (Session 47); intake show revamp, complaint moved to Intake, mileage, Repair→Job copy (Session 46)) · prior: 2026-11-11 (Session 45 — the Vehicles sidebar register ships (`5933ecc`); kaminari ruled in, `mobile_device?` dropped, search-queries review backlogged) · prior: 2026-11-11 (Session 44 — customer/vehicle CRUD built nested under customers; the sidebar register was NOT built, so S5.5f is partial; kaminari added without a recorded dependency ruling; suite red on a stale assertion; Claude-memory rules migrated into Conventions/Workflows; prior: 2026-10-11 (Session 43 — #11 re-cut on #12 as three commits composing on existing primitives; three new primitives named by concept not location; buttons ruled at three roles; silent-bad-auto-merge found in auth.html.slim; #13 pending rebase; prior: 2026-09-21 (Session 42 — the pipeline is ruled for Sass; the identity fork collapses to one frame; marketing leaves the app; a topbar is wanted but three sources disagree; prior: 2026-09-18 (Session 41 — Connor's UI PR re-sliced into four; design ownership and skills ruled; pipeline left open; prior: 2026-09-01 (Session 40 — Board re-cut against UI rules 8–23; two card-vs-book forks flagged; prior: 2026-08-31 (Session 39 — vault reorganized for builder navigation: renames, Home, two rule cards, Workflows; prior: Session 38 — one-board fork ruled; content rule; named the Board; screen-decision notes; deeper-layer hard rule; board first cut built, TBD)))))))
 ---
 # Worklog
 Running narrative of discussions, decisions, and progress. **Newest session on top.**
 Each session (~one work period) opens with a **summary**, then **topic entries** underneath.
 Settled decisions get formalized as ADRs in [[Decisions]]; this log is the story that links them.
+
+---
+
+## 2026-11-18/19 · Session 47 — the open visit becomes editable; destroy cascades
+
+**Summary.** An open intake can now be edited end-to-end, and intakes/jobs are destroyable for
+cleanup. Cascade-delete wiring (`acc1452`) and the edit-intake page (`17499525`), plus a seed bulk
+fleet (`624a92a`) and a dead-partial removal (`3c8188b`). Not browser-verified — Slim parse-checked,
+`UpdateIntake` exercised via rollback runners.
+
+**Edit-intake page (`17499525`).** The show page gains an "Edit intake" action (counter staff, open
+visit only) → one form mirroring check-in: edit mileage + complaint, manage jobs in a single list.
+Each row self-identifies so one submit covers every case — a hidden id updates a persisted job's
+type/description, no id creates one (via `CreateJob`, the door), a `_destroy` flag hard-deletes it
+(the row hides client-side, its id still posts). `UpdateIntake` applies the three branches in one
+transaction; the jobsheet is never touched (inspection_type write-once, complaint on Intake).
+Technician reassignment stays a stage-gated door move on the job page — read-only on persisted rows.
+
+**Two partials, not one flag.** The row partial was switching on `if job` (prefill vs blank;
+read-only vs editable technician), which both broke check-in — an unpassed `job` local is a method
+call on the view, not nil, so `new.html.slim` raised `undefined method 'job'` — and read as a runtime
+switch. Split into `_new_job_fields` (blank/editable, shared by check-in and the edit "Add" template)
+and `_job_fields` (persisted/prefilled, read-only technician). One partial per shape; neither template
+branches on existence.
+
+**Why not `accepts_nested_attributes_for`.** It would hand back indexed rows and a `jobs_attributes=`
+setter for free — but that setter writes jobs around the doors (no `CreateJob`, no birth transition).
+Rejected: full nested forms trade a view-logic smell for an architectural one; writes stay in the
+service. `position` stays too — new rows need a client key so field names and Type-radio groups don't
+collide, and the Stimulus counter starts past the server-rendered rows so a new row never lands on a
+persisted index. The only dead part is the params re-sort (`UpdateIntake` is order-independent), left
+as a cosmetic cleanup.
+
+**Cascade delete (`acc1452`).** Jobs and intakes are `dependent: :destroy` down their trees (jobs:
+stage/crew/blocker history; intake: status + blocker events; jobsheet: answers). The two
+blocker→events guards moved from `restrict_with_error` to `:destroy` since cleanup deletion is now
+intentional; the "never deleted" comments were corrected. Destroy is meant to be **permission-gated**,
+but roles aren't built — **the destroy controller actions and their interim gate are NOT yet built;
+only the model cascade is wired.**
+
+**Also:** a deterministic bulk vehicle fleet in seeds (`624a92a`); removed the unreferenced
+`jobs/_board_row` (`3c8188b`); a comment pass over the feature (hidden-info-only); and a style ruling
+— multi-line method chains break with a **leading dot, 2-space continuation**, not aligned under the
+receiver.
+
+**Still owed:** the destroy controller actions + interim gate; a `UpdateIntake` test (deferred);
+browser verification; the params-sort simplification; a [[Screen decisions]] note for the edit page;
+and extracting the `CreateIntake`/`UpdateIntake` shared job-authoring (an `AuthorsJobs` concern).
+
+---
+
+## 2026-11-16/17 · Session 46 — the intake surfaces catch up to the model
+
+**Summary.** The visit's screen and data aligned to the Intake/Job aggregate. Mileage + vehicle
+detail columns (`a2ccb1d`), enriched seeds (`184dabd`), Repair→Job UI copy (`27c2b34`), the intake
+show revamp (`414af73`), and the complaint moved off the jobsheet onto the Intake (`7415af7`).
+*(Session boundary 46↔47 inferred from commit timestamps — renumber if these were more sittings.)*
+
+**Complaint → Intake (`7415af7`) — reverses the 2026-08-19 build placement.** The complaint is
+free-form per-visit text, so it belongs on the Intake, not the fixed-vocabulary jobsheet; the build
+had put it on `jobsheets`. Realigned: migrated the column to `intakes`, `CreateIntake` writes
+`intake.complaint`, check-in and show read it off the intake, the jobsheet keeps only its fixed
+inspection; the obsolete complaint-freeze jobsheet test is dropped. **This reverses the ⚠ 2026-08-19
+"ships on the jobsheets header" footnotes on [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+and Sprint plan S5.1a/S5.5** — footnoted on S5.5; ADR-015 / [[Data model]] owed the same, left to the
+in-flight ADR-015 edit.
+
+**Intake show revamp (`414af73`).** Reframed as an intake, not a vehicle: title "Intake — <plate>",
+a metric strip (Opened · Jobs done/total · Attention = active holds + blocked jobs), the vehicle/owner
+identity rail mirroring check-in, status in the Intake panel, clickable job rows. Metrics prepped in
+the controller off one shared jobs collection. Progresses S5A.10 (the visit screen) — annotated,
+not ticked.
+
+**Mileage + vehicle columns (`a2ccb1d`).** Migrations add make/model/year/description to vehicles
+(columns only — form/display land with the vehicle work) and mileage to intakes; check-in captures an
+optional odometer reading stored at open.
+
+**Repair→Job copy (`27c2b34`).** User-facing wording aligned to the Intake/Job vocabulary
+(vehicle-delete flash, customer metric hints, job-timeline birth-row label).
+
+**Seeds (`184dabd`).** Eight customers (private + fleet) with detailed vehicles and mileage; seeded
+visits span open, in-progress multi-job, ready, delivered, blocked, cancelled — real data for the
+board and visit pages.
 
 ---
 

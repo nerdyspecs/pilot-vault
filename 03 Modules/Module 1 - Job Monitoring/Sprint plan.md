@@ -2,7 +2,7 @@
 type: plan
 module: M1
 created: 2026-07-04
-updated: 2026-11-11 (Session 45 — S5.5f ticked done: the sidebar vehicles register shipped, `5933ecc`; pagination fork ruled — keep kaminari) · prior: 2026-11-11 (Session 44 — S5.5f ticked partial: customer-side vehicle CRUD built, the sidebar register outstanding; S5.7 partly delivered by the vehicle page; prior: 2026-09-21 (Session 42 — S5A.1/.3/.3a annotated against the unmerged `#12`; S5A.13 dropped, marketing leaves the app; nothing ticked, `#12` is not merged; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)))
+updated: 2026-11-19 (Sessions 46–47 — annotations only, nothing ticked: intake show revamp progresses S5A.10; complaint moved to Intake (`7415af7`) footnoted on S5.5, reversing the 2026-08-19 jobsheet-header placement; edit-intake page (`17499525`) + destroy cascade (`acc1452`) recorded as out-of-plan intake work) · prior: 2026-11-11 (Session 45 — S5.5f ticked done: the sidebar vehicles register shipped, `5933ecc`; pagination fork ruled — keep kaminari) · prior: 2026-11-11 (Session 44 — S5.5f ticked partial: customer-side vehicle CRUD built, the sidebar register outstanding; S5.7 partly delivered by the vehicle page; prior: 2026-09-21 (Session 42 — S5A.1/.3/.3a annotated against the unmerged `#12`; S5A.13 dropped, marketing leaves the app; nothing ticked, `#12` is not merged; prior: 2026-09-01 (Session 40 — S5A.9 re-cut against UI rules 8–23; prior: 2026-08-27 (Session 38 — S5A.3a added; S5A.9 first cut built and TBD; S6.1a partly pulled forward; prior: 2026-08-25 Session 36 — Sprint 5A added: the UI phase, ordered by fan-in, per-task detail in [[UI rollout]]; S5.5 narrowed to the two new intake screens; sequence-by-fan-in added to §Conventions)))
 downstream sprints S5/S6/S7 re-pointed; prior: 2026-08-03 Sprint 4.5 inserted before Sprint 5 — Intake/Job aggregate morph, ADR-012; prior: 2026-07-28 Sprint 4 closed + archived → Sprints 0-4 archive; live file now Sprint 5 onward)
 ---
 # Module 1 — Sprint plan (execution)
@@ -324,6 +324,11 @@ top-of-file warning: the current app has no working intake-creation UI at all.
       inspection item; ⚠ corrected at build 2026-08-19 — it ships on the `jobsheets` header, not on
       Intake; ⚠ 2026-08-14 ADR-012/013 — creation goes through `CreateIntake`, never a bare
       `Job.create!` or a door verb.)*
+      *(⚠ 2026-11-17 — the complaint **moved to Intake** (`7415af7`), reversing the ⚠ 2026-08-19
+      "ships on the `jobsheets` header" correction above: it is free-form per-visit text, so it lives
+      on `intakes.complaint`, read by check-in and the intake show; the jobsheet keeps only its fixed
+      inspection. The same footnote is owed on [[ADR-015 Jobsheet answers are rows against a frozen question set]]
+      and [[Data model]], left to the in-flight ADR-015 edit.)*
 - [ ] **S5.5a** ~~cross-cutting: component inventory~~ · **S5.5b** ~~the visual re-lock~~ ·
       **S5.5c** ~~the shell~~ · **S5.5d** ~~law-3 audit~~ · **S5.5e** ~~customers search-first~~ ·
       **S5.5i** ~~tests~~ — **all moved 2026-08-25 (Session 36) to
@@ -388,6 +393,18 @@ top-of-file warning: the current app has no working intake-creation UI at all.
 - [ ] **S5.9** Tests: intake creates the full graph (incl. its auto-created `Jobsheet`) · complaint
       saved on Intake · jobsheet answers saved (see S5.1d for the model-level answer tests) · ETA
       persists · history shows.
+
+> [!note] Out-of-plan intake work *(2026-11-16/19, Sessions 46–47 — recorded, not planned tasks)*
+> Two capabilities landed outside the task list: the open visit became **editable** and intakes/jobs
+> became **destroyable**.
+> - **Edit-intake page** (`17499525`) — an "Edit intake" action (counter staff, open visit) → one form
+>   editing mileage/complaint and managing jobs (update · create via `CreateJob` · `_destroy`
+>   hard-delete) in a single `UpdateIntake` transaction. Technician reassignment stays a door move on
+>   the job page.
+> - **Destroy cascade** (`acc1452`) — jobs/intakes `dependent: :destroy` down their trees, for
+>   permission-gated cleanup. **The destroy controller actions + their interim gate are not yet built.**
+> - Supporting: intake **show revamp** (`414af73`), **mileage** on intake (`a2ccb1d`), **Repair→Job**
+>   copy (`27c2b34`). The show revamp progresses **S5A.10**. Full narrative: [[worklog]] Sessions 46–47.
 
 ---
 
